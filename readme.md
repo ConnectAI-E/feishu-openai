@@ -1,8 +1,9 @@
 
 <p align='center'>
-  <img src='https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/da7632aafca8419d93ace47fa6479feb~tplv-k3u1fbpfcp-watermark.image?' alt='' width='900'/>
+  <img src='https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/91d1c7af087646aea2c550665c01796b~tplv-k3u1fbpfcp-watermark.image?' alt='' width='900'/>
 </p>
 
+<br>
 
 <p align='center'>
 在飞书与ChatGPT随时对话，智慧随身。

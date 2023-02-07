@@ -20,8 +20,8 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		fmt.Println("msgId", *msgId, "processed")
 		return nil
 	}
+	p.msgCache.TagProcessed(*msgId)
 	qParsed := parseContent(*content)
-	fmt.Println("qParsed", qParsed)
 	sender := event.Event.Sender
 	openId := sender.SenderId.OpenId
 	cacheContent := p.userCache.Get(*openId)
@@ -29,10 +29,8 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	if cacheContent != "" {
 		qEnd = cacheContent + qParsed
 	}
-	fmt.Println("qEnd", qEnd)
 	ok := true
 	completions, err := services.Completions(qEnd)
-	p.msgCache.TagProcessed(*msgId)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ func (u UserService) Get(userId string) string {
 	list := sessionContext.([]string)
 	var result string
 	for _, v := range list {
-		result += v + "------------------------\n"
+		result += v
 	}
 	return result
 }
@@ -31,7 +31,7 @@ func (u UserService) Set(userId string, question, reply string) {
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
 	listOut := make([]string, 4)
-	value := question + "\n" + reply
+	value := "ask:" + question + "\n" + "answer:" + reply + "\n------------------------\n"
 
 	raw, ok := u.cache.Get(userId)
 	if ok {
@@ -42,6 +42,11 @@ func (u UserService) Set(userId string, question, reply string) {
 		listOut = append(listOut, value)
 	} else {
 		listOut = append(listOut, value)
+	}
+
+	//如果长度超过1000，删除最早的一个
+	if len(listOut) > 1000 {
+		listOut = listOut[1:]
 	}
 	u.cache.Set(userId, listOut, time.Minute*5)
 }
