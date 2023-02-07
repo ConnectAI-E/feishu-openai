@@ -12,11 +12,26 @@
 
 ## 项目特点
 
-- gpt3
-- 飞书机器人
-- 责任链的设计模式
-- zap日志记录
-- goCache缓存
+- 🍏 openai [gpt3](https://platform.openai.com/account/api-keys)
+- 🥒 [serverless一键部署](https://github.com/serverless-devs/serverless-devs)
+- 🍎 [飞书](https://open.feishu.cn/app)机器人
+- 🍐 [责任链](https://refactoringguru.cn/design-patterns/chain-of-responsibility/go/example)的设计模式
+- 🍊 [zap](https://github.com/uber-go/zap)日志记录
+- 🍋 [goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
+
+
+## 部署
+``` bash
+git clone git@github.com:Leizhenpeng/feishu-chatGpt.git
+cd feishu-chatGpt/code
+
+# 配置config.yaml
+mv config.example.yaml config.yaml
+
+# serverless部署
+cd ..
+s deploy
+```
 
 ## 功能解释
 
