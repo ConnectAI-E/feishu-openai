@@ -1,4 +1,14 @@
 
+<p align='center'>
+  <img src='https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/da7632aafca8419d93ace47fa6479feb~tplv-k3u1fbpfcp-watermark.image?' alt='' width='900'/>
+</p>
+
+
+<p align='center'>
+在飞书与ChatGPT随时对话，智慧随身。
+<br>
+ Feishu ChatGpt
+</p>
 
 ## 项目特点
 
@@ -7,10 +17,6 @@
 - 责任链的设计模式
 - zap日志记录
 - goCache缓存
-
-## 项目介绍
-
-聊天机器人，当然得在聊天软件上使用呀！
 
 ## 功能解释
 
@@ -40,7 +46,7 @@
 
 ### 相关阅读
 
-- [go-value-cache]()
+- [go-cache](https://github.com/patrickmn/go-cache)
 
 - [在Go语言项目中使用Zap日志库](https://www.liwenzhou.com/posts/Go/zap/)
 
