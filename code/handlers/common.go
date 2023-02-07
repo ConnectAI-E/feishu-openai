@@ -15,13 +15,15 @@ func sendMsg(ctx context.Context, msg string, chatId *string) {
 	msg = strings.Trim(msg, "\n")
 	msg = strings.Trim(msg, "\r")
 	msg = strings.Trim(msg, "\t")
-	//只保留中文和英文
-	regex := regexp.MustCompile("i[^a-zA-Z0-9\u4e00-\u9fa5]")
-	msg = regex.ReplaceAllString(msg, "")
+	// 去除空行 以及空行前的空格
+	regex := regexp.MustCompile(`\n[\s| ]*\r`)
+	msg = regex.ReplaceAllString(msg, "\n")
+	//换行符转义
+	msg = strings.ReplaceAll(msg, "\n", "\\n")
 	fmt.Println("sendMsg", msg, chatId)
 	client := initialization.GetLarkClient()
 	content := larkim.NewTextMsgBuilder().
-		Text(msg).
+		TextLine(msg).
 		Build()
 	fmt.Println("content", content)
 

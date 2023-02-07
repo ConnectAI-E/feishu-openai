@@ -25,6 +25,7 @@ go.work
 .vscode
 .s
 
-./code/feishu_config.yaml
+config.yaml
+
 
 

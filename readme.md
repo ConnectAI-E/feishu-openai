@@ -40,7 +40,10 @@
 
 ### 相关阅读
 
+- [go-value-cache]()
+
 - [在Go语言项目中使用Zap日志库](https://www.liwenzhou.com/posts/Go/zap/)
-- 
+
 - [飞书 User_ID、Open_ID 与 Union_ID 区别](https://www.feishu.cn/hc/zh-CN/articles/794300086214)
-- 
+
+- [飞书重复接受到消息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/im-v1/message/events/receive)

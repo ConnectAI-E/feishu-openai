@@ -12,16 +12,38 @@ type UserService struct {
 var userServices *UserService
 
 func (u UserService) Get(userId string) string {
-	get, b := u.cache.Get(userId)
-	if !b {
+	// 获取用户的会话上下文
+	sessionContext, ok := u.cache.Get(userId)
+	if !ok {
 		return ""
 	}
-	return get.(string)
+	//list to string
+	list := sessionContext.([]string)
+	var result string
+	for _, v := range list {
+		result += v + "------------------------\n"
+	}
+	return result
 }
 
 func (u UserService) Set(userId string, question, reply string) {
+	// 列表，最多保存4个
+	//如果满了，删除最早的一个
+	//如果没有满，直接添加
+	listOut := make([]string, 4)
 	value := question + "\n" + reply
-	u.cache.Set(userId, value, time.Minute*5)
+
+	raw, ok := u.cache.Get(userId)
+	if ok {
+		listOut = raw.([]string)
+		if len(listOut) == 4 {
+			listOut = listOut[1:]
+		}
+		listOut = append(listOut, value)
+	} else {
+		listOut = append(listOut, value)
+	}
+	u.cache.Set(userId, listOut, time.Minute*5)
 }
 
 func (u UserService) Clear(userId string) bool {
