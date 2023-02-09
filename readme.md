@@ -38,7 +38,7 @@ mv config.example.yaml config.yaml
 ```
 <details>
     <summary>本地部署</summary>
-    <br>
+<br>
 
 如果你的服务器没有公网 IP，可以使用反向代理的方式
 
@@ -65,7 +65,7 @@ kill -9 PID
 
 更多详细介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV1nW4y1378T/)
 
-    <br>
+<br>
 
 </details>
 
@@ -80,17 +80,17 @@ s deploy
 ```
 
 更多详细介绍，参考[仅需1min，用Serverless部署基于 gin 的飞书机器人](https://www.bilibili.com/video/BV1nW4y1378T/)
-    <br>
+<br>
 
 </details>
 
 
 <details>
     <summary>docker部署</summary>
-    <br>
+<br>
 
 待补充
-    <br>
+<br>
 
 </details>
 
