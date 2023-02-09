@@ -12,7 +12,6 @@
 </p>
 
 ## 项目特点
-
 - 🍏 openai-[gpt3](https://platform.openai.com/account/api-keys)
 - 🍎 [飞书](https://open.feishu.cn/app)机器人
 - 🥒 支持[Serverless](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多渠道部署
@@ -27,7 +26,7 @@
 ## 项目部署
 
 
-######  有关飞书相关的配置文件，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
+######  有关飞书具体的配置文件说明，**[➡︎ 点击查看](##详细配置步骤)**
 
 
 ``` bash
@@ -73,7 +72,7 @@ kill -9 PID
 
 <details>
     <summary>serverless部署</summary>
-    <br>
+<br>
 
 ``` bash
 cd ..
@@ -117,9 +116,24 @@ s deploy
 
 
 
-### 日志记录
+## 详细配置步骤
 
-- 按照文件大小切割
+-  获取 [OpenAI](https://platform.openai.com/account/api-keys) 的 KEY
+-  创建 [飞书](https://open.feishu.cn/) 机器人
+    1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
+    2. 打开机器人能力
+    3. 从cpolar或者serverless获得公网地址,例如`http://xxxx.r6.cpolar.top/webhook/event` ,在飞书机器人的 `事件订阅` 板块填写回调地址。
+    4. 给订阅添加下列回调事件
+        - im:message
+        - im:message.group_at_msg
+        - im:message.group_at_msg:readonly
+        - im:message.p2p_msg
+        - im:message.p2p_msg:readonly
+        - im:message:send_as_bot
+    5. 发布版本，等待企业管理员审核通过
+
+更多介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
+
 
 
 ### 相关阅读
