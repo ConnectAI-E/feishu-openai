@@ -41,28 +41,28 @@ mv config.example.yaml config.yaml
     <summary>本地部署</summary>
     <br>
 
-    如果你的服务器没有公网 IP，可以使用反向代理的方式
+如果你的服务器没有公网 IP，可以使用反向代理的方式
 
-    飞书的服务器在国内对ngrok的访问速度很慢，所以推荐使用一些国内的反向代理服务商
-    - [cpolar](https://dashboard.cpolar.com/)
-    - [natapp](https://natapp.cn/)
+飞书的服务器在国内对ngrok的访问速度很慢，所以推荐使用一些国内的反向代理服务商
+- [cpolar](https://dashboard.cpolar.com/)
+- [natapp](https://natapp.cn/)
 
 
-    ```bash
-    //测试部署
-    go run main.go
-    cpolar http 9000
+```bash
+//测试部署
+go run main.go
+cpolar http 9000
 
-    //正式部署
-    nohup cpolar http 8080 -log=stdout &
+//正式部署
+nohup cpolar http 8080 -log=stdout &
 
-    //查看服务器状态
-    https://dashboard.cpolar.com/status
+//查看服务器状态
+https://dashboard.cpolar.com/status
 
-    // 下线服务
-    ps -ef | grep cpolar
-    kill -9 PID
-    ```
+// 下线服务
+ps -ef | grep cpolar
+kill -9 PID
+```
 
     - 详细介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV1nW4y1378T/)
 
@@ -75,11 +75,11 @@ mv config.example.yaml config.yaml
     <summary>serverless部署</summary>
     <br>
 
-    ``` bash
-    cd ..
-    s deploy
-    ```
-    - 详细介绍，参考[仅需1min，用Serverless部署基于 gin 的飞书机器人](https://www.bilibili.com/video/BV1nW4y1378T/)
+``` bash
+cd ..
+s deploy
+```
+- 详细介绍，参考[仅需1min，用Serverless部署基于 gin 的飞书机器人](https://www.bilibili.com/video/BV1nW4y1378T/)
     <br>
 
 </details>
