@@ -53,7 +53,7 @@ go run main.go
 cpolar http 9000
 
 //正式部署
-nohup cpolar http 8080 -log=stdout &
+nohup cpolar http 9000 -log=stdout &
 
 //查看服务器状态
 https://dashboard.cpolar.com/status
