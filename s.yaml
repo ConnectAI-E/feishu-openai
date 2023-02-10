@@ -18,6 +18,7 @@ services:
       # post-deploy:
       #   - run: rm -rf target
       #     path: ./code
+      # 配置参考https://docs.serverless-devs.com/fc/yaml/readme
     props: # 组件的属性值
       region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
       service:
@@ -37,7 +38,7 @@ services:
         instanceType: e1
         memorySize: 128
         runtime: custom
-        timeout: 30
+        timeout: 120
         internetAccess: true
       triggers:
         - name: httpTrigger
