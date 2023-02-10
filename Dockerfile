@@ -9,10 +9,11 @@ ADD /code /build
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-w -s' -o feishu_chatgpt
 
-FROM scratch
+FROM alpine:latest
 
 WORKDIR /dist
 
+RUN apk add --no-cache bash
 COPY --from=golang /build/config.yaml /dist/config.yaml
 COPY --from=golang /build/feishu_chatgpt /dist
 
