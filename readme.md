@@ -11,9 +11,18 @@
     Feishu ChatGpt
 </p>
 
-## 项目特点
-- 🍏 openai-[gpt3](https://platform.openai.com/account/api-keys)
-- 🍎 [飞书](https://open.feishu.cn/app)机器人
+## 👻 已实现功能
+
+- [x] 群聊和私聊
+- [x] 引入持续对话功能
+- [x] 超时自动结束对话
+- [x] 退出对话
+
+
+
+## 🌟 项目特点
+- 🍏 基于 OpenAi-[gpt3](https://platform.openai.com/account/api-keys) 接口
+- 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
 - 🥒 支持[Serverless](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多渠道部署
 - 🍐 基于[责任链](https://refactoringguru.cn/design-patterns/chain-of-responsibility/go/example)的消息处理器，轻松自定义扩展命令
 
