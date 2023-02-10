@@ -124,7 +124,10 @@ docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
 -  创建 [飞书](https://open.feishu.cn/) 机器人
     1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
     2. 前往`应用功能-机器人`, 创建机器人
-    3. 从cpolar或者serverless获得公网地址,例如`http://xxxx.r6.cpolar.top/webhook/event` ,在飞书机器人的 `事件订阅` 板块填写回调地址。
+    3. 从cpolar或者serverless获得公网地址,在飞书机器人后台的 `事件订阅` 板块填写。例如，
+        - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
+        - `/webhook/event`为统一的应用路由
+        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
     4. 给订阅添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
@@ -155,5 +158,5 @@ docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
 
 可以加入飞书群~
 <p align='center'>
-  <img src='./docs/talk.png' alt='' width='200'/>
+  <img src='./docs/talk.png' alt='' width='300' align='left'/>
 </p>
