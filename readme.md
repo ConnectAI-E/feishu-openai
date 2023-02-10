@@ -14,11 +14,13 @@
 ## 👻 机器人功能
 
 - [x] 支持私人对话
-- [x] 支持群聊@机器人
-- [x] 持续对话功能
+- [x] 支持群聊@机器人回复
+- [x] 持续对话联系上下文
 - [x] 超时自动结束对话
-- [x] 限制对话上下文长度
-- [x] 主动退出对话
+- [x] 用户主动开启新对话
+- [ ] 对接[prompts](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [ ] markdown格式回复，重点支持代码场景
+
 
 <p align='center'>
     <img src='./docs/image2.png' alt='' width='800'/>
@@ -29,12 +31,7 @@
 ## 🌟 项目特点
 - 🍏 基于 OpenAi-[gpt3](https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
-- 🥒 支持[Serverless](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多渠道部署
-- 🍐 基于[责任链](https://refactoringguru.cn/design-patterns/chain-of-responsibility/go/example)的消息处理器，轻松自定义扩展命令
-
-[//]: # (- 🍊 [zap]&#40;https://github.com/uber-go/zap&#41;日志记录)
-
-[//]: # (- )
+- 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多种渠道部署
 - 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
 
 
@@ -86,9 +83,14 @@ kill -9 PID
 
 
 <details>
-    <summary>serverless部署</summary>
+    <summary>serverless云函数部署</summary>
 <br>
 
+安装[severless](https://docs.serverless-devs.com/serverless-devs/quick_start)工具
+```bash
+npm install @serverless-devs/s -g
+```
+一键部署
 ``` bash
 cd ..
 s deploy
