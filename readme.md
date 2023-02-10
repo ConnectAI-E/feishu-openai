@@ -149,3 +149,11 @@ docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
 - [飞书 User_ID、Open_ID 与 Union_ID 区别](https://www.feishu.cn/hc/zh-CN/articles/794300086214)
 
 - [飞书重复接受到消息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/im-v1/message/events/receive)
+
+
+### 更多交流
+
+可以加入飞书群~
+<p align='center'>
+  <img src='./docs/talk.png' alt='' width='200'/>
+</p>
