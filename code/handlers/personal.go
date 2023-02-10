@@ -26,11 +26,13 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	p.msgCache.TagProcessed(*msgId)
 	qParsed := parseContent(*content)
 	if len(qParsed) == 0 {
+		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
+
 		fmt.Println("msgId", *msgId, "message.text is empty")
 		return nil
 	}
 
-	if qParsed == "/clear" || qParsed == "记忆清除" {
+	if qParsed == "/clear" || qParsed == "清除" {
 		p.userCache.Clear(*openId)
 		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
 		return nil
