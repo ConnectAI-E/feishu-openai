@@ -130,7 +130,7 @@ s deploy
 -  获取 [OpenAI](https://platform.openai.com/account/api-keys) 的 KEY
 -  创建 [飞书](https://open.feishu.cn/) 机器人
     1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
-    2. 打开机器人能力
+    2. 前往`应用功能-机器人`, 创建机器人
     3. 从cpolar或者serverless获得公网地址,例如`http://xxxx.r6.cpolar.top/webhook/event` ,在飞书机器人的 `事件订阅` 板块填写回调地址。
     4. 给订阅添加下列回调事件
         - im:message
