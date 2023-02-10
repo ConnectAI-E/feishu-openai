@@ -1,6 +1,6 @@
 
 <p align='center'>
-  <img src='https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/91d1c7af087646aea2c550665c01796b~tplv-k3u1fbpfcp-watermark.image?' alt='' width='900'/>
+  <img src='./docs/image.png' alt='' width='900'/>
 </p>
 
 <br>
@@ -101,8 +101,10 @@ s deploy
 <br>
 
 ``` bash
-# 1)配置 config.example.yaml
-# 2)构建运行
+# 配置config.yaml
+mv config.example.yaml config.yaml
+# 构建运行
+cd ..
 docker build -t feishu-chatgpt:latest .
 docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
 ```
