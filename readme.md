@@ -29,7 +29,7 @@
 
 
 ## 🌟 项目特点
-- 🍏 基于 OpenAi-[gpt3](https://platform.openai.com/account/api-keys) 接口
+- 🍏 基于 OpenAI-[Gpt3](https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
 - 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多种渠道部署
 - 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
@@ -127,7 +127,7 @@ docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
     3. 从cpolar或者serverless获得公网地址,在飞书机器人后台的 `事件订阅` 板块填写。例如，
         - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
         - `/webhook/event`为统一的应用路由
-        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
+        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`c
     4. 给订阅添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
