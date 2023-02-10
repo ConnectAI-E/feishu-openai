@@ -28,15 +28,18 @@ func (u UserService) Get(userId string) string {
 }
 
 func (u UserService) Set(userId string, question, reply string) {
-	// 列表，最多保存4个
+	// 列表，最多保存8个
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
-	listOut := make([]string, 4)
+	maxCache := 8
+	maxLength := 2048
+	maxCacheTime := time.Minute * 30
+	listOut := make([]string, maxCache)
 	value := fmt.Sprintf("Q:%s\nA:%s\n\n", question, reply)
 	raw, ok := u.cache.Get(userId)
 	if ok {
 		listOut = raw.([]string)
-		if len(listOut) == 4 {
+		if len(listOut) == maxCache {
 			listOut = listOut[1:]
 		}
 		listOut = append(listOut, value)
@@ -45,10 +48,10 @@ func (u UserService) Set(userId string, question, reply string) {
 	}
 
 	//限制对话上下文长度
-	if getStrPoolTotalLength(listOut) > 2048 {
+	if getStrPoolTotalLength(listOut) > maxLength {
 		listOut = listOut[1:]
 	}
-	u.cache.Set(userId, listOut, time.Minute*5)
+	u.cache.Set(userId, listOut, maxCacheTime)
 }
 
 func (u UserService) Clear(userId string) bool {

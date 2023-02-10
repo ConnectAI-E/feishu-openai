@@ -10,20 +10,24 @@ import (
 	"strings"
 )
 
-func sendMsg(ctx context.Context, msg string, chatId *string) {
-	msg = strings.Trim(msg, " ")
-	msg = strings.Trim(msg, "\n")
-	msg = strings.Trim(msg, "\r")
-	msg = strings.Trim(msg, "\t")
-	// 去除空行 以及空行前的空格
-	regex := regexp.MustCompile(`\n[\s| ]*\r`)
-	msg = regex.ReplaceAllString(msg, "\n")
-	//换行符转义
-	msg = strings.ReplaceAll(msg, "\n", "\\n")
+func sendMsg(ctx context.Context, msg string, chatId *string) error {
+	//msg = strings.Trim(msg, " ")
+	//msg = strings.Trim(msg, "\n")
+	//msg = strings.Trim(msg, "\r")
+	//msg = strings.Trim(msg, "\t")
+	//// 去除空行 以及空行前的空格
+	//regex := regexp.MustCompile(`\n[\s| ]*\r`)
+	//msg = regex.ReplaceAllString(msg, "\n")
+	////换行符转义
+	//msg = strings.ReplaceAll(msg, "\n", "\\n")
 	fmt.Println("sendMsg", msg, chatId)
+	msg, i := processMessage(msg)
+	if i != nil {
+		return i
+	}
 	client := initialization.GetLarkClient()
 	content := larkim.NewTextMsgBuilder().
-		TextLine(msg).
+		Text(msg).
 		Build()
 	fmt.Println("content", content)
 
@@ -39,12 +43,15 @@ func sendMsg(ctx context.Context, msg string, chatId *string) {
 	// 处理错误
 	if err != nil {
 		fmt.Println(err)
+		return err
 	}
 
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return err
 	}
+	return nil
 }
 func msgFilter(msg string) string {
 	//replace @到下一个非空的字段 为 ''
@@ -62,4 +69,20 @@ func parseContent(content string) string {
 	}
 	text := contentMap["text"].(string)
 	return msgFilter(text)
+}
+
+func processMessage(msg interface{}) (string, error) {
+	msg = strings.TrimSpace(msg.(string))
+	msgB, err := json.Marshal(msg)
+	if err != nil {
+		return "", err
+	}
+
+	msgStr := string(msgB)
+
+	if len(msgStr) >= 2 {
+		msgStr = msgStr[1 : len(msgStr)-1]
+	}
+
+	return msgStr, nil
 }
