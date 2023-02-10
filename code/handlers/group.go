@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/services"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"github.com/spf13/viper"
 )
 
 type GroupMessageHandler struct {
@@ -78,5 +80,5 @@ func judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
 	if len(mention) != 1 {
 		return false
 	}
-	return *mention[0].Name == "chatGpt"
+	return *mention[0].Name == viper.GetString("BOT_NAME")
 }
