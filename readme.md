@@ -1,6 +1,6 @@
 
 <p align='center'>
-  <img src='./docs/image.png' alt='' width='900'/>
+  <img src='./docs/image.png' alt='' width='800'/>
 </p>
 
 <br>
@@ -21,7 +21,7 @@
 - [x] 主动退出对话
 
 <p align='center'>
-    <img src='./docs/image2.png' alt='' width='600'/>
+    <img src='./docs/image2.png' alt='' width='800'/>
 </p>
 
 
