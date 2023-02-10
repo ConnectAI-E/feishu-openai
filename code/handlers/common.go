@@ -4,23 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"regexp"
 	"start-feishubot/initialization"
 	"strings"
 )
 
-func sendMsg(ctx context.Context, msg string, chatId *string) error {
-	//msg = strings.Trim(msg, " ")
-	//msg = strings.Trim(msg, "\n")
-	//msg = strings.Trim(msg, "\r")
-	//msg = strings.Trim(msg, "\t")
-	//// 去除空行 以及空行前的空格
-	//regex := regexp.MustCompile(`\n[\s| ]*\r`)
-	//msg = regex.ReplaceAllString(msg, "\n")
-	////换行符转义
-	//msg = strings.ReplaceAll(msg, "\n", "\\n")
-	fmt.Println("sendMsg", msg, chatId)
+func replyMsg(ctx context.Context, msg string, msgId *string) error {
+	fmt.Println("sendMsg", msg, msgId)
 	msg, i := processMessage(msg)
 	if i != nil {
 		return i
@@ -29,7 +21,43 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	content := larkim.NewTextMsgBuilder().
 		Text(msg).
 		Build()
-	fmt.Println("content", content)
+
+	resp, err := client.Im.Message.Reply(ctx, larkim.NewReplyMessageReqBuilder().
+		MessageId(*msgId).
+		Body(larkim.NewReplyMessageReqBodyBuilder().
+			MsgType(larkim.MsgTypeText).
+			Uuid(uuid.New().String()).
+			Content(content).
+			Build()).
+		Build())
+
+	// 处理错误
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 服务端错误处理
+	if !resp.Success() {
+		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return err
+	}
+	return nil
+	return nil
+
+}
+func sendMsg(ctx context.Context, msg string, chatId *string) error {
+	//fmt.Println("sendMsg", msg, chatId)
+	msg, i := processMessage(msg)
+	if i != nil {
+		return i
+	}
+	client := initialization.GetLarkClient()
+	content := larkim.NewTextMsgBuilder().
+		Text(msg).
+		Build()
+
+	//fmt.Println("content", content)
 
 	resp, err := client.Im.Message.Create(ctx, larkim.NewCreateMessageReqBuilder().
 		ReceiveIdType(larkim.ReceiveIdTypeChatId).
@@ -70,7 +98,6 @@ func parseContent(content string) string {
 	text := contentMap["text"].(string)
 	return msgFilter(text)
 }
-
 func processMessage(msg interface{}) (string, error) {
 	msg = strings.TrimSpace(msg.(string))
 	msgB, err := json.Marshal(msg)

@@ -7,17 +7,22 @@ import (
 	"start-feishubot/services"
 )
 
-type PersonalMessageHandler struct {
+type GroupMessageHandler struct {
 	userCache services.UserCacheInterface
 	msgCache  services.MsgCacheInterface
 }
 
-func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+	ifMention := judgeIfMentionMe(event)
+	if !ifMention {
+		return nil
+	}
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
 	sender := event.Event.Sender
 	openId := sender.SenderId.OpenId
 	chatId := event.Event.Message.ChatId
+
 	if p.msgCache.IfProcessed(*msgId) {
 		fmt.Println("msgId", *msgId, "processed")
 		return nil
@@ -41,7 +46,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	completions, err := services.Completions(prompt)
 	ok := true
 	if err != nil {
-		sendMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), chatId)
+		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
 	}
 	if len(completions) == 0 {
@@ -49,9 +54,9 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 	if ok {
 		p.userCache.Set(*openId, qParsed, completions)
-		err := sendMsg(ctx, completions, chatId)
+		err := replyMsg(ctx, completions, msgId)
 		if err != nil {
-			sendMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), chatId)
+			replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 			return nil
 		}
 	}
@@ -61,9 +66,17 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 
 var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
 
-func NewPersonalMessageHandler() MessageHandlerInterface {
-	return &PersonalMessageHandler{
+func NewGroupMessageHandler() MessageHandlerInterface {
+	return &GroupMessageHandler{
 		userCache: services.GetUserCache(),
 		msgCache:  services.GetMsgCache(),
 	}
+}
+
+func judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
+	mention := event.Event.Message.Mentions
+	if len(mention) != 1 {
+		return false
+	}
+	return *mention[0].Name == "chatGpt"
 }

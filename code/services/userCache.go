@@ -67,7 +67,7 @@ type UserCacheInterface interface {
 
 func GetUserCache() UserCacheInterface {
 	if userServices == nil {
-		userServices = &UserService{cache: cache.New(10*time.Minute, 10*time.Minute)}
+		userServices = &UserService{cache: cache.New(30*time.Minute, 30*time.Minute)}
 	}
 	return userServices
 }

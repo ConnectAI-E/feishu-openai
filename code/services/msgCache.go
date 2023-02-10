@@ -19,7 +19,7 @@ func (u MsgService) IfProcessed(msgId string) bool {
 	return get.(bool)
 }
 func (u MsgService) TagProcessed(msgId string) {
-	u.cache.Set(msgId, true, time.Minute*5)
+	u.cache.Set(msgId, true, time.Minute*30)
 }
 
 func (u MsgService) Clear(userId string) bool {
@@ -34,7 +34,7 @@ type MsgCacheInterface interface {
 
 func GetMsgCache() MsgCacheInterface {
 	if msgService == nil {
-		msgService = &MsgService{cache: cache.New(10*time.Minute, 10*time.Minute)}
+		msgService = &MsgService{cache: cache.New(30*time.Minute, 30*time.Minute)}
 	}
 	return msgService
 }
