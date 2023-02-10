@@ -16,7 +16,9 @@
 - [x] 群聊和私聊
 - [x] 引入持续对话功能
 - [x] 超时自动结束对话
-- [x] 退出对话
+- [x] 限制对话上下文长度
+- [x] 主动退出对话
+
 
 
 
@@ -130,16 +132,18 @@ s deploy
 -  获取 [OpenAI](https://platform.openai.com/account/api-keys) 的 KEY
 -  创建 [飞书](https://open.feishu.cn/) 机器人
     1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
-    2. 打开机器人能力
+    2. 前往`应用功能-机器人`, 创建机器人
     3. 从cpolar或者serverless获得公网地址,例如`http://xxxx.r6.cpolar.top/webhook/event` ,在飞书机器人的 `事件订阅` 板块填写回调地址。
     4. 给订阅添加下列回调事件
         - im:message
-        - im:message.group_at_msg
-        - im:message.group_at_msg:readonly
-        - im:message.p2p_msg
-        - im:message.p2p_msg:readonly
-        - im:message:send_as_bot
-    5. 发布版本，等待企业管理员审核通过
+        - im:message.group_at_msg(获取群组中所有消息)
+        - im:message.group_at_msg:readonly(接收群聊中@机器人消息事件)
+        - im:message.p2p_msg(获取用户发给机器人的单聊消息)
+        - im:message.p2p_msg:readonly(读取用户发给机器人的单聊消息)
+        - im:message:send_as_bot(获取用户在群组中@机器人的消息)
+        - im:chat:readonly(获取群组信息)
+        - im:chat(获取与更新群组信息)
+5. 发布版本，等待企业管理员审核通过
 
 更多介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
 
