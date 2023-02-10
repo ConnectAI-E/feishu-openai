@@ -6,8 +6,9 @@
 <br>
 
 <p align='center'>
-    在飞书与ChatGPT随时对话，智慧随身。
-    <br>
+    在飞书上与ChatGPT随时对话
+<br>
+<br>
     Feishu ChatGpt
 </p>
 
