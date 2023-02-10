@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/patrickmn/go-cache"
 	"time"
 )
@@ -31,8 +32,7 @@ func (u UserService) Set(userId string, question, reply string) {
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
 	listOut := make([]string, 4)
-	value := "ask:" + question + "\n" + "answer:" + reply + "\n------------------------\n"
-
+	value := fmt.Sprintf("Q:%s\nA:%s\n\n", question, reply)
 	raw, ok := u.cache.Get(userId)
 	if ok {
 		listOut = raw.([]string)
@@ -44,8 +44,8 @@ func (u UserService) Set(userId string, question, reply string) {
 		listOut = append(listOut, value)
 	}
 
-	//如果长度超过1000，删除最早的一个
-	if len(listOut) > 1000 {
+	//限制对话上下文长度
+	if getStrPoolTotalLength(listOut) > 2048 {
 		listOut = listOut[1:]
 	}
 	u.cache.Set(userId, listOut, time.Minute*5)
@@ -67,4 +67,12 @@ func GetUserCache() UserCacheInterface {
 		userServices = &UserService{cache: cache.New(10*time.Minute, 10*time.Minute)}
 	}
 	return userServices
+}
+
+func getStrPoolTotalLength(strPool []string) int {
+	var total int
+	for _, v := range strPool {
+		total += len(v)
+	}
+	return total
 }
