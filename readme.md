@@ -100,7 +100,12 @@ s deploy
     <summary>docker部署</summary>
 <br>
 
-待补充
+``` bash
+# 1)配置 config.example.yaml
+# 2)构建运行
+docker build -t feishu-chatgpt:latest
+docker run --name feishu-chatgpt -p 9000 feishu-chatgpt:latest
+```
 <br>
 
 </details>
