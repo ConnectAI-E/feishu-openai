@@ -128,7 +128,7 @@ docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
     3. 从cpolar或者serverless获得公网地址,在飞书机器人后台的 `事件订阅` 板块填写。例如，
         - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
         - `/webhook/event`为统一的应用路由
-        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`c
+        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
     4. 给订阅添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
