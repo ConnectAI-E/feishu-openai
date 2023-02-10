@@ -103,32 +103,32 @@ s deploy
 ``` bash
 # 1)配置 config.example.yaml
 # 2)构建运行
-docker build -t feishu-chatgpt:latest
-docker run --name feishu-chatgpt -p 9000 feishu-chatgpt:latest
+docker build -t feishu-chatgpt:latest .
+docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
 ```
 <br>
 
 </details>
 
 
-## 功能解释
+{{/*## 功能解释*/}}
 
-### 责任链-设计模式
+{{/*### 责任链-设计模式*/}}
 
-划重点@bro
+{{/*划重点@bro*/}}
 
-千万不要用if else，这样的代码，不仅可读性差，而且，如果要增加一个处理器，就需要修改代码，违反了开闭原则
+{{/*千万不要用if else，这样的代码，不仅可读性差，而且，如果要增加一个处理器，就需要修改代码，违反了开闭原则*/}}
 
-用户发送的文本消息，根据消息内容，匹配到对应的处理器，处理器处理消息，返回结果给用户
+{{/*用户发送的文本消息，根据消息内容，匹配到对应的处理器，处理器处理消息，返回结果给用户*/}}
 
-这种匹配，可以使用责任链模式，将匹配的逻辑抽象成一个个的处理器，然后将这些处理器串联起来，形成一个链条。
+{{/*这种匹配，可以使用责任链模式，将匹配的逻辑抽象成一个个的处理器，然后将这些处理器串联起来，形成一个链条。*/}}
 
-用户发送的消息，从链条的头部开始，依次匹配，匹配到后，就不再继续匹配，直接返回结果给用户
+{{/*用户发送的消息，从链条的头部开始，依次匹配，匹配到后，就不再继续匹配，直接返回结果给用户*/}}
 
 
-！！！切记！！！
+{{/*！！！切记！！！*/}}
 
-责任链模式[参考代码](https://refactoringguru.cn/design-patterns/chain-of-responsibility)
+{{/*责任链模式[参考代码](https://refactoringguru.cn/design-patterns/chain-of-responsibility)*/}}
 
 
 
