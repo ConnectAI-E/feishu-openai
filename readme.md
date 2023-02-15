@@ -84,7 +84,7 @@ kill -9 PID
 
 
 <details>
-    <summary>serverless云函数部署</summary>
+    <summary>serverless云函数(阿里云等)部署</summary>
 <br>
 
 安装[severless](https://docs.serverless-devs.com/serverless-devs/quick_start)工具
