@@ -25,8 +25,6 @@ go.work
 .vscode
 .s
 
-config.yaml
-
 
 
 /code/target/

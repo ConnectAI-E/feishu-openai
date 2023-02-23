@@ -1,0 +1,10 @@
+#  飞书
+APP_ID: cli_a37ac5df1138d009
+APP_SECRET: FRnY5kZaQwd1vrIkv5urkbmAd6Mc4fca
+APP_ENCRYPT_KEY: eFK47GSxUb6lIzOzSKcN7eN7TpH85lNC
+APP_VERIFICATION_TOKEN: EoKs1tpEZHURFAxusV5LBdkWW62EZlLt
+# 请确保和飞书应用管理平台中的设置一致
+BOT_NAME: MyGPT
+# openAI
+OPENAI_KEY: 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
+# cd /home/feishu-chatGpt/code/
