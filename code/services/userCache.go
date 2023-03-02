@@ -1,9 +1,10 @@
 package services
 
 import (
-	"fmt"
-	"github.com/patrickmn/go-cache"
+	"encoding/json"
 	"time"
+
+	"github.com/patrickmn/go-cache"
 )
 
 type UserService struct {
@@ -12,46 +13,32 @@ type UserService struct {
 
 var userServices *UserService
 
-func (u UserService) Get(userId string) string {
+func (u UserService) Get(userId string) (msg []Messages) {
 	// 获取用户的会话上下文
 	sessionContext, ok := u.cache.Get(userId)
 	if !ok {
-		return ""
+		return msg
 	}
-	//list to string
-	list := sessionContext.([]string)
-	var result string
-	for _, v := range list {
-		result += v
-	}
-	return result
+	return sessionContext.([]Messages)
 }
 
-func (u UserService) Set(userId string, question, reply string) {
+func (u UserService) Set(userId string, msg []Messages) {
 	// 列表，最多保存8个
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
-	maxCache := 8
+	maxCache := 16
 	maxLength := 2048
 	maxCacheTime := time.Minute * 30
-	listOut := make([]string, maxCache)
-	value := fmt.Sprintf("Q:%s\nA:%s\n\n", question, reply)
-	raw, ok := u.cache.Get(userId)
-	if ok {
-		listOut = raw.([]string)
-		if len(listOut) == maxCache {
-			listOut = listOut[1:]
-		}
-		listOut = append(listOut, value)
-	} else {
-		listOut = append(listOut, value)
+
+	if len(msg) == maxCache {
+		msg = msg[2:]
 	}
 
 	//限制对话上下文长度
-	if getStrPoolTotalLength(listOut) > maxLength {
-		listOut = listOut[1:]
+	for getStrPoolTotalLength(msg) > maxLength {
+		msg = msg[2:]
 	}
-	u.cache.Set(userId, listOut, maxCacheTime)
+	u.cache.Set(userId, msg, maxCacheTime)
 }
 
 func (u UserService) Clear(userId string) bool {
@@ -60,8 +47,8 @@ func (u UserService) Clear(userId string) bool {
 }
 
 type UserCacheInterface interface {
-	Get(userId string) string
-	Set(userId string, question, reply string)
+	Get(userId string) []Messages
+	Set(userId string, msg []Messages)
 	Clear(userId string) bool
 }
 
@@ -72,10 +59,11 @@ func GetUserCache() UserCacheInterface {
 	return userServices
 }
 
-func getStrPoolTotalLength(strPool []string) int {
+func getStrPoolTotalLength(strPool []Messages) int {
 	var total int
 	for _, v := range strPool {
-		total += len(v)
+		bytes, _ := json.Marshal(v)
+		total += len(string(bytes))
 	}
 	return total
 }

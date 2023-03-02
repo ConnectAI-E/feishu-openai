@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 const (
@@ -23,36 +24,36 @@ type ChatGPTResponseBody struct {
 	ID      string                 `json:"id"`
 	Object  string                 `json:"object"`
 	Created int                    `json:"created"`
+	Model   string                 `json:"model"`
 	Choices []ChoiceItem           `json:"choices"`
 	Usage   map[string]interface{} `json:"usage"`
 }
-
 type ChoiceItem struct {
-	Index        int     `json:"index"`
-	Message      Message `json:"message"`
-	FinishReason string  `json:"finish_reason"`
+	Message      Messages `json:"message"`
+	Index        int      `json:"index"`
+	FinishReason string   `json:"finish_reason"`
 }
 
-type Message struct {
+type Messages struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
-	Model            string    `json:"model"`
-	Messages         []Message `json:"messages"`
-	MaxTokens        int       `json:"max_tokens"`
-	Temperature      float32   `json:"temperature"`
-	TopP             int       `json:"top_p"`
-	FrequencyPenalty int       `json:"frequency_penalty"`
-	PresencePenalty  int       `json:"presence_penalty"`
+	Model            string     `json:"model"`
+	Messages         []Messages `json:"messages"`
+	MaxTokens        int        `json:"max_tokens"`
+	Temperature      float32    `json:"temperature"`
+	TopP             int        `json:"top_p"`
+	FrequencyPenalty int        `json:"frequency_penalty"`
+	PresencePenalty  int        `json:"presence_penalty"`
 }
 
-func Completions(msg string) (string, error) {
+func Completions(msg []Messages) (resp Messages, err error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            engine,
-		Messages:         []Message{{Role: "user", Content: msg}},
+		Messages:         msg,
 		MaxTokens:        maxTokens,
 		Temperature:      temperature,
 		TopP:             1,
@@ -62,12 +63,12 @@ func Completions(msg string) (string, error) {
 	requestData, err := json.Marshal(requestBody)
 
 	if err != nil {
-		return "", err
+		return resp, err
 	}
 	log.Printf("request gtp json string : %v", string(requestData))
 	req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
-		return "", err
+		return resp, err
 	}
 
 	apiKey := viper.GetString("OPENAI_KEY")
@@ -76,30 +77,26 @@ func Completions(msg string) (string, error) {
 	client := &http.Client{Timeout: 110 * time.Second}
 	response, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return resp, err
 	}
 	defer response.Body.Close()
 	if response.StatusCode/2 != 100 {
-		return "", fmt.Errorf("gtp api %s", response.Status)
+		return resp, fmt.Errorf("gtp api %s", response.Status)
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return "", err
+		return resp, err
 	}
 
 	gptResponseBody := &ChatGPTResponseBody{}
-	log.Println(string(body))
+	// log.Println(string(body))
 	err = json.Unmarshal(body, gptResponseBody)
 	if err != nil {
-		return "", err
+		return resp, err
 	}
 
-	var reply string
-	if len(gptResponseBody.Choices) > 0 {
-		reply = gptResponseBody.Choices[0].Message.Content
-	}
-	log.Printf("gpt response text: %s \n", reply)
-	return reply, nil
+	resp = gptResponseBody.Choices[0].Message
+	return resp, nil
 }
 
 func FormatQuestion(question string) string {
