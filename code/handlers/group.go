@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"start-feishubot/services"
+	"strings"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/spf13/viper"
-	"strings"
 )
 
 type GroupMessageHandler struct {
@@ -31,7 +31,7 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 	p.msgCache.TagProcessed(*msgId)
-	qParsed := strings.Trim(parseContent(*content)," ")
+	qParsed := strings.Trim(parseContent(*content), " ")
 	if len(qParsed) == 0 {
 		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
 		fmt.Println("msgId", *msgId, "message.text is empty")
@@ -44,24 +44,21 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
-	prompt := p.userCache.Get(*openId)
-	prompt = fmt.Sprintf("%s\nQ:%s\nA:", prompt, qParsed)
-	completions, err := services.Completions(prompt)
-	ok := true
+	msg := p.userCache.Get(*openId)
+	msg = append(msg, services.Messages{
+		Role: "user", Content: qParsed,
+	})
+	completions, err := services.Completions(msg)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
 	}
-	if len(completions) == 0 {
-		ok = false
-	}
-	if ok {
-		p.userCache.Set(*openId, qParsed, completions)
-		err := replyMsg(ctx, completions, msgId)
-		if err != nil {
-			replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
-			return nil
-		}
+	msg = append(msg, completions)
+	p.userCache.Set(*openId, msg)
+	err = replyMsg(ctx, completions.Content, msgId)
+	if err != nil {
+		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
+		return nil
 	}
 	return nil
 

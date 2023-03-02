@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"regexp"
 	"start-feishubot/initialization"
 	"strings"
+
+	"github.com/google/uuid"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
@@ -43,9 +44,8 @@ func replyMsg(ctx context.Context, msg string, msgId *string) error {
 		return err
 	}
 	return nil
-	return nil
-
 }
+
 func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	//fmt.Println("sendMsg", msg, chatId)
 	msg, i := processMessage(msg)

@@ -3,8 +3,10 @@ package handlers
 import (
 	"context"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/services"
+	"strings"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type PersonalMessageHandler struct {
@@ -23,7 +25,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 	p.msgCache.TagProcessed(*msgId)
-	qParsed := parseContent(*content)
+	qParsed := strings.Trim(parseContent(*content), " ")
 	if len(qParsed) == 0 {
 		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
 		fmt.Println("msgId", *msgId, "message.text is empty")
@@ -36,24 +38,21 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 
-	prompt := p.userCache.Get(*openId)
-	prompt = fmt.Sprintf("%s\nQ:%s\nA:", prompt, qParsed)
-	completions, err := services.Completions(prompt)
-	ok := true
+	msg := p.userCache.Get(*openId)
+	msg = append(msg, services.Messages{
+		Role: "user", Content: qParsed,
+	})
+	completions, err := services.Completions(msg)
 	if err != nil {
-		sendMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), chatId)
+		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
 	}
-	if len(completions) == 0 {
-		ok = false
-	}
-	if ok {
-		p.userCache.Set(*openId, qParsed, completions)
-		err := sendMsg(ctx, completions, chatId)
-		if err != nil {
-			sendMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), chatId)
-			return nil
-		}
+	msg = append(msg, completions)
+	p.userCache.Set(*openId, msg)
+	err = replyMsg(ctx, completions.Content, msgId)
+	if err != nil {
+		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
+		return nil
 	}
 	return nil
 
