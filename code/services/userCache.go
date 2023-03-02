@@ -27,7 +27,7 @@ func (u UserService) Set(userId string, msg []Messages) {
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
 	maxCache := 16
-	maxLength := 2048
+	maxLength := 4096
 	maxCacheTime := time.Minute * 30
 
 	if len(msg) == maxCache {
