@@ -15,7 +15,7 @@ const (
 	BASEURL     = "https://api.openai.com/v1/"
 	maxTokens   = 2000
 	temperature = 0.7
-	engine      = "text-davinci-003"
+	engine      = "gpt-3.5-turbo"
 )
 
 // ChatGPTResponseBody 请求体
@@ -23,33 +23,36 @@ type ChatGPTResponseBody struct {
 	ID      string                 `json:"id"`
 	Object  string                 `json:"object"`
 	Created int                    `json:"created"`
-	Model   string                 `json:"model"`
 	Choices []ChoiceItem           `json:"choices"`
 	Usage   map[string]interface{} `json:"usage"`
 }
 
 type ChoiceItem struct {
-	Text         string `json:"text"`
-	Index        int    `json:"index"`
-	Logprobs     int    `json:"logprobs"`
-	FinishReason string `json:"finish_reason"`
+	Index        int     `json:"index"`
+	Message      Message `json:"message"`
+	FinishReason string  `json:"finish_reason"`
+}
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
-	Model            string  `json:"model"`
-	Prompt           string  `json:"prompt"`
-	MaxTokens        int     `json:"max_tokens"`
-	Temperature      float32 `json:"temperature"`
-	TopP             int     `json:"top_p"`
-	FrequencyPenalty int     `json:"frequency_penalty"`
-	PresencePenalty  int     `json:"presence_penalty"`
+	Model            string    `json:"model"`
+	Messages         []Message `json:"messages"`
+	MaxTokens        int       `json:"max_tokens"`
+	Temperature      float32   `json:"temperature"`
+	TopP             int       `json:"top_p"`
+	FrequencyPenalty int       `json:"frequency_penalty"`
+	PresencePenalty  int       `json:"presence_penalty"`
 }
 
 func Completions(msg string) (string, error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            engine,
-		Prompt:           msg,
+		Messages:         []Message{{Role: "user", Content: msg}},
 		MaxTokens:        maxTokens,
 		Temperature:      temperature,
 		TopP:             1,
@@ -62,7 +65,7 @@ func Completions(msg string) (string, error) {
 		return "", err
 	}
 	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return "", err
 	}
@@ -93,7 +96,7 @@ func Completions(msg string) (string, error) {
 
 	var reply string
 	if len(gptResponseBody.Choices) > 0 {
-		reply = gptResponseBody.Choices[0].Text
+		reply = gptResponseBody.Choices[0].Message.Content
 	}
 	log.Printf("gpt response text: %s \n", reply)
 	return reply, nil
