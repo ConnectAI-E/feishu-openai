@@ -40,7 +40,10 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 
 	if qParsed == "/clear" || qParsed == "清除" {
 		p.userCache.Clear(*openId)
-		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
+		//sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
+
+		sendClearCacheCheckCard(ctx, chatId)
+
 		return nil
 	}
 
