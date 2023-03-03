@@ -6,6 +6,7 @@ import (
 	"fmt"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/services"
+	"start-feishubot/utils"
 	"strings"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -63,13 +64,13 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
-	system, found := strings.CutPrefix(qParsed, "/system ")
+	system, found := utils.CutPrefix(qParsed, "/system ")
 	if found {
 		p.sessionCache.Clear(*sessionId)
-		system_msg := append([]services.Messages{}, services.Messages{
+		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
-		p.sessionCache.Set(*sessionId, system_msg)
+		p.sessionCache.Set(*sessionId, systemMsg)
 		sendSystemInstructionCard(ctx, sessionId, msgId, system)
 		return nil
 	}
