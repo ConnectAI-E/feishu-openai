@@ -23,7 +23,7 @@
 - [x] 支持富文本卡片回复
 - [x] [交互式](https://github.com/Leizhenpeng/feishu-chatGpt/pull/26)反馈提醒
 - [ ] 支持token用量查询
-- [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [x] 基于[角色扮演的场景模式](https://github.com/f/awesome-chatgpt-prompts)(关键词`角色扮演 描述`）
 - [ ] markdown格式回复，重点支持代码场景
 - [ ] 支持图片显示
 
