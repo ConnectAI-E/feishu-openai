@@ -108,6 +108,13 @@ s deploy
 <br>
 
 ``` bash
+# 配置config.yaml
+mv config.example.yaml config.yaml
+# 构建运行
+cd ..
+docker build -t feishu-chatgpt:latest .
+docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
+
 Go版本，小白简单化 docker部署教程
 项目地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
 
