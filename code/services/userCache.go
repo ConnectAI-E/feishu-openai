@@ -23,7 +23,7 @@ func (u UserService) Get(userId string) (msg []Messages) {
 }
 
 func (u UserService) Set(userId string, msg []Messages) {
-	// 列表，最多保存8个
+	//会话列表，最多保存16个
 	//如果满了，删除最早的一个
 	//如果没有满，直接添加
 	maxCache := 16

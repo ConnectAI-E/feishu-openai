@@ -21,10 +21,8 @@
 - [x] 用户主动开启新对话
 - [ ] 支持富文本卡片
 - [ ] 允许个性化的界面配置
-- [ ] 支持图片显示
 - [ ] 支持token用量查询
 - [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
-- [ ] markdown格式回复，重点支持代码场景
 
 
 <p align='center'>

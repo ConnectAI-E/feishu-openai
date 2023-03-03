@@ -26,6 +26,12 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 	p.msgCache.TagProcessed(*msgId)
 	qParsed := strings.Trim(parseContent(*content), " ")
+	//// todo: test
+	//if true {
+	//	replyMarkdown(ctx, `![](https://open.feishu.cn/open-apis/block-kit/image/img_v2_041b28e3-5680-48c2-9af2-497ace79333g)`, msgId)
+	//	return nil
+	//}
+
 	if len(qParsed) == 0 {
 		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
 		fmt.Println("msgId", *msgId, "message.text is empty")
