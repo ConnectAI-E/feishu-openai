@@ -47,6 +47,17 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
+	system, found := strings.CutPrefix(qParsed, "/system:")
+	if found {
+		p.sessionCache.Clear(*sessionId)
+		system_msg := service.Message{
+			Role: "system", Content: system,
+		} 
+		p.sessionCache.Set(*sessionId, system_msg)
+		sendMsg(ctx, "🤖️：AI机器人已收到指令", chatId)
+		return nil
+	}
+
 	msg := p.sessionCache.Get(*sessionId)
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
