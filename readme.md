@@ -15,11 +15,15 @@
 ## 👻 机器人功能
 
 - [x] 支持私人对话
-- [x] 支持群聊@机器人回复
+- [x] 支持群聊@机器人[持续回复](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)~
 - [x] 持续对话联系上下文
 - [x] 超时自动结束对话
 - [x] 用户主动开启新对话
-- [ ] 对接[prompts](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [ ] 支持富文本卡片
+- [ ] 允许个性化的界面配置
+- [ ] 支持图片显示
+- [ ] 支持token用量查询
+- [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
 - [ ] markdown格式回复，重点支持代码场景
 
 
@@ -30,7 +34,7 @@
 
 
 ## 🌟 项目特点
-- 🍏 基于 OpenAI-[Gpt3](https://platform.openai.com/account/api-keys) 接口
+- 🍏 基于 OpenAI-[gpt-3.5-turbo](https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
 - 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多种渠道部署
 - 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存

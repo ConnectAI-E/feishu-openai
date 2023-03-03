@@ -5,21 +5,23 @@ import (
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 
-	"github.com/spf13/viper"
-
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
 
 	"github.com/larksuite/oapi-sdk-go/v3/event/dispatcher"
 )
 
-func init() {
-	initialization.LoadConfig()
-	initialization.LoadLarkClient()
-}
+var (
+	cfg = pflag.StringP("config", "c", "./config.yaml", "apiserver config file path.")
+)
 
 func main() {
+	pflag.Parse()
+	initialization.LoadConfig(*cfg)
+	initialization.LoadLarkClient()
 
 	handler := dispatcher.NewEventDispatcher(viper.GetString(
 		"APP_VERIFICATION_TOKEN"), viper.GetString("APP_ENCRYPT_KEY")).
