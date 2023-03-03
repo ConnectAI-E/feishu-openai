@@ -29,9 +29,8 @@
 
 
 <p align='center'>
-    <img src='./docs/image2.png' alt='' width='800'/>
+    <img src='./docs/img.png' alt='' width='400'/>
 </p>
-
 
 
 ## 🌟 项目特点
