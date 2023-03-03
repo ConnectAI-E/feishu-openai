@@ -64,8 +64,10 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
-	system, found := utils.CutPrefix(qParsed, "/system ")
-	if found {
+	system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ",
+		"角色扮演 ")
+
+	if foundSystem {
 		p.sessionCache.Clear(*sessionId)
 		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,

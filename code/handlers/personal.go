@@ -6,6 +6,7 @@ import (
 	"fmt"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/services"
+	"start-feishubot/utils"
 	"strings"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -38,7 +39,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	if cardMsg.Value == "1" {
 		newCard, _ := newSendCard(
 			withHeader("️👻 机器人提醒", larkcard.TemplateRed),
-			withMainMsg("此话题上下文信息已删除"),
+			withMainMsg("已删除此话题的上下文信息"),
 			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
 		)
 		session.Clear(cardMsg.SessionId)
@@ -47,8 +48,8 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	if cardMsg.Value == "0" {
 		newCard, _ := newSendCard(
 			withHeader("️👻 机器人提醒", larkcard.TemplateGreen),
-			withMainMsg("此话题上下文信息保留"),
-			withNote("我们可以继续探讨这个话题。我期待和您聊天，如果您有其他问题或者想要讨论的话题，请告诉我哦"),
+			withMainMsg("依旧保留此话题的上下文信息"),
+			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
 		)
 		return newCard, nil, true
 	}
@@ -81,13 +82,14 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 
-	system, found := strings.CutPrefix(qParsed, "/system ")
-	if found {
+	system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ",
+		"角色扮演 ")
+	if foundSystem {
 		p.sessionCache.Clear(*sessionId)
-		system_msg := append([]services.Messages{}, services.Messages{
+		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
-		p.sessionCache.Set(*sessionId, system_msg)
+		p.sessionCache.Set(*sessionId, systemMsg)
 		sendSystemInstructionCard(ctx, sessionId, msgId, system)
 		return nil
 	}

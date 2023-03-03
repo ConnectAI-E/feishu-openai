@@ -234,7 +234,7 @@ func sendClearCacheCheckCard(ctx context.Context,
 func sendSystemInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
-		withHeader("👽 机器人已收到指令", larkcard.TemplateBlue),
+		withHeader("🥷 已开启角色扮演模式", larkcard.TemplateBlue),
 		withMainMsg(content),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
 	replyCard(
