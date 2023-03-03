@@ -14,15 +14,18 @@
 
 ## 👻 机器人功能
 
-- [x] 支持私人对话
-- [x] 支持群聊@机器人[持续回复](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)~
+- [x] 支持私人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/25)同时对话
+- [x] 支持群聊@机器人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)同时回复
 - [x] 持续对话联系上下文
 - [x] 超时自动结束对话
-- [x] 用户主动开启新对话
-- [ ] 支持富文本卡片
-- [ ] 允许个性化的界面配置
+- [x] 主动开启新话题
+- [ ] 从历史上下文中恢复对话
+- [x] 支持富文本卡片
+- [x] 交互式反馈提醒
 - [ ] 支持token用量查询
 - [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [ ] markdown格式回复，重点支持代码场景
+- [ ] 支持图片显示
 
 
 <p align='center'>
@@ -116,6 +119,26 @@ mv config.example.yaml config.yaml
 cd ..
 docker build -t feishu-chatgpt:latest .
 docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
+```
+------------
+小白简易化docker部署版
+
+``` bash
+docker地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
+
+docker run -d --restart=always --name feishu-chatgpt2 -p 9500:9000 -v /etc/localtime:/etc/localtim:ro w779945/feishu-chatgpt3.5:latest
+
+docker exec -it feishu-chatgpt2 bash #进入容器
+
+vi config.yaml #修改参数
+
+exit #退出容器
+
+docker restart feishu-chatgpt2 #重启容器
+
+最后回调地址是: http://IP:9500/webhook/event
+
+把它填入飞书后台
 ```
 <br>
 
