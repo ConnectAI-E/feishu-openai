@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/services"
 	"strings"
 
@@ -13,6 +15,21 @@ import (
 type GroupMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
+}
+
+func (p GroupMessageHandler) cardHandler(_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
+	var cardMsg CardMsg
+	actionValue := cardAction.Action.Value
+	actionValueJson, _ := json.Marshal(actionValue)
+	json.Unmarshal(actionValueJson, &cardMsg)
+	if cardMsg.Kind == ClearCardKind {
+		newCard, err, done := CommonProcessClearCache(cardMsg, p.sessionCache)
+		if done {
+			return newCard, err
+		}
+	}
+	return nil, nil
 }
 
 func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
@@ -42,8 +59,8 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 	}
 
 	if qParsed == "/clear" || qParsed == "清除" {
-		p.sessionCache.Clear(*sessionId)
-		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
+		sendClearCacheCheckCard(ctx, sessionId, msgId)
+		return nil
 		return nil
 	}
 
@@ -67,7 +84,7 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 
 }
 
-var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
+var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
 
 func NewGroupMessageHandler() MessageHandlerInterface {
 	return &GroupMessageHandler{
