@@ -118,15 +118,18 @@ mv config.example.yaml config.yaml
 cd ..
 docker build -t feishu-chatgpt:latest .
 docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
+```
+------------
+小白简易化docker部署版
 
-Go版本，小白简单化 docker部署教程
-项目地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
+``` bash
+docker地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
 
 docker run -d --restart=always --name feishu-chatgpt2 -p 9500:9000 -v /etc/localtime:/etc/localtim:ro w779945/feishu-chatgpt3.5:latest
 
 docker exec -it feishu-chatgpt2 bash #进入容器
 
-vi config.yaml #修改那几样参数
+vi config.yaml #修改参数
 
 exit #退出容器
 
