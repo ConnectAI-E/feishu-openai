@@ -1,6 +1,6 @@
 
 <p align='center'>
-  <img src='./docs/image.png' alt='' width='800'/>
+    <img src='./docs/img3.png' alt='' width='800'/>
 </p>
 
 <br>
@@ -26,7 +26,6 @@
 - [x] 基于[角色扮演的场景模式](https://github.com/f/awesome-chatgpt-prompts)(关键词`角色扮演 描述`）
 - [ ] markdown格式回复，重点支持代码场景
 - [ ] 支持图片显示
-
 
 <p align='center'>
     <img src='./docs/img.png' alt='' width='400'/>
