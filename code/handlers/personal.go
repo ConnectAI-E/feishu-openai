@@ -10,16 +10,19 @@ import (
 )
 
 type PersonalMessageHandler struct {
-	userCache services.UserCacheInterface
-	msgCache  services.MsgCacheInterface
+	sessionCache services.SessionServiceCacheInterface
+	msgCache     services.MsgCacheInterface
 }
 
 func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
-	sender := event.Event.Sender
-	openId := sender.SenderId.OpenId
+	rootId := event.Event.Message.RootId
 	chatId := event.Event.Message.ChatId
+	sessionId := rootId
+	if sessionId == nil || *sessionId == "" {
+		sessionId = msgId
+	}
 	if p.msgCache.IfProcessed(*msgId) {
 		fmt.Println("msgId", *msgId, "processed")
 		return nil
@@ -33,23 +36,23 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 
 	if qParsed == "/clear" || qParsed == "清除" {
-		p.userCache.Clear(*openId)
+		p.sessionCache.Clear(*sessionId)
 		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
 		return nil
 	}
 
 	system, found := strings.CutPrefix(qParsed, "/system:")
 	if found {
-		p.userCache.Clear(*openId)
+		p.sessionCache.Clear(*sessionId)
 		system_msg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
-		p.userCache.Set(*openId, system_msg)
+		p.sessionCache.Set(*sessionId, system_msg)
 		sendMsg(ctx, "🤖️：AI机器人已收到指令", chatId)
 		return nil
 	}
 
-	msg := p.userCache.Get(*openId)
+	msg := p.sessionCache.Get(*sessionId)
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
 	})
@@ -59,7 +62,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 	msg = append(msg, completions)
-	p.userCache.Set(*openId, msg)
+	p.sessionCache.Set(*sessionId, msg)
 	err = replyMsg(ctx, completions.Content, msgId)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
@@ -73,7 +76,7 @@ var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
 
 func NewPersonalMessageHandler() MessageHandlerInterface {
 	return &PersonalMessageHandler{
-		userCache: services.GetUserCache(),
-		msgCache:  services.GetMsgCache(),
+		sessionCache: services.GetSessionCache(),
+		msgCache:     services.GetMsgCache(),
 	}
 }

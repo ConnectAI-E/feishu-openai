@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -48,4 +49,13 @@ func GetSessionCache() SessionServiceCacheInterface {
 		sessionServices = &SessionService{cache: cache.New(time.Hour*12, time.Hour*1)}
 	}
 	return sessionServices
+}
+
+func getStrPoolTotalLength(strPool []Messages) int {
+	var total int
+	for _, v := range strPool {
+		bytes, _ := json.Marshal(v)
+		total += len(string(bytes))
+	}
+	return total
 }
