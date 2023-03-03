@@ -105,6 +105,11 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 	msg = append(msg, completions)
 	p.sessionCache.Set(*sessionId, msg)
+	//if new topic
+	if len(msg) == 2 {
+		sendNewTopicCard(ctx, sessionId, msgId, completions.Content)
+		return nil
+	}
 	err = replyMsg(ctx, completions.Content, msgId)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
