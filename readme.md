@@ -15,11 +15,15 @@
 ## 👻 机器人功能
 
 - [x] 支持私人对话
-- [x] 支持群聊@机器人回复
+- [x] 支持群聊@机器人持续回复~
 - [x] 持续对话联系上下文
 - [x] 超时自动结束对话
 - [x] 用户主动开启新对话
-- [ ] 对接[prompts](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [ ] 支持富文本卡片
+- [ ] 允许个性化的界面配置
+- [ ] 支持图片显示
+- [ ] 支持token用量查询
+- [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
 - [ ] markdown格式回复，重点支持代码场景
 
 
