@@ -18,25 +18,26 @@ var (
 
 var (
 	GroupChatType = CardChatType("group")
-	UserChatType  = CardChatType("user")
+	UserChatType  = CardChatType("personal")
 )
 
 type CardMsg struct {
-	kind     CardKind
-	chatType CardChatType
-	value    interface{}
+	Kind      CardKind
+	ChatType  CardChatType
+	Value     interface{}
+	SessionId string
 }
 
-func sendCard(ctx context.Context,
-	chatId *string,
+func replyCard(ctx context.Context,
+	msgId *string,
 	cardContent string,
 ) error {
 	client := initialization.GetLarkClient()
-	resp, err := client.Im.Message.Create(ctx, larkim.NewCreateMessageReqBuilder().
-		ReceiveIdType(larkim.ReceiveIdTypeChatId).
-		Body(larkim.NewCreateMessageReqBodyBuilder().
+	resp, err := client.Im.Message.Reply(ctx, larkim.NewReplyMessageReqBuilder().
+		MessageId(*msgId).
+		Body(larkim.NewReplyMessageReqBodyBuilder().
 			MsgType(larkim.MsgTypeInteractive).
-			ReceiveId(*chatId).
+			Uuid(uuid.New().String()).
 			Content(cardContent).
 			Build()).
 		Build())
@@ -55,22 +56,15 @@ func sendCard(ctx context.Context,
 	return nil
 }
 
-func newSendCard(elements ...larkcard.MessageCardElement) (string,
+func newSendCard(
+	header *larkcard.MessageCardHeader,
+	elements ...larkcard.MessageCardElement) (string,
 	error) {
 	config := larkcard.NewMessageCardConfig().
 		WideScreenMode(false).
 		EnableForward(true).
 		UpdateMulti(false).
 		Build()
-	// header
-	title := "🤖️机器人提醒"
-	header := larkcard.NewMessageCardHeader().
-		Template(larkcard.TemplateBlue).
-		Title(larkcard.NewMessageCardPlainText().
-			Content(title).
-			Build()).
-		Build()
-
 	var aElementPool []larkcard.MessageCardElement
 	for _, element := range elements {
 		aElementPool = append(aElementPool, element)
@@ -86,10 +80,23 @@ func newSendCard(elements ...larkcard.MessageCardElement) (string,
 	return cardContent, err
 }
 
+func withHeader(title string, color string) *larkcard.
+	MessageCardHeader {
+	if title == "" {
+		title = "🤖️机器人提醒"
+	}
+	header := larkcard.NewMessageCardHeader().
+		Template(color).
+		Title(larkcard.NewMessageCardPlainText().
+			Content(title).
+			Build()).
+		Build()
+	return header
+}
 func withNote(note string) larkcard.MessageCardElement {
 	noteElement := larkcard.NewMessageCardNote().
 		Elements([]larkcard.MessageCardNoteElement{larkcard.NewMessageCardPlainText().
-			Content("请注意，这将开始一个全新的对话，您将无法利用之前的对话历史信息").
+			Content(note).
 			Build()}).
 		Build()
 	return noteElement
@@ -111,15 +118,17 @@ func withMainMsg(msg string) larkcard.MessageCardElement {
 	return mainElement
 }
 
-func withDoubleCheckBtn() larkcard.MessageCardElement {
+func withDoubleCheckBtn(sessionId *string) larkcard.
+	MessageCardElement {
 	actions := larkcard.NewMessageCardAction().
 		Actions([]larkcard.MessageCardActionElement{
 			larkcard.NewMessageCardEmbedButton().
 				Type(larkcard.MessageCardButtonTypeDanger).
 				Value(map[string]interface{}{
-					"clearCheck": 1, // 1 代表确认清除
-					"kind":       ClearCardKind,
-					"chatType":   UserChatType,
+					"value":     "1", // 1 代表确认清除
+					"kind":      ClearCardKind,
+					"chatType":  UserChatType,
+					"sessionId": *sessionId,
 				}).
 				Text(larkcard.NewMessageCardPlainText().
 					Content("确认清除").
@@ -127,9 +136,10 @@ func withDoubleCheckBtn() larkcard.MessageCardElement {
 			larkcard.NewMessageCardEmbedButton().
 				Type(larkcard.MessageCardButtonTypePrimary).
 				Value(map[string]interface{}{
-					"clearCheck": 0, // 0 代表取消清除
-					"kind":       ClearCardKind,
-					"chatType":   UserChatType,
+					"value":     "0", // 0 代表取消清除
+					"kind":      ClearCardKind,
+					"sessionId": *sessionId,
+					"chatType":  UserChatType,
 				}).
 				Text(larkcard.NewMessageCardPlainText().
 					Content("我再想想").
@@ -207,14 +217,16 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	return nil
 }
 
-func sendClearCacheCheckCard(ctx context.Context, chatId *string) {
+func sendClearCacheCheckCard(ctx context.Context,
+	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
+		withHeader("👻️ 机器人提醒", larkcard.TemplateBlue),
 		withMainMsg("您确定要清除对话上下文吗？"),
-		withNote("请注意，这将开始一个全新的对话，您将无法利用之前的对话历史信息"),
-		withDoubleCheckBtn())
-	sendCard(
+		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
+		withDoubleCheckBtn(sessionId))
+	replyCard(
 		ctx,
-		chatId,
+		msgId,
 		newCard,
 	)
 }

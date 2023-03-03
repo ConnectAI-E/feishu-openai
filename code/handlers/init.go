@@ -9,6 +9,7 @@ import (
 
 type MessageHandlerInterface interface {
 	handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error
+	cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error)
 }
 
 type HandlerType string
@@ -45,12 +46,22 @@ func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 func CardHandler() func(ctx context.Context,
 	cardAction *larkcard.CardAction) (interface{}, error) {
 	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
-		value := cardAction.Action.Value
-		//change map to struct CardMsg
-
-		fmt.Println(value)
-		return nil, nil
+		handlerType := judgeCardType(cardAction)
+		return handlers[handlerType].cardHandler(ctx, cardAction)
 	}
+}
+
+func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
+	actionValue := cardAction.Action.Value
+	chatType := actionValue["chatType"]
+	fmt.Printf("chatType: %v", chatType)
+	if chatType == "group" {
+		return GroupHandler
+	}
+	if chatType == "personal" {
+		return UserHandler
+	}
+	return "otherChat"
 }
 
 func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
