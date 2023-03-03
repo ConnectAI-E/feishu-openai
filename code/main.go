@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 
@@ -23,9 +24,15 @@ func main() {
 	initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient()
 
-	handler := dispatcher.NewEventDispatcher(viper.GetString(
-		"APP_VERIFICATION_TOKEN"), viper.GetString("APP_ENCRYPT_KEY")).
+	eventHandler := dispatcher.NewEventDispatcher(
+		viper.GetString("APP_VERIFICATION_TOKEN"),
+		viper.GetString("APP_ENCRYPT_KEY")).
 		OnP2MessageReceiveV1(handlers.Handler)
+
+	cardHandler := larkcard.NewCardActionHandler(
+		viper.GetString("APP_VERIFICATION_TOKEN"),
+		viper.GetString("APP_ENCRYPT_KEY"),
+		handlers.CardHandler())
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -33,13 +40,14 @@ func main() {
 			"message": "pong",
 		})
 	})
-
-	// 在已有 Gin 实例上注册消息处理路由
-	r.POST("/webhook/event", sdkginext.NewEventHandlerFunc(handler))
+	r.POST("/webhook/event",
+		sdkginext.NewEventHandlerFunc(eventHandler))
+	r.POST("/webhook/card",
+		sdkginext.NewCardActionHandlerFunc(
+			cardHandler))
 
 	fmt.Println("http server started",
 		"http://localhost:9000/webhook/event")
-
 	r.Run(":9000")
 
 }

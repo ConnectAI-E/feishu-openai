@@ -9,67 +9,29 @@ import (
 	"start-feishubot/initialization"
 )
 
-func sendCard(ctx context.Context, msg string,
-	chatId *string) error {
-	msg, i := processMessage(msg)
-	if i != nil {
-		return i
-	}
+type CardKind string
+type CardChatType string
+
+var (
+	ClearCardKind = CardKind("clear")
+)
+
+var (
+	GroupChatType = CardChatType("group")
+	UserChatType  = CardChatType("user")
+)
+
+type CardMsg struct {
+	kind     CardKind
+	chatType CardChatType
+	value    interface{}
+}
+
+func sendCard(ctx context.Context,
+	chatId *string,
+	cardContent string,
+) error {
 	client := initialization.GetLarkClient()
-	config := larkcard.NewMessageCardConfig().
-		WideScreenMode(false).
-		EnableForward(true).
-		UpdateMulti(false).
-		Build()
-	// header
-	header := larkcard.NewMessageCardHeader().
-		Template(larkcard.TemplateBlue).
-		Title(larkcard.NewMessageCardPlainText().
-			Content("🤖️机器人提醒").
-			Build()).
-		Build()
-
-	// Elements
-	divElement := larkcard.NewMessageCardDiv().
-		Fields([]*larkcard.MessageCardField{larkcard.NewMessageCardField().
-			Text(larkcard.NewMessageCardLarkMd().
-				Content(msg).
-				Build()).
-			IsShort(true).
-			Build()}).
-		Build()
-
-	divElement3 := larkcard.NewMessageCardNote().
-		Elements([]larkcard.MessageCardNoteElement{larkcard.NewMessageCardPlainText().
-			Content("请注意，这将开始一个全新的对话，您将无法利用之前的对话历史信息").
-			Build()}).
-		Build()
-
-	divElement4 := larkcard.NewMessageCardAction().
-		Actions([]larkcard.MessageCardActionElement{
-			larkcard.NewMessageCardEmbedButton().
-				Type(larkcard.MessageCardButtonTypeDanger).
-				Value(map[string]interface{}{"key1": "value1"}).
-				Text(larkcard.NewMessageCardPlainText().
-					Content("确认清除").
-					Build()),
-			larkcard.NewMessageCardEmbedButton().
-				Type(larkcard.MessageCardButtonTypePrimary).
-				Value(map[string]interface{}{"key1": "value1"}).
-				Text(larkcard.NewMessageCardPlainText().
-					Content("我再想想").
-					Build()),
-		}).Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
-		Build()
-
-	// 卡片消息体
-	cardContent, err := larkcard.NewMessageCard().
-		Config(config).
-		Header(header).
-		Elements([]larkcard.MessageCardElement{divElement, divElement4,
-			divElement3}).
-		String()
-
 	resp, err := client.Im.Message.Create(ctx, larkim.NewCreateMessageReqBuilder().
 		ReceiveIdType(larkim.ReceiveIdTypeChatId).
 		Body(larkim.NewCreateMessageReqBodyBuilder().
@@ -91,6 +53,90 @@ func sendCard(ctx context.Context, msg string,
 		return err
 	}
 	return nil
+}
+
+func newSendCard(elements ...larkcard.MessageCardElement) (string,
+	error) {
+	config := larkcard.NewMessageCardConfig().
+		WideScreenMode(false).
+		EnableForward(true).
+		UpdateMulti(false).
+		Build()
+	// header
+	title := "🤖️机器人提醒"
+	header := larkcard.NewMessageCardHeader().
+		Template(larkcard.TemplateBlue).
+		Title(larkcard.NewMessageCardPlainText().
+			Content(title).
+			Build()).
+		Build()
+
+	var aElementPool []larkcard.MessageCardElement
+	for _, element := range elements {
+		aElementPool = append(aElementPool, element)
+	}
+	// 卡片消息体
+	cardContent, err := larkcard.NewMessageCard().
+		Config(config).
+		Header(header).
+		Elements(
+			aElementPool,
+		).
+		String()
+	return cardContent, err
+}
+
+func withNote(note string) larkcard.MessageCardElement {
+	noteElement := larkcard.NewMessageCardNote().
+		Elements([]larkcard.MessageCardNoteElement{larkcard.NewMessageCardPlainText().
+			Content("请注意，这将开始一个全新的对话，您将无法利用之前的对话历史信息").
+			Build()}).
+		Build()
+	return noteElement
+}
+
+func withMainMsg(msg string) larkcard.MessageCardElement {
+	msg, i := processMessage(msg)
+	if i != nil {
+		return nil
+	}
+	mainElement := larkcard.NewMessageCardDiv().
+		Fields([]*larkcard.MessageCardField{larkcard.NewMessageCardField().
+			Text(larkcard.NewMessageCardLarkMd().
+				Content(msg).
+				Build()).
+			IsShort(true).
+			Build()}).
+		Build()
+	return mainElement
+}
+
+func withDoubleCheckBtn() larkcard.MessageCardElement {
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{
+			larkcard.NewMessageCardEmbedButton().
+				Type(larkcard.MessageCardButtonTypeDanger).
+				Value(map[string]interface{}{
+					"clearCheck": 1, // 1 代表确认清除
+					"kind":       ClearCardKind,
+					"chatType":   UserChatType,
+				}).
+				Text(larkcard.NewMessageCardPlainText().
+					Content("确认清除").
+					Build()),
+			larkcard.NewMessageCardEmbedButton().
+				Type(larkcard.MessageCardButtonTypePrimary).
+				Value(map[string]interface{}{
+					"clearCheck": 0, // 0 代表取消清除
+					"kind":       ClearCardKind,
+					"chatType":   UserChatType,
+				}).
+				Text(larkcard.NewMessageCardPlainText().
+					Content("我再想想").
+					Build()),
+		}).Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+		Build()
+	return actions
 }
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
 	fmt.Println("sendMsg", msg, msgId)
@@ -162,5 +208,13 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 }
 
 func sendClearCacheCheckCard(ctx context.Context, chatId *string) {
-	sendCard(ctx, "您确定要清除对话上下文吗？", chatId)
+	newCard, _ := newSendCard(
+		withMainMsg("您确定要清除对话上下文吗？"),
+		withNote("请注意，这将开始一个全新的对话，您将无法利用之前的对话历史信息"),
+		withDoubleCheckBtn())
+	sendCard(
+		ctx,
+		chatId,
+		newCard,
+	)
 }
