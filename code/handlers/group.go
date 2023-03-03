@@ -17,7 +17,8 @@ type GroupMessageHandler struct {
 	msgCache     services.MsgCacheInterface
 }
 
-func (p GroupMessageHandler) cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+func (p GroupMessageHandler) cardHandler(_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)

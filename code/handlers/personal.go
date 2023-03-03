@@ -16,7 +16,9 @@ type PersonalMessageHandler struct {
 	msgCache     services.MsgCacheInterface
 }
 
-func (p PersonalMessageHandler) cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+func (p PersonalMessageHandler) cardHandler(
+	_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
