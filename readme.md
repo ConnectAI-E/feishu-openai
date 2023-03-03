@@ -14,17 +14,18 @@
 
 ## 👻 机器人功能
 
-- [x] 支持私人对话
-- [x] 支持群聊@机器人[持续回复](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)~
+- [x] 支持私人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/25)同时对话
+- [x] 支持群聊@机器人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)同时回复
 - [x] 持续对话联系上下文
 - [x] 超时自动结束对话
-- [x] 用户主动开启新对话
-- [ ] 支持富文本卡片
-- [ ] 允许个性化的界面配置
-- [ ] 支持图片显示
+- [x] 主动开启新话题
+- [ ] 从历史上下文中恢复对话
+- [x] 支持富文本卡片
+- [x] 交互式反馈提醒
 - [ ] 支持token用量查询
 - [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
 - [ ] markdown格式回复，重点支持代码场景
+- [ ] 支持图片显示
 
 
 <p align='center'>
