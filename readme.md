@@ -18,10 +18,10 @@
 - [x] 支持群聊@机器人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)同时回复
 - [x] 持续对话联系上下文
 - [x] 超时自动结束对话
-- [x] 主动开启新话题
-- [ ] 从历史上下文中恢复对话
-- [x] 支持富文本卡片
-- [x] 交互式反馈提醒
+- [x] 清除话题历史上下文（关键词`清除`）
+- [ ] 从历史上下文中恢复话题，继续对话
+- [x] 支持富文本卡片回复
+- [x] [交互式](https://github.com/Leizhenpeng/feishu-chatGpt/pull/26)反馈提醒
 - [ ] 支持token用量查询
 - [ ] 对接[场景模式](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
 - [ ] markdown格式回复，重点支持代码场景
@@ -29,9 +29,8 @@
 
 
 <p align='center'>
-    <img src='./docs/image2.png' alt='' width='800'/>
+    <img src='./docs/img.png' alt='' width='400'/>
 </p>
-
 
 
 ## 🌟 项目特点
@@ -154,7 +153,11 @@ docker restart feishu-chatgpt2 #重启容器
         - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
         - `/webhook/event`为统一的应用路由
         - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
-    4. 给订阅添加下列回调事件
+    4. 在飞书机器人后台的 `机器人` 板块，填写消息卡片请求网址。例如，
+        - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
+        - `/webhook/card`为统一的应用路由
+        - 最终的消息卡片请求网址为 `http://xxxx.r6.cpolar.top/webhook/card`
+    5. 给订阅添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
         - im:message.group_at_msg:readonly(接收群聊中@机器人消息事件)

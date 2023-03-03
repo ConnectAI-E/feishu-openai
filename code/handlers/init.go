@@ -3,11 +3,13 @@ package handlers
 import (
 	"context"
 	"fmt"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type MessageHandlerInterface interface {
 	handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error
+	cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error)
 }
 
 type HandlerType string
@@ -41,6 +43,27 @@ func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	return handlers[handlerType].handle(ctx, event)
 }
 
+func CardHandler() func(ctx context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
+	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+		handlerType := judgeCardType(cardAction)
+		return handlers[handlerType].cardHandler(ctx, cardAction)
+	}
+}
+
+func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
+	actionValue := cardAction.Action.Value
+	chatType := actionValue["chatType"]
+	fmt.Printf("chatType: %v", chatType)
+	if chatType == "group" {
+		return GroupHandler
+	}
+	if chatType == "personal" {
+		return UserHandler
+	}
+	return "otherChat"
+}
+
 func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
 	chatType := event.Event.Message.ChatType
 	fmt.Printf("chatType: %v", *chatType)
@@ -50,7 +73,6 @@ func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
 	if *chatType == "p2p" {
 		return UserHandler
 	}
-
 	return "otherChat"
 }
 

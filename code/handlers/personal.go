@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/services"
 	"strings"
 
@@ -12,6 +14,45 @@ import (
 type PersonalMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
+}
+
+func (p PersonalMessageHandler) cardHandler(
+	_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
+	var cardMsg CardMsg
+	actionValue := cardAction.Action.Value
+	actionValueJson, _ := json.Marshal(actionValue)
+	json.Unmarshal(actionValueJson, &cardMsg)
+	if cardMsg.Kind == ClearCardKind {
+		newCard, err, done := CommonProcessClearCache(cardMsg, p.sessionCache)
+		if done {
+			return newCard, err
+		}
+	}
+	return nil, nil
+}
+
+func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (interface{},
+	error,
+	bool) {
+	if cardMsg.Value == "1" {
+		newCard, _ := newSendCard(
+			withHeader("️👻 机器人提醒", larkcard.TemplateRed),
+			withMainMsg("此话题上下文信息已删除"),
+			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
+		)
+		session.Clear(cardMsg.SessionId)
+		return newCard, nil, true
+	}
+	if cardMsg.Value == "0" {
+		newCard, _ := newSendCard(
+			withHeader("️👻 机器人提醒", larkcard.TemplateGreen),
+			withMainMsg("此话题上下文信息保留"),
+			withNote("我们可以继续探讨这个话题。我期待和您聊天，如果您有其他问题或者想要讨论的话题，请告诉我哦"),
+		)
+		return newCard, nil, true
+	}
+	return nil, nil, false
 }
 
 func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
@@ -36,8 +77,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 
 	if qParsed == "/clear" || qParsed == "清除" {
-		p.sessionCache.Clear(*sessionId)
-		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
+		sendClearCacheCheckCard(ctx, sessionId, msgId)
 		return nil
 	}
 
