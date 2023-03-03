@@ -27,7 +27,7 @@ func (u SessionService) Set(sessionId string, msg []Messages) {
 
 	//限制对话上下文长度
 	for getStrPoolTotalLength(msg) > maxLength {
-		msg = msg[2:]
+		msg = append(msg[:1], msg[3:]...)
 	}
 	u.cache.Set(sessionId, msg, maxCacheTime)
 }

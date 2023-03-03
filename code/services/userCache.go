@@ -31,12 +31,12 @@ func (u UserService) Set(userId string, msg []Messages) {
 	maxCacheTime := time.Minute * 30
 
 	if len(msg) == maxCache {
-		msg = msg[2:]
+		msg = msg = append(msg[:1], msg[3:]...)
 	}
 
 	//限制对话上下文长度
 	for getStrPoolTotalLength(msg) > maxLength {
-		msg = msg[2:]
+		msg = msg = append(msg[:1], msg[3:]...)
 	}
 	u.cache.Set(userId, msg, maxCacheTime)
 }

@@ -41,9 +41,9 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	system, found := strings.CutPrefix(qParsed, "/system:")
 	if found {
 		p.userCache.Clear(*openId)
-		system_msg := services.Messages{
+		system_msg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
-		} 
+		})
 		p.userCache.Set(*openId, system_msg)
 		sendMsg(ctx, "🤖️：AI机器人已收到指令", chatId)
 		return nil
