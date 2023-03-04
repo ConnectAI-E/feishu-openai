@@ -16,7 +16,7 @@
 
 - [x] 支持私人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/25)同时对话
 - [x] 支持群聊@机器人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)同时回复
-- [x] 持续对话联系上下文
+- [x] 持续对话联系[上下文](https://github.com/Leizhenpeng/feishu-chatGpt/pull/30)（点击对话框参与回复，可保持话题连贯）
 - [x] 超时自动结束对话
 - [x] 清除话题历史上下文（关键词`清除`）
 - [ ] 从历史上下文中恢复话题，继续对话
