@@ -24,9 +24,10 @@
 - [x] [交互式](https://github.com/Leizhenpeng/feishu-chatGpt/pull/26)反馈提醒
 - [ ] 支持token用量查询
 - [x] 基于[角色扮演的场景模式](https://github.com/f/awesome-chatgpt-prompts)(关键词`角色扮演 描述`）
-- [ ] 内置丰富的场景预设，允许用户自定义场景的管理能力
+- [ ] 内置丰富的场景预设，允许用户自定义管理场景
 - [ ] markdown格式回复，重点支持代码场景
 - [ ] 支持图片显示
+- [ ] 支持管理员模式
 
 <p align='center'>
     <img src='./docs/img.png' alt='' width='400'/>
