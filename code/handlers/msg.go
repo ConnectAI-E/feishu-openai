@@ -102,14 +102,31 @@ func withNote(note string) larkcard.MessageCardElement {
 	return noteElement
 }
 
-func withMainMsg(msg string) larkcard.MessageCardElement {
+func withMainMd(msg string) larkcard.MessageCardElement {
 	msg, i := processMessage(msg)
+	msg = processNewLine(msg)
 	if i != nil {
 		return nil
 	}
 	mainElement := larkcard.NewMessageCardDiv().
 		Fields([]*larkcard.MessageCardField{larkcard.NewMessageCardField().
 			Text(larkcard.NewMessageCardLarkMd().
+				Content(msg).
+				Build()).
+			IsShort(true).
+			Build()}).
+		Build()
+	return mainElement
+}
+func withMainText(msg string) larkcard.MessageCardElement {
+	msg, i := processMessage(msg)
+	msg = processNewLine(msg)
+	if i != nil {
+		return nil
+	}
+	mainElement := larkcard.NewMessageCardDiv().
+		Fields([]*larkcard.MessageCardField{larkcard.NewMessageCardField().
+			Text(larkcard.NewMessageCardPlainText().
 				Content(msg).
 				Build()).
 			IsShort(true).
@@ -221,7 +238,7 @@ func sendClearCacheCheckCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
 		withHeader("👻️ 机器人提醒", larkcard.TemplateBlue),
-		withMainMsg("您确定要清除对话上下文吗？"),
+		withMainMd("您确定要清除对话上下文吗？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
 		withDoubleCheckBtn(sessionId))
 	replyCard(
@@ -235,7 +252,7 @@ func sendSystemInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
 		withHeader("🥷 已进入角色扮演模式", larkcard.TemplateBlue),
-		withMainMsg(content),
+		withMainText(content),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
 	replyCard(
 		ctx,
@@ -248,7 +265,7 @@ func sendNewTopicCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
 		withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
-		withMainMsg(content),
+		withMainText(content),
 		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
 	replyCard(
 		ctx,

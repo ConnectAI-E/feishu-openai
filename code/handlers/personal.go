@@ -39,7 +39,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	if cardMsg.Value == "1" {
 		newCard, _ := newSendCard(
 			withHeader("️👻 机器人提醒", larkcard.TemplateRed),
-			withMainMsg("已删除此话题的上下文信息"),
+			withMainMd("已删除此话题的上下文信息"),
 			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
 		)
 		session.Clear(cardMsg.SessionId)
@@ -48,7 +48,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	if cardMsg.Value == "0" {
 		newCard, _ := newSendCard(
 			withHeader("️👻 机器人提醒", larkcard.TemplateGreen),
-			withMainMsg("依旧保留此话题的上下文信息"),
+			withMainMd("依旧保留此话题的上下文信息"),
 			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
 		)
 		return newCard, nil, true
