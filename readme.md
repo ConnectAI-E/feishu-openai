@@ -113,28 +113,27 @@ s deploy
 <br>
 
 ``` bash
-# 配置config.yaml
-mv config.example.yaml config.yaml
-# 构建运行
-cd ..
 docker build -t feishu-chatgpt:latest .
-docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
+docker run -d --name feishu-chatgpt -p 9000:9000 \
+--env APP_ID=xxx \
+--env APP_SECRET=xxx \
+--env APP_VERIFICATION_TOKEN=xxx \
+--env OPENAI_KEY=sk-xxx \
+feishu-chatgpt:latest
 ```
 ------------
 小白简易化docker部署版
 
 ``` bash
 docker地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
+docker地址: https://hub.docker.com/r/cfxks1989/feishu-chatgpt
 
-docker run -d --restart=always --name feishu-chatgpt2 -p 9500:9000 -v /etc/localtime:/etc/localtim:ro w779945/feishu-chatgpt3.5:latest
-
-docker exec -it feishu-chatgpt2 bash #进入容器
-
-vi config.yaml #修改参数
-
-exit #退出容器
-
-docker restart feishu-chatgpt2 #重启容器
+docker run -d --restart=always --name feishu-chatgpt2 -p 9500:9000 -v /etc/localtime:/etc/localtim:ro  \
+--env APP_ID=xxx \
+--env APP_SECRET=xxx \
+--env APP_VERIFICATION_TOKEN=xxx \
+--env OPENAI_KEY=sk-xxx \
+cfxks1989/feishu-chatgpt:latest
 
 最后回调地址是: http://IP:9500/webhook/event
 
