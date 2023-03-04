@@ -14,8 +14,9 @@ FROM alpine:latest
 WORKDIR /dist
 
 RUN apk add --no-cache bash
-COPY --from=golang /build/config.yaml /dist/config.yaml
+COPY --from=golang /build/config.example.yaml /dist/config.yaml
 COPY --from=golang /build/feishu_chatgpt /dist
+ADD entrypoint.sh /dist/entrypoint.sh
 
 EXPOSE 9000
-ENTRYPOINT ["/dist/feishu_chatgpt"]
+CMD /dist/entrypoint.sh
