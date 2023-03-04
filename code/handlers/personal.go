@@ -107,6 +107,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	p.sessionCache.Set(*sessionId, msg)
 	//if new topic
 	if len(msg) == 2 {
+		fmt.Println("new topic", msg[1].Content)
 		sendNewTopicCard(ctx, sessionId, msgId, completions.Content)
 		return nil
 	}

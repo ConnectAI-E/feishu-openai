@@ -120,7 +120,7 @@ func withMainMd(msg string) larkcard.MessageCardElement {
 }
 func withMainText(msg string) larkcard.MessageCardElement {
 	msg, i := processMessage(msg)
-	msg = processNewLine(msg)
+	msg = cleanTextBlock(msg)
 	if i != nil {
 		return nil
 	}
@@ -129,7 +129,7 @@ func withMainText(msg string) larkcard.MessageCardElement {
 			Text(larkcard.NewMessageCardPlainText().
 				Content(msg).
 				Build()).
-			IsShort(true).
+			IsShort(false).
 			Build()}).
 		Build()
 	return mainElement
