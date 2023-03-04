@@ -37,6 +37,10 @@ func processMessage(msg interface{}) (string, error) {
 	if len(msgStr) >= 2 {
 		msgStr = msgStr[1 : len(msgStr)-1]
 	}
-
 	return msgStr, nil
+}
+
+func processNewLine(msg string) string {
+	return strings.Replace(msg, "\\n", `
+`, -1)
 }
