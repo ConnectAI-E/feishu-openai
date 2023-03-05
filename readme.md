@@ -124,7 +124,7 @@ feishu-chatgpt:latest
 
 小白简易化docker部署
 
-- docker地址: https://hub.docker.com/r/cfxks1989/feishu-chatgpt
+- docker地址: https://hub.docker.com/r/leizhenpeng/feishu-chatgpt
 ``` bash
 docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/localtime:/etc/localtim:ro  \
 --env APP_ID=xxx \
@@ -133,8 +133,10 @@ docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/local
 --env APP_VERIFICATION_TOKEN=xxx \
 --env BOT_NAME=chatGpt \
 --env OPENAI_KEY=sk-xxx \
-cfxks1989/feishu-chatgpt:latest
-
+leizhenpeng/feishu-chatgpt:amd64-latest
+    
+//如果mac替换为 
+//leizhenpeng/feishu-chatgpt:arm64-latest
 ```
 事件回调地址是: http://IP:9000/webhook/event
 卡片回调地址是: http://IP:9000/webhook/card
