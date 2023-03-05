@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -49,8 +47,11 @@ type ChatGPTRequestBody struct {
 	FrequencyPenalty int        `json:"frequency_penalty"`
 	PresencePenalty  int        `json:"presence_penalty"`
 }
+type ChatGPT struct {
+	ApiKey string
+}
 
-func Completions(msg []Messages) (resp Messages, err error) {
+func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            engine,
 		Messages:         msg,
@@ -71,9 +72,8 @@ func Completions(msg []Messages) (resp Messages, err error) {
 		return resp, err
 	}
 
-	apiKey := viper.GetString("OPENAI_KEY")
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Authorization", "Bearer "+gpt.ApiKey)
 	client := &http.Client{Timeout: 110 * time.Second}
 	response, err := client.Do(req)
 	if err != nil {

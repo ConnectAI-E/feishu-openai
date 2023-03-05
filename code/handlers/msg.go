@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/larksuite/oapi-sdk-go/v3/card"
-	"github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/initialization"
+
+	"github.com/google/uuid"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type CardKind string

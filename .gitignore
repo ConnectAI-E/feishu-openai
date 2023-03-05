@@ -30,3 +30,5 @@ config.yaml
 
 
 /code/target/
+start-feishubot
+.env
