@@ -59,21 +59,23 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
-	if qParsed == "/clear" || qParsed == "清除" {
+	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {
 		sendClearCacheCheckCard(ctx, sessionId, msgId)
 		return nil
 	}
 
-	system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ",
-		"角色扮演 ")
-
-	if foundSystem {
+	if system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ", "角色扮演 "); foundSystem {
 		p.sessionCache.Clear(*sessionId)
 		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
 		p.sessionCache.Set(*sessionId, systemMsg)
 		sendSystemInstructionCard(ctx, sessionId, msgId, system)
+		return nil
+	}
+
+	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
+		sendHelpCard(ctx, sessionId, msgId)
 		return nil
 	}
 

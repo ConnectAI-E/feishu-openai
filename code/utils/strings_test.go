@@ -45,3 +45,65 @@ func TestEitherCutPrefix(t *testing.T) {
 		})
 	}
 }
+
+func TestEitherTrimEqual(t *testing.T) {
+	type args struct {
+		s      string
+		prefix []string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  string
+		want1 bool
+	}{
+		{
+			name: "Prefix match",
+			args: args{
+				s:      "清除",
+				prefix: []string{"清除"},
+			},
+			want:  "",
+			want1: true,
+		},
+		{
+			name: "Prefix match",
+			args: args{
+				s:      " /clear ",
+				prefix: []string{"清除", "/clear"},
+			},
+			want:  "",
+			want1: true,
+		},
+		{
+			name: "Prefix match",
+			args: args{
+				s:      " 清除 ",
+				prefix: []string{"清除", "/clear"},
+			},
+			want:  "",
+			want1: true,
+		},
+		{
+			name: "Prefix match",
+			args: args{
+				s:      " clear ",
+				prefix: []string{"清除", "/clear"},
+			},
+			want:  " clear ",
+			want1: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := EitherTrimEqual(tt.args.s, tt.args.prefix...)
+			if got != tt.want {
+				t.Errorf("EitherTrimEqual() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("EitherTrimEqual() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
