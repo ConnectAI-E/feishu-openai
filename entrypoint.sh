@@ -37,6 +37,8 @@ fi
 
 if [ "$BOT_NAME" != "" ] ; then
     sed -i "7c   BOT_NAME: $BOT_NAME" $CONFIG_PATH
+else
+    echo -e "\033[31m[Warning] You need to set BOT_NAME before running!\033[0m"
 fi
 
 
