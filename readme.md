@@ -41,7 +41,7 @@
 ## 项目部署
 
 
-######  有关飞书具体的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
+######  有关飞书具的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
 
 
 ``` bash
@@ -114,28 +114,30 @@ docker build -t feishu-chatgpt:latest .
 docker run -d --name feishu-chatgpt -p 9000:9000 \
 --env APP_ID=xxx \
 --env APP_SECRET=xxx \
+--env APP_ENCRYPT_KEY=xxx \
 --env APP_VERIFICATION_TOKEN=xxx \
 --env OPENAI_KEY=sk-xxx \
 feishu-chatgpt:latest
 ```
 ------------
-小白简易化docker部署版
 
+小白简易化docker部署
+
+- docker地址: https://hub.docker.com/r/leizhenpeng/feishu-chatgpt
 ``` bash
-docker地址:https://hub.docker.com/r/w779945/feishu-chatgpt3.5
-docker地址: https://hub.docker.com/r/cfxks1989/feishu-chatgpt
-
-docker run -d --restart=always --name feishu-chatgpt2 -p 9500:9000 -v /etc/localtime:/etc/localtim:ro  \
+docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/localtime:/etc/localtim:ro  \
 --env APP_ID=xxx \
 --env APP_SECRET=xxx \
+--env APP_ENCRYPT_KEY=xxx \
 --env APP_VERIFICATION_TOKEN=xxx \
 --env OPENAI_KEY=sk-xxx \
-cfxks1989/feishu-chatgpt:latest
+leizhenpeng/feishu-chatgpt:latest
 
-最后回调地址是: http://IP:9500/webhook/event
+```
+事件回调地址是: http://IP:9000/webhook/event
+卡片回调地址是: http://IP:9000/webhook/card
 
 把它填入飞书后台
-```
 <br>
 
 </details>

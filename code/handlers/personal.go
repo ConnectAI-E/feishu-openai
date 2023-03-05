@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/services"
 	"start-feishubot/utils"
 	"strings"
+
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
@@ -15,6 +16,7 @@ import (
 type PersonalMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
+	gpt          services.ChatGPT
 }
 
 func (p PersonalMessageHandler) cardHandler(
@@ -101,7 +103,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
 	})
-	completions, err := services.Completions(msg)
+	completions, err := p.gpt.Completions(msg)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
@@ -125,9 +127,10 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 
 var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
 
-func NewPersonalMessageHandler() MessageHandlerInterface {
+func NewPersonalMessageHandler(gpt services.ChatGPT) MessageHandlerInterface {
 	return &PersonalMessageHandler{
 		sessionCache: services.GetSessionCache(),
 		msgCache:     services.GetMsgCache(),
+		gpt:          gpt,
 	}
 }

@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
+	"start-feishubot/services"
+
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
 
@@ -21,17 +22,18 @@ var (
 
 func main() {
 	pflag.Parse()
-	initialization.LoadConfig(*cfg)
-	initialization.LoadLarkClient()
+	config := initialization.LoadConfig(*cfg)
+	initialization.LoadLarkClient(*config)
+
+	gpt := &services.ChatGPT{ApiKey: config.OpenaiApiKey}
+	handlers.InitHanders(*gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
-		viper.GetString("APP_VERIFICATION_TOKEN"),
-		viper.GetString("APP_ENCRYPT_KEY")).
+		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
 		OnP2MessageReceiveV1(handlers.Handler)
 
 	cardHandler := larkcard.NewCardActionHandler(
-		viper.GetString("APP_VERIFICATION_TOKEN"),
-		viper.GetString("APP_ENCRYPT_KEY"),
+		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey,
 		handlers.CardHandler())
 
 	r := gin.Default()

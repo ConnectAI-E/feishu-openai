@@ -25,6 +25,8 @@ fi
 
 if [ "$APP_ENCRYPT_KEY" != "" ] ; then
     sed -i "4c   APP_ENCRYPT_KEY: $APP_ENCRYPT_KEY" $CONFIG_PATH
+else
+    echo -e "\033[31m[Warning] You need to set APP_ENCRYPT_KEY before running!\033[0m"
 fi
 
 if [ "$APP_VERIFICATION_TOKEN" != "" ] ; then
