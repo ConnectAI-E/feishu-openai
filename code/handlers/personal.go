@@ -38,7 +38,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	bool) {
 	if cardMsg.Value == "1" {
 		newCard, _ := newSendCard(
-			withHeader("️👻 机器人提醒", larkcard.TemplateRed),
+			withHeader("️🆑 机器人提醒", larkcard.TemplateRed),
 			withMainMd("已删除此话题的上下文信息"),
 			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
 		)
@@ -47,7 +47,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	}
 	if cardMsg.Value == "0" {
 		newCard, _ := newSendCard(
-			withHeader("️👻 机器人提醒", larkcard.TemplateGreen),
+			withHeader("️🆑 机器人提醒", larkcard.TemplateGreen),
 			withMainMd("依旧保留此话题的上下文信息"),
 			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
 		)
@@ -77,20 +77,23 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 
-	if qParsed == "/clear" || qParsed == "清除" {
+	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {
 		sendClearCacheCheckCard(ctx, sessionId, msgId)
 		return nil
 	}
 
-	system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ",
-		"角色扮演 ")
-	if foundSystem {
+	if system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ", "角色扮演 "); foundSystem {
 		p.sessionCache.Clear(*sessionId)
 		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
 		p.sessionCache.Set(*sessionId, systemMsg)
 		sendSystemInstructionCard(ctx, sessionId, msgId, system)
+		return nil
+	}
+
+	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
+		sendHelpCard(ctx, sessionId, msgId)
 		return nil
 	}
 
