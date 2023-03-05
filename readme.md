@@ -30,9 +30,8 @@
 - [ ] 支持管理员模式
 
 <p align='center'>
-    <img src='./docs/img.png' alt='' width='400'/>
+    <img src='./docs/help.png' alt='' width='600'/>
 </p>
-
 
 ## 🌟 项目特点
 - 🍏 基于 OpenAI-[gpt-3.5-turbo](https://platform.openai.com/account/api-keys) 接口
