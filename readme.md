@@ -14,20 +14,18 @@
 
 ## 👻 机器人功能
 
-- [x] 支持私人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/25)同时对话
-- [x] 支持群聊@机器人[多话题](https://github.com/Leizhenpeng/feishu-chatGpt/pull/22)同时回复
-- [x] 持续对话联系[上下文](https://github.com/Leizhenpeng/feishu-chatGpt/pull/30)（点击对话框参与回复，可保持话题连贯）
-- [x] 超时自动结束对话
-- [x] 清除话题历史上下文（关键词`清除`）
-- [ ] 从历史上下文中恢复话题，继续对话
-- [x] 支持富文本卡片回复
-- [x] [交互式](https://github.com/Leizhenpeng/feishu-chatGpt/pull/26)反馈提醒
-- [ ] 支持token用量查询
-- [x] 基于[角色扮演的场景模式](https://github.com/f/awesome-chatgpt-prompts)(关键词`角色扮演 描述`）
-- [ ] 内置丰富的场景预设，允许用户自定义管理场景
-- [ ] markdown格式回复，重点支持代码场景
-- [ ] 支持图片显示
-- [ ] 支持管理员模式
+- 🗣 畅所欲言，直接语音交流 🚧
+- 💬 私人和群聊支持多话题同时对话，让讨论更加连贯和高效
+- 🔄 持续对话联系上下文，回复对话框即可继续同一话题讨论
+- ⏰ 超时自动结束对话，同时支持清除讨论历史
+- 📝 支持富文本卡片回复，让信息更加丰富多彩
+- 👍 交互式反馈提醒，及时获取机器人处理结果
+- 🎭 支持角色扮演的场景模式，为讨论增添乐趣和创意
+- 🏞 内置丰富的场景预设，让用户更方便地管理场景  🚧
+- 🔙 轻松恢复历史话题，继续讨论  🚧
+- 🖼 支持根据文本生成图片，增强信息呈现效果  🚧
+- 🔒 内置管理员模式，使用更加安全可靠 🚧
+
 
 <p align='center'>
     <img src='./docs/help.png' alt='' width='600'/>
@@ -170,21 +168,11 @@ cfxks1989/feishu-chatgpt:latest
 更多介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
 
 
-
-### 相关阅读
-
-- [go-cache](https://github.com/patrickmn/go-cache)
-
-- [在Go语言项目中使用Zap日志库](https://www.liwenzhou.com/posts/Go/zap/)
-
-- [飞书 User_ID、Open_ID 与 Union_ID 区别](https://www.feishu.cn/hc/zh-CN/articles/794300086214)
-
-- [飞书重复接受到消息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/im-v1/message/events/receive)
-
-
 ### 更多交流
 
-可以加入飞书群~
+企业如需定制部署，可联系WeChat: `laolei_forkway`，支持发票~
+
+遇到其他问题，可以加入飞书群沟通~
 <p align='center'>
   <img src='./docs/talk.png' alt='' width='300' align='left'/>
 </p>
