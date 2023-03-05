@@ -80,6 +80,14 @@ func newSendCard(
 	return cardContent, err
 }
 
+// withSplitLine 用于生成分割线
+func withSplitLine() larkcard.MessageCardElement {
+	splitLine := larkcard.NewMessageCardHr().
+		Build()
+	return splitLine
+}
+
+// withHeader 用于生成消息头
 func withHeader(title string, color string) *larkcard.
 	MessageCardHeader {
 	if title == "" {
@@ -93,6 +101,8 @@ func withHeader(title string, color string) *larkcard.
 		Build()
 	return header
 }
+
+// withNote 用于生成纯文本脚注
 func withNote(note string) larkcard.MessageCardElement {
 	noteElement := larkcard.NewMessageCardNote().
 		Elements([]larkcard.MessageCardNoteElement{larkcard.NewMessageCardPlainText().
@@ -102,6 +112,7 @@ func withNote(note string) larkcard.MessageCardElement {
 	return noteElement
 }
 
+// withMainMd 用于生成markdown消息体
 func withMainMd(msg string) larkcard.MessageCardElement {
 	msg, i := processMessage(msg)
 	msg = processNewLine(msg)
@@ -118,6 +129,8 @@ func withMainMd(msg string) larkcard.MessageCardElement {
 		Build()
 	return mainElement
 }
+
+// withMainText 用于生成纯文本消息体
 func withMainText(msg string) larkcard.MessageCardElement {
 	msg, i := processMessage(msg)
 	msg = cleanTextBlock(msg)
@@ -135,36 +148,65 @@ func withMainText(msg string) larkcard.MessageCardElement {
 	return mainElement
 }
 
-func withDoubleCheckBtn(sessionId *string) larkcard.
-	MessageCardElement {
-	actions := larkcard.NewMessageCardAction().
-		Actions([]larkcard.MessageCardActionElement{
-			larkcard.NewMessageCardEmbedButton().
-				Type(larkcard.MessageCardButtonTypeDanger).
-				Value(map[string]interface{}{
-					"value":     "1", // 1 代表确认清除
-					"kind":      ClearCardKind,
-					"chatType":  UserChatType,
-					"sessionId": *sessionId,
-				}).
-				Text(larkcard.NewMessageCardPlainText().
-					Content("确认清除").
-					Build()),
-			larkcard.NewMessageCardEmbedButton().
-				Type(larkcard.MessageCardButtonTypePrimary).
-				Value(map[string]interface{}{
-					"value":     "0", // 0 代表取消清除
-					"kind":      ClearCardKind,
-					"sessionId": *sessionId,
-					"chatType":  UserChatType,
-				}).
-				Text(larkcard.NewMessageCardPlainText().
-					Content("我再想想").
-					Build()),
-		}).Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+// withMdAndExtraBtn 用于生成带有额外按钮的消息体
+func withMdAndExtraBtn(msg string, btn *larkcard.
+	MessageCardEmbedButton) larkcard.MessageCardElement {
+	msg, i := processMessage(msg)
+	msg = processNewLine(msg)
+	if i != nil {
+		return nil
+	}
+	mainElement := larkcard.NewMessageCardDiv().
+		Fields(
+			[]*larkcard.MessageCardField{
+				larkcard.NewMessageCardField().
+					Text(larkcard.NewMessageCardLarkMd().
+						Content(msg).
+						Build()).
+					IsShort(true).
+					Build()}).
+		Extra(btn).
 		Build()
+	return mainElement
+}
+
+func withBtn(content string, value map[string]interface{},
+	typename larkcard.MessageCardButtonType) *larkcard.
+	MessageCardEmbedButton {
+	btn := larkcard.NewMessageCardEmbedButton().
+		Type(typename).
+		Value(value).
+		Text(larkcard.NewMessageCardPlainText().
+			Content(content).
+			Build())
+	return btn
+}
+
+// 清除卡片按钮
+func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
+	confirmBtn := withBtn("确认清除", map[string]interface{}{
+		"value":     "1",
+		"kind":      ClearCardKind,
+		"chatType":  UserChatType,
+		"sessionId": *sessionID,
+	}, larkcard.MessageCardButtonTypeDanger,
+	)
+	cancelBtn := withBtn("我再想想", map[string]interface{}{
+		"value":     "0",
+		"kind":      ClearCardKind,
+		"sessionId": *sessionID,
+		"chatType":  UserChatType,
+	},
+		larkcard.MessageCardButtonTypeDefault)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{confirmBtn, cancelBtn}).
+		Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+		Build()
+
 	return actions
 }
+
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
 	fmt.Println("sendMsg", msg, msgId)
 	msg, i := processMessage(msg)
@@ -237,7 +279,7 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 func sendClearCacheCheckCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
-		withHeader("👻️ 机器人提醒", larkcard.TemplateBlue),
+		withHeader("🆑 机器人提醒", larkcard.TemplateBlue),
 		withMainMd("您确定要清除对话上下文吗？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
 		withDoubleCheckBtn(sessionId))
@@ -267,6 +309,44 @@ func sendNewTopicCard(ctx context.Context,
 		withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
 		withMainText(content),
 		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+}
+
+func sendHelpCard(ctx context.Context,
+	sessionId *string, msgId *string) {
+	newCard, _ := newSendCard(
+		withHeader("🎒需要帮助吗？", larkcard.TemplateBlue),
+		withMainMd("**我是小飞机，一款基于chatGpt技术的智能聊天机器人！**"),
+		withSplitLine(),
+		withMdAndExtraBtn(
+			"** 🆑 清除话题上下文**\n文本回复 *清除* 或 */clear*",
+			withBtn("立刻清除", map[string]interface{}{
+				"value":     "1",
+				"kind":      ClearCardKind,
+				"chatType":  UserChatType,
+				"sessionId": *sessionId,
+			}, larkcard.MessageCardButtonTypeDanger)),
+		withSplitLine(),
+		withMainMd("**🥷 开启角色扮演模式**\n文本回复*角色扮演* 或 */system*+空格+角色信息"),
+		withSplitLine(),
+		withMainMd("**📮 常用角色管理** 🚧\n"+
+			" 文本回复 *角色管理* 或 */manage*"),
+		withSplitLine(),
+		withMainMd("**🔃️ 历史话题回档** 🚧\n"+
+			" 进入话题的回复详情页,文本回复 *恢复* 或 */reload*"),
+		withSplitLine(),
+		withMainMd("**📤 话题内容导出** 🚧\n"+
+			" 文本回复 *导出* 或 */export*"),
+		withSplitLine(),
+		withMainMd("**🎰 连续对话与多话题模式**\n"+
+			" 点击对话框参与回复，可保持话题连贯。同时，单独提问即可开启全新新话题"),
+		withSplitLine(),
+		withMainMd("**🎒 需要更多帮助**\n文本回复 *帮助* 或 */help*"),
+	)
 	replyCard(
 		ctx,
 		msgId,
