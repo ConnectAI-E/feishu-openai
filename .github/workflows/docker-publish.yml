@@ -33,6 +33,7 @@ jobs:
 
       - name: Install dependencies
         run:
+          cd ./code
           go mod download
 
       - name: Build Docker image
