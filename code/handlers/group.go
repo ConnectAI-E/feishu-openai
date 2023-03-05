@@ -4,18 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/utils"
 	"strings"
 
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
-	"github.com/spf13/viper"
 )
 
 type GroupMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
+	gpt          services.ChatGPT
+	config       initialization.Config
 }
 
 func (p GroupMessageHandler) cardHandler(_ context.Context,
@@ -34,7 +37,7 @@ func (p GroupMessageHandler) cardHandler(_ context.Context,
 }
 
 func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
-	ifMention := judgeIfMentionMe(event)
+	ifMention := p.judgeIfMentionMe(event)
 	if !ifMention {
 		return nil
 	}
@@ -83,7 +86,7 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
 	})
-	completions, err := services.Completions(msg)
+	completions, err := p.gpt.Completions(msg)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
@@ -105,17 +108,19 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 
 var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
 
-func NewGroupMessageHandler() MessageHandlerInterface {
+func NewGroupMessageHandler(gpt services.ChatGPT, config initialization.Config) MessageHandlerInterface {
 	return &GroupMessageHandler{
 		sessionCache: services.GetSessionCache(),
 		msgCache:     services.GetMsgCache(),
+		gpt:          gpt,
+		config:       config,
 	}
 }
 
-func judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
+func (p GroupMessageHandler) judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
 	mention := event.Event.Message.Mentions
 	if len(mention) != 1 {
 		return false
 	}
-	return *mention[0].Name == viper.GetString("BOT_NAME")
+	return *mention[0].Name == p.config.FeishuBotName
 }

@@ -30,3 +30,7 @@ config.yaml
 
 
 /code/target/
+start-feishubot
+.env
+
+docker.md

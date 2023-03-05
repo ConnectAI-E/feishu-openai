@@ -3,6 +3,9 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"start-feishubot/initialization"
+	"start-feishubot/services"
+
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
@@ -22,10 +25,10 @@ const (
 // handlers 所有消息类型类型的处理器
 var handlers map[HandlerType]MessageHandlerInterface
 
-func init() {
+func InitHanders(gpt services.ChatGPT, config initialization.Config) {
 	handlers = make(map[HandlerType]MessageHandlerInterface)
-	handlers[GroupHandler] = NewGroupMessageHandler()
-	handlers[UserHandler] = NewPersonalMessageHandler()
+	handlers[GroupHandler] = NewGroupMessageHandler(gpt, config)
+	handlers[UserHandler] = NewPersonalMessageHandler(gpt)
 
 }
 
