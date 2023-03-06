@@ -20,3 +20,17 @@ func TestCompletions(t *testing.T) {
 
 	fmt.Println(resp.Content, resp.Role)
 }
+
+func TestGenerateOneImage(t *testing.T) {
+	config := initialization.LoadConfig("../config.yaml")
+	gpt := ChatGPT{ApiKey: config.OpenaiApiKey}
+	prompt := "a red apple"
+	size := "256x256"
+	imageURL, err := gpt.GenerateOneImage(prompt, size)
+	if err != nil {
+		t.Fatalf("GenerateImage failed with error: %v", err)
+	}
+	if imageURL == "" {
+		t.Fatalf("GenerateImage returned empty imageURL")
+	}
+}
