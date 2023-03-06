@@ -135,7 +135,7 @@ docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/local
 --env OPENAI_KEY=sk-xxx \
 leizhenpeng/feishu-chatgpt:amd64-latest
     
-//如果mac替换为 
+//如果arm替换为 
 //leizhenpeng/feishu-chatgpt:arm64-latest
 ```
 事件回调地址是: http://IP:9000/webhook/event
