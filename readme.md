@@ -156,6 +156,9 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 2. 解压安装包,修改config.example.yml中配置信息,另存为config.yml
 3. 运行程序入口文件 `feishu-chatgpt`
 
+事件回调地址: http://IP:9000/webhook/event
+卡片回调地址: http://IP:9000/webhook/card
+
 </details>
 
 ## 详细配置步骤
