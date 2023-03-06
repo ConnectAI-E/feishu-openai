@@ -2,11 +2,11 @@ name: Build Release
 
 on:
   release:
-    types: [created]
-    
+    types: [created,published]
+
 permissions:
   contents: read
-  
+
 jobs:
   build-go-binary:
     permissions:
@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, windows]  
-        goarch: [amd64, arm64]
-        exclude:
+        goos: [ linux, windows, darwin ] # 需要打包的系统
+        goarch: [ amd64, arm64 ] # 需要打包的架构
+        exclude: # 排除某些平台和架构
           - goarch: arm64
             goos: windows
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: Parallel build
         uses: wangyoucao577/go-release-action@v1.30
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }} 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           goversion: 1.18
@@ -35,5 +35,5 @@ jobs:
           executable_compression: "upx -9"
           md5sum: false
           project_path: "./code"
-          binary_name: "start-feishubot"
-          extra_files: ./code/config.example.yaml
+          binary_name: "feishu-chatgpt"
+          extra_files: ./code/config.example.yaml readme.md

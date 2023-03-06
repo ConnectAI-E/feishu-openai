@@ -1,47 +1,59 @@
-name: Docker Publish
+name: build docker image
 
+# 仅在release时触发
 on:
   push:
     branches:
       - master
+  release:
+    types: [created,published]
 
-env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  # 可以手动触发
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
 
 jobs:
-  build-and-publish:
+  buildx:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        architecture: [ amd64, arm64 ]
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Login to Docker Hub
+      - name: Inject slug/short variables
+        uses: rlespinasse/github-slug-action@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name: Build and push
+        uses: docker/build-push-action@v2
         with:
-            go-version: '1.18'
-
-      - name: Install dependencies
-        run:
-          cd ./code && go mod tidy
-
-      - name: Build Docker image
-        run: |
-          docker build -t feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} --build-arg ARCHITECTURE=${{ matrix.architecture }} .
-
-      - name: Push Docker image to Docker Hub
-        run: |
-          docker tag feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }}
-          docker tag feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-latest
-          docker push ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }}
-          docker push ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-latest
+          context: .
+          file: ./Dockerfile
+          # 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构
+          platforms: linux/amd64,linux/arm64/v8
+          # 镜像推送时间
+          push: ${{ github.event_name != 'pull_request' }}
+          # 给清单打上多个标签
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.GITHUB_REPOSITORY_NAME_PART }}:${{ env.GITHUB_REF_NAME }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.GITHUB_REPOSITORY_NAME_PART }}:latest
