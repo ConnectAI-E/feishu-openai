@@ -41,15 +41,13 @@
 ## 项目部署
 
 
-######  有关飞书具的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
+######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
 
 
 ``` bash
-git clone git@github.com:Leizhenpeng/feishu-chatGpt.git
-cd feishu-chatGpt/code
+git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
+cd feishu-chatgpt/code
 
-# 配置config.yaml
-mv config.example.yaml config.yaml
 ```
 <details>
     <summary>本地部署</summary>
@@ -63,6 +61,9 @@ mv config.example.yaml config.yaml
 
 
 ```bash
+# 配置config.yaml
+mv config.example.yaml config.yaml
+
 //测试部署
 go run main.go
 cpolar http 9000
@@ -91,6 +92,9 @@ kill -9 PID
 
 安装[severless](https://docs.serverless-devs.com/serverless-devs/quick_start)工具
 ```bash
+# 配置config.yaml
+mv config.example.yaml config.yaml
+# 安装severless cli
 npm install @serverless-devs/s -g
 ```
 一键部署

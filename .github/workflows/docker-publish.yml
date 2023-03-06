@@ -1,6 +1,6 @@
 name: build docker image
 
-# 仅在release时触发
+# release 事件触发 + Master 分支触发 + 手动触发
 on:
   push:
     branches:
