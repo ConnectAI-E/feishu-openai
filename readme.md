@@ -34,7 +34,7 @@
 ## 🌟 项目特点
 - 🍏 基于 OpenAI-[gpt-3.5-turbo](https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
-- 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多种渠道部署
+- 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/)、[二进制安装包](https://github.com/Leizhenpeng/feishu-chatgpt/releases/)多种渠道部署
 - 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
 
 
@@ -148,6 +148,16 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 
 </details>
 
+<details>
+    <summary>二进制安装包部署</summary>
+<br>
+
+1. 进入[release页面](https://github.com/Leizhenpeng/feishu-chatgpt/releases/) 下载对应的安装包
+2. 解压安装包,修改config.example.yml中配置信息,另存为config.yml
+3. 运行程序入口文件 `feishu-chatgpt`
+
+</details>
+
 ## 详细配置步骤
 
 -  获取 [OpenAI](https://platform.openai.com/account/api-keys) 的 KEY
@@ -176,11 +186,21 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 更多介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
 
 
-### 更多交流
+## 更多交流
 
 企业如需定制部署，可联系WeChat: `laolei_forkway`，支持发票~
 
 遇到其他问题，可以加入飞书群沟通~
-<p align='center'>
-  <img src='./docs/talk.png' alt='' width='300' align='left'/>
-</p>
+
+<img src='./docs/talk.png' alt='' width='300'/>
+
+## 赞助项目
+
+如果你觉得这个项目对你有帮助，可以请作者买本书~
+
+😚 谢谢你啦 😚
+
+<details>
+    <summary>赞赏二维码</summary>
+    <img width="400" src="https://user-images.githubusercontent.com/50035229/222702169-cec777f9-cb0c-4f6a-90e5-418959e668e5.png">
+</details>
