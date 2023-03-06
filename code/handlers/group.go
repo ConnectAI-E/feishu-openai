@@ -2,21 +2,42 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"start-feishubot/initialization"
 	"start-feishubot/services"
+	"start-feishubot/utils"
 	"strings"
 
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
-	"github.com/spf13/viper"
 )
 
 type GroupMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
+	gpt          services.ChatGPT
+	config       initialization.Config
+}
+
+func (p GroupMessageHandler) cardHandler(_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
+	var cardMsg CardMsg
+	actionValue := cardAction.Action.Value
+	actionValueJson, _ := json.Marshal(actionValue)
+	json.Unmarshal(actionValueJson, &cardMsg)
+	if cardMsg.Kind == ClearCardKind {
+		newCard, err, done := CommonProcessClearCache(cardMsg, p.sessionCache)
+		if done {
+			return newCard, err
+		}
+	}
+	return nil, nil
 }
 
 func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
-	ifMention := judgeIfMentionMe(event)
+	ifMention := p.judgeIfMentionMe(event)
 	if !ifMention {
 		return nil
 	}
@@ -41,9 +62,23 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 		return nil
 	}
 
-	if qParsed == "/clear" || qParsed == "清除" {
+	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {
+		sendClearCacheCheckCard(ctx, sessionId, msgId)
+		return nil
+	}
+
+	if system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ", "角色扮演 "); foundSystem {
 		p.sessionCache.Clear(*sessionId)
-		sendMsg(ctx, "🤖️：AI机器人已清除记忆", chatId)
+		systemMsg := append([]services.Messages{}, services.Messages{
+			Role: "system", Content: system,
+		})
+		p.sessionCache.Set(*sessionId, systemMsg)
+		sendSystemInstructionCard(ctx, sessionId, msgId, system)
+		return nil
+	}
+
+	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
+		sendHelpCard(ctx, sessionId, msgId)
 		return nil
 	}
 
@@ -51,13 +86,17 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
 	})
-	completions, err := services.Completions(msg)
+	completions, err := p.gpt.Completions(msg)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
 		return nil
 	}
 	msg = append(msg, completions)
 	p.sessionCache.Set(*sessionId, msg)
+	if len(msg) == 2 {
+		sendNewTopicCard(ctx, sessionId, msgId, completions.Content)
+		return nil
+	}
 	err = replyMsg(ctx, completions.Content, msgId)
 	if err != nil {
 		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
@@ -67,19 +106,21 @@ func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2Message
 
 }
 
-var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
+var _ MessageHandlerInterface = (*GroupMessageHandler)(nil)
 
-func NewGroupMessageHandler() MessageHandlerInterface {
+func NewGroupMessageHandler(gpt services.ChatGPT, config initialization.Config) MessageHandlerInterface {
 	return &GroupMessageHandler{
 		sessionCache: services.GetSessionCache(),
 		msgCache:     services.GetMsgCache(),
+		gpt:          gpt,
+		config:       config,
 	}
 }
 
-func judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
+func (p GroupMessageHandler) judgeIfMentionMe(event *larkim.P2MessageReceiveV1) bool {
 	mention := event.Event.Message.Mentions
 	if len(mention) != 1 {
 		return false
 	}
-	return *mention[0].Name == viper.GetString("BOT_NAME")
+	return *mention[0].Name == p.config.FeishuBotName
 }

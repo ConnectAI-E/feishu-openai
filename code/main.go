@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
+	"start-feishubot/services"
+
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
 
@@ -20,12 +22,19 @@ var (
 
 func main() {
 	pflag.Parse()
-	initialization.LoadConfig(*cfg)
-	initialization.LoadLarkClient()
+	config := initialization.LoadConfig(*cfg)
+	initialization.LoadLarkClient(*config)
 
-	handler := dispatcher.NewEventDispatcher(viper.GetString(
-		"APP_VERIFICATION_TOKEN"), viper.GetString("APP_ENCRYPT_KEY")).
+	gpt := &services.ChatGPT{ApiKey: config.OpenaiApiKey}
+	handlers.InitHanders(*gpt, *config)
+
+	eventHandler := dispatcher.NewEventDispatcher(
+		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
 		OnP2MessageReceiveV1(handlers.Handler)
+
+	cardHandler := larkcard.NewCardActionHandler(
+		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey,
+		handlers.CardHandler())
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
@@ -33,13 +42,14 @@ func main() {
 			"message": "pong",
 		})
 	})
-
-	// 在已有 Gin 实例上注册消息处理路由
-	r.POST("/webhook/event", sdkginext.NewEventHandlerFunc(handler))
+	r.POST("/webhook/event",
+		sdkginext.NewEventHandlerFunc(eventHandler))
+	r.POST("/webhook/card",
+		sdkginext.NewCardActionHandlerFunc(
+			cardHandler))
 
 	fmt.Println("http server started",
 		"http://localhost:9000/webhook/event")
-
 	r.Run(":9000")
 
 }

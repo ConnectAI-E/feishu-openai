@@ -1,0 +1,47 @@
+name: Docker Publish
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        architecture: [ amd64, arm64 ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+            go-version: '1.18'
+
+      - name: Install dependencies
+        run:
+          cd ./code && go mod tidy
+
+      - name: Build Docker image
+        run: |
+          docker build -t feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} --build-arg ARCHITECTURE=${{ matrix.architecture }} .
+
+      - name: Push Docker image to Docker Hub
+        run: |
+          docker tag feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }}
+          docker tag feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }} ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-latest
+          docker push ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-${{ github.sha }}
+          docker push ${{ env.DOCKER_USERNAME }}/feishu-chatgpt:${{ matrix.architecture }}-latest
