@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-//func sendCard
+// func sendCard
 func msgFilter(msg string) string {
 	//replace @到下一个非空的字段 为 ''
 	regex := regexp.MustCompile(`@[^ ]*`)
@@ -25,6 +25,16 @@ func parseContent(content string) string {
 	}
 	text := contentMap["text"].(string)
 	return msgFilter(text)
+}
+
+func parseAudioContent(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fileKey := contentMap["file_key"].(string)
+	return fileKey
 }
 func processMessage(msg interface{}) (string, error) {
 	msg = strings.TrimSpace(msg.(string))
@@ -50,7 +60,7 @@ func processQuote(msg string) string {
 	return strings.Replace(msg, "\\\"", "\"", -1)
 }
 
-//将字符中 \u003c 替换为 <  等等
+// 将字符中 \u003c 替换为 <  等等
 func processUnicode(msg string) string {
 	regex := regexp.MustCompile(`\\u[0-9a-fA-F]{4}`)
 	return regex.ReplaceAllStringFunc(msg, func(s string) string {

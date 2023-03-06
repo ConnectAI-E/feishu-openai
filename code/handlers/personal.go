@@ -4,9 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/utils"
 	"strings"
+
+	"github.com/sashabaranov/go-openai"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
@@ -72,11 +76,37 @@ func (p PersonalMessageHandler) msgReceivedHandler(ctx context.Context, event *l
 		return nil
 	}
 	p.msgCache.TagProcessed(*msgId)
-	qParsed := strings.Trim(parseContent(*content), " ")
-	if len(qParsed) == 0 {
-		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
-		fmt.Println("msgId", *msgId, "message.text is empty")
-		return nil
+	var qParsed string
+	if *event.Event.Message.MessageType == "audio" {
+		fileKey := parseAudioContent(*content)
+		req := larkim.NewGetMessageResourceReqBuilder().MessageId(*msgId).FileKey(fileKey).Type("file").Build()
+		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+		f := fmt.Sprintf("%s.ogg", fileKey)
+		resp.WriteFile(f)
+		output := fmt.Sprintf("%s.mp3", fileKey)
+		ffmpeg.Input(f).Output(output, ffmpeg.KwArgs{"f": "mp3"}).OverWriteOutput().ErrorToStdOut().Run()
+
+		resp2, err := openai.NewClient(p.gpt.ApiKey).CreateTranscription(context.Background(), openai.AudioRequest{
+			Model:    openai.Whisper1,
+			FilePath: output,
+		})
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		qParsed = resp2.Text
+		replyMsg(ctx, qParsed, msgId)
+	} else if *event.Event.Message.MessageType == "text" {
+		qParsed = strings.Trim(parseContent(*content), " ")
+		if len(qParsed) == 0 {
+			sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
+			fmt.Println("msgId", *msgId, "message.text is empty")
+			return nil
+		}
 	}
 
 	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {

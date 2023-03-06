@@ -14,6 +14,12 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.38.20 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/u2takey/go-utils v0.3.1 // indirect
+)
+
+require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -30,10 +36,12 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
+	github.com/sashabaranov/go-openai v1.4.1
 	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/u2takey/ffmpeg-go v0.4.1
 	github.com/ugorji/go/codec v1.2.8 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/net v0.5.0 // indirect

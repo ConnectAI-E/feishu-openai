@@ -2,12 +2,15 @@ package services
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/sashabaranov/go-openai"
 )
 
 const (
@@ -49,6 +52,17 @@ type ChatGPTRequestBody struct {
 }
 type ChatGPT struct {
 	ApiKey string
+}
+
+func (g ChatGPT) AudioToText(file string) string {
+	resp, err := openai.NewClient(g.ApiKey).CreateTranscription(context.Background(), openai.AudioRequest{
+		Model:    openai.Whisper1,
+		FilePath: file,
+	})
+	if err != nil {
+		return ""
+	}
+	return resp.Text
 }
 
 func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {

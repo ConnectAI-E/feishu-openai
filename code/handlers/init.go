@@ -39,7 +39,7 @@ func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 		return nil
 	}
 	msgType := judgeMsgType(event)
-	if msgType != "text" {
+	if msgType != "text" && msgType != "audio" {
 		fmt.Println("unknown msg type")
 		return nil
 	}
@@ -86,9 +86,5 @@ func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
 }
 
 func judgeMsgType(event *larkim.P2MessageReceiveV1) string {
-	msgType := event.Event.Message.MessageType
-	if *msgType == "text" {
-		return "text"
-	}
-	return ""
+	return *event.Event.Message.MessageType
 }
