@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"start-feishubot/initialization"
 
@@ -241,6 +243,83 @@ func replyMsg(ctx context.Context, msg string, msgId *string) error {
 	}
 	return nil
 }
+
+func uploadImage(base64Str string) (*string, error) {
+	imageBytes, err := base64.StdEncoding.DecodeString(base64Str)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	client := initialization.GetLarkClient()
+	resp, err := client.Im.Image.Create(context.Background(),
+		larkim.NewCreateImageReqBuilder().
+			Body(larkim.NewCreateImageReqBodyBuilder().
+				ImageType(larkim.ImageTypeMessage).
+				Image(bytes.NewReader(imageBytes)).
+				Build()).
+			Build())
+
+	// 处理错误
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+
+	// 服务端错误处理
+	if !resp.Success() {
+		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return nil, err
+	}
+	return resp.Data.ImageKey, nil
+}
+func replyImage(ctx context.Context, ImageKey *string,
+	msgId *string) error {
+	fmt.Println("sendMsg", ImageKey, msgId)
+
+	msgImage := larkim.MessageImage{ImageKey: *ImageKey}
+	content, err := msgImage.String()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	client := initialization.GetLarkClient()
+
+	resp, err := client.Im.Message.Reply(ctx, larkim.NewReplyMessageReqBuilder().
+		MessageId(*msgId).
+		Body(larkim.NewReplyMessageReqBodyBuilder().
+			MsgType(larkim.MsgTypeImage).
+			Uuid(uuid.New().String()).
+			Content(content).
+			Build()).
+		Build())
+
+	// 处理错误
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	// 服务端错误处理
+	if !resp.Success() {
+		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		return err
+	}
+	return nil
+
+}
+
+func replayImageByBase64(ctx context.Context, base64Str string, msgId *string) error {
+	imageKey, err := uploadImage(base64Str)
+	if err != nil {
+		return err
+	}
+	err = replyImage(ctx, imageKey, msgId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	//fmt.Println("sendMsg", msg, chatId)
 	msg, i := processMessage(msg)
@@ -276,7 +355,6 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	}
 	return nil
 }
-
 func sendClearCacheCheckCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
@@ -294,8 +372,20 @@ func sendClearCacheCheckCard(ctx context.Context,
 func sendSystemInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
-		withHeader("🥷 已进入角色扮演模式", larkcard.TemplateBlue),
+		withHeader("🥷  已进入角色扮演模式", larkcard.TemplateBlue),
 		withMainText(content),
+		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+}
+
+func sendPicCreateInstructionCard(ctx context.Context,
+	sessionId *string, msgId *string, content string) {
+	newCard, _ := newSendCard(
+		withHeader("🖼️  已进入图片创作模式", larkcard.TemplateBlue),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
 	replyCard(
 		ctx,

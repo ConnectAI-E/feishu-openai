@@ -89,17 +89,37 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
-		p.sessionCache.Set(*sessionId, systemMsg)
+		p.sessionCache.SetMsg(*sessionId, systemMsg)
 		sendSystemInstructionCard(ctx, sessionId, msgId, system)
 		return nil
 	}
 
 	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
+		p.sessionCache.Clear(*sessionId)
 		sendHelpCard(ctx, sessionId, msgId)
 		return nil
 	}
 
-	msg := p.sessionCache.Get(*sessionId)
+	if pictureNew, foundPicture := utils.EitherTrimEqual(qParsed,
+		"/picture", "图片创作"); foundPicture {
+		p.sessionCache.Clear(*sessionId)
+		p.sessionCache.SetMode(*sessionId, services.ModePicCreate)
+		sendPicCreateInstructionCard(ctx, sessionId, msgId, pictureNew)
+		return nil
+	}
+
+	mode := p.sessionCache.GetMode(*sessionId)
+	if mode == services.ModePicCreate {
+		bs64, err := p.gpt.GenerateOneImage(qParsed, "256x256")
+		if err != nil {
+			replyMsg(ctx, fmt.Sprintf("🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), msgId)
+			return nil
+		}
+		replayImageByBase64(ctx, bs64, msgId)
+		return nil
+	}
+
+	msg := p.sessionCache.GetMsg(*sessionId)
 	msg = append(msg, services.Messages{
 		Role: "user", Content: qParsed,
 	})
@@ -109,7 +129,7 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 		return nil
 	}
 	msg = append(msg, completions)
-	p.sessionCache.Set(*sessionId, msg)
+	p.sessionCache.SetMsg(*sessionId, msg)
 	//if new topic
 	if len(msg) == 2 {
 		fmt.Println("new topic", msg[1].Content)

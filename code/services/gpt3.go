@@ -113,7 +113,7 @@ type ImageGenerationRequestBody struct {
 type ImageGenerationResponseBody struct {
 	Created int64 `json:"created"`
 	Data    []struct {
-		URL string `json:"url"`
+		Base64Json string `json:"b64_json"`
 	} `json:"data"`
 }
 
@@ -123,7 +123,7 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string,
 		Prompt:         prompt,
 		N:              n,
 		Size:           size,
-		ResponseFormat: "url",
+		ResponseFormat: "b64_json",
 	}
 	requestData, err := json.Marshal(requestBody)
 	if err != nil {
@@ -151,7 +151,6 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string,
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("image generation response body: %s", string(body))
 
 	imageResponseBody := &ImageGenerationResponseBody{}
 	err = json.Unmarshal(body, imageResponseBody)
@@ -159,18 +158,18 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string,
 		return nil, err
 	}
 
-	var urls []string
+	var b64Pool []string
 	for _, data := range imageResponseBody.Data {
-		urls = append(urls, data.URL)
+		b64Pool = append(b64Pool, data.Base64Json)
 	}
-	return urls, nil
+	return b64Pool, nil
 
 }
 
 func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) {
-	urls, err := gpt.GenerateImage(prompt, size, 1)
+	b64s, err := gpt.GenerateImage(prompt, size, 1)
 	if err != nil {
 		return "", err
 	}
-	return urls[0], nil
+	return b64s[0], nil
 }
