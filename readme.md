@@ -40,13 +40,13 @@
 
 ## 项目部署
 
-
+######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
 
 
 <details>
     <summary>本地部署</summary>
 <br>
-######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
+
 ``` bash
 git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
 cd feishu-chatgpt/code
@@ -87,8 +87,8 @@ kill -9 PID
 <details>
     <summary>serverless云函数(阿里云等)部署</summary>
 <br>
-######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
-``` bash
+
+```bash
 git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
 cd feishu-chatgpt/code
 ```
