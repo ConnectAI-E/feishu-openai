@@ -41,18 +41,16 @@
 ## 项目部署
 
 
-######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
 
 
-``` bash
-git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
-cd feishu-chatgpt/code
-
-```
 <details>
     <summary>本地部署</summary>
 <br>
-
+######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
+``` bash
+git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
+cd feishu-chatgpt/code
+```
 如果你的服务器没有公网 IP，可以使用反向代理的方式
 
 飞书的服务器在国内对ngrok的访问速度很慢，所以推荐使用一些国内的反向代理服务商
@@ -89,6 +87,11 @@ kill -9 PID
 <details>
     <summary>serverless云函数(阿里云等)部署</summary>
 <br>
+######  有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
+``` bash
+git clone git@github.com:Leizhenpeng/feishu-chatgpt.git
+cd feishu-chatgpt/code
+```
 
 安装[severless](https://docs.serverless-devs.com/serverless-devs/quick_start)工具
 ```bash
