@@ -7,13 +7,36 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
+type SessionMode string
+
+var (
+	ModePicCreate SessionMode = "pic_create"
+	ModePicVary   SessionMode = "pic_vary"
+	ModeGPT       SessionMode = "gpt"
+)
+
 type SessionService struct {
 	cache *cache.Cache
 }
 
+func (u SessionService) GetMode(sessionId string) SessionMode {
+	// 获取用户的会话上下文
+	sessionContext, ok := u.cache.Get(sessionId)
+	if !ok {
+		return ModeGPT
+	}
+	return sessionContext.(SessionMode)
+}
+
+func (u SessionService) SetMode(sessionId string, mode SessionMode) {
+	maxCacheTime := time.Hour * 12
+
+	u.cache.Set(sessionId, mode, maxCacheTime)
+}
+
 var sessionServices *SessionService
 
-func (u SessionService) Get(sessionId string) (msg []Messages) {
+func (u SessionService) GetMsg(sessionId string) (msg []Messages) {
 	// 获取用户的会话上下文
 	sessionContext, ok := u.cache.Get(sessionId)
 	if !ok {
@@ -22,7 +45,7 @@ func (u SessionService) Get(sessionId string) (msg []Messages) {
 	return sessionContext.([]Messages)
 }
 
-func (u SessionService) Set(sessionId string, msg []Messages) {
+func (u SessionService) SetMsg(sessionId string, msg []Messages) {
 	maxLength := 4096
 	maxCacheTime := time.Hour * 12
 
@@ -39,8 +62,10 @@ func (u SessionService) Clear(sessionId string) bool {
 }
 
 type SessionServiceCacheInterface interface {
-	Get(sessionId string) []Messages
-	Set(sessionId string, msg []Messages)
+	GetMsg(sessionId string) []Messages
+	SetMsg(sessionId string, msg []Messages)
+	SetMode(sessionId string, mode SessionMode)
+	GetMode(sessionId string) SessionMode
 	Clear(sessionId string) bool
 }
 
