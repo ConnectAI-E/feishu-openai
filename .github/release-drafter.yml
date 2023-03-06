@@ -23,6 +23,7 @@ categories:
       - 'kind/doc'
   - title: 👷 Maintenance
     labels:
+      - refactor
       - chore
       - dependencies
       - 'kind/chore'
