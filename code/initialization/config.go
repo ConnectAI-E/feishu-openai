@@ -13,6 +13,7 @@ type Config struct {
 	FeishuAppVerificationToken string
 	FeishuBotName              string
 	OpenaiApiKey               string
+	OpenaiApiUrl               string
 }
 
 func LoadConfig(cfg string) *Config {
@@ -27,6 +28,7 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN"),
 		FeishuBotName:              getViperStringValue("BOT_NAME"),
 		OpenaiApiKey:               getViperStringValue("OPENAI_KEY"),
+		OpenaiApiUrl:               getViperStringValue("API_URL"),
 	}
 
 }

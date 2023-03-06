@@ -8,6 +8,7 @@ APP_VERIFICATION_TOKEN=${APP_VERIFICATION_TOKEN:-""}
 BOT_NAME=${BOT_NAME:-""}
 OPENAI_KEY=${OPENAI_KEY:-""}
 CONFIG_PATH=${CONFIG_PATH:-"config.yaml"}
+API_URL=${API_URL:-""}
 
 
 # modify content in config.yaml
@@ -46,6 +47,10 @@ if [ "$OPENAI_KEY" != "" ] ; then
     sed -i "9c   OPENAI_KEY: $OPENAI_KEY" $CONFIG_PATH
 else
     echo -e "\033[31m[Warning] You need to set OPENAI_KEY before running!\033[0m"
+fi
+
+if [ "$API_URL" != "" ] ; then
+    sed -i "11c   API_URL: $API_URL" $CONFIG_PATH
 fi
 
 /dist/feishu_chatgpt

@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	BASEURL     = "https://api.openai.com/v1/"
+	BASEURL     = "/v1/"
 	maxTokens   = 2000
 	temperature = 0.7
 	engine      = "gpt-3.5-turbo"
@@ -49,6 +49,7 @@ type ChatGPTRequestBody struct {
 }
 type ChatGPT struct {
 	ApiKey string
+	ApiUrl string
 }
 
 func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
@@ -67,7 +68,7 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		return resp, err
 	}
 	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest("POST", gpt.ApiUrl+BASEURL+"chat/completions", bytes.NewBuffer(requestData))
 	if err != nil {
 		return resp, err
 	}

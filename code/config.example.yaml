@@ -7,4 +7,5 @@ APP_VERIFICATION_TOKEN: xxx
 BOT_NAME: chatGpt
 # openAI
 OPENAI_KEY: sk-xxx
-
+# api URL 默认是https://api.openai.com
+API_URL: https://api.openai.com

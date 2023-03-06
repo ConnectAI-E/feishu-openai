@@ -126,6 +126,19 @@ feishu-chatgpt:latest
 ```
 ------------
 
+#### 如果需要指定OpenAi请求域名  --env API_URL=https://api.openai.com \
+``` bash
+docker run -d --name feishu-chatgpt -p 9000:9000 \
+--env APP_ID=xxx \
+--env APP_SECRET=xxx \
+--env APP_ENCRYPT_KEY=xxx \
+--env APP_VERIFICATION_TOKEN=xxx \
+--env BOT_NAME=chatGpt \
+--env OPENAI_KEY=sk-xxx \
+--env API_URL=https://api.openai.com \
+feishu-chatgpt:latest
+```
+------------
 小白简易化docker部署
 
 - docker地址: https://hub.docker.com/r/leizhenpeng/feishu-chatgpt
