@@ -148,6 +148,16 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 
 </details>
 
+<details>
+    <summary>二进制安装包部署</summary>
+<br>
+
+1. 进入[release页面](https://github.com/Leizhenpeng/feishu-chatgpt/releases/) 下载对应的安装包
+2. 解压安装包,修改config.example.yml中配置信息,另存为config.yml
+3. 运行程序入口文件 `feishu-chatgpt`
+
+</details>
+
 ## 详细配置步骤
 
 -  获取 [OpenAI](https://platform.openai.com/account/api-keys) 的 KEY
