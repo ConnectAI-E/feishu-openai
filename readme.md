@@ -172,7 +172,7 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
         - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
         - `/webhook/card`为统一的应用路由
         - 最终的消息卡片请求网址为 `http://xxxx.r6.cpolar.top/webhook/card`
-    5. 给订阅添加下列回调事件
+    5. 在事件订阅板块，搜索三个词`机器人进群`,`接收消息`,`消息已读`, 把他们后面所有的权限全部勾选，最终会添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
         - im:message.group_at_msg:readonly(接收群聊中@机器人消息事件)
