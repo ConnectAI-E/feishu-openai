@@ -73,7 +73,6 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	}
 	p.msgCache.TagProcessed(*msgId)
 	qParsed := strings.Trim(parseContent(*content), " ")
-	// todo: refactor this with responsibility chain model
 	if len(qParsed) == 0 {
 		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
 		fmt.Println("msgId", *msgId, "message.text is empty")
