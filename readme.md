@@ -186,19 +186,19 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 更多介绍，参考[飞书上的小计算器: Go机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
 
 
-### 更多交流
+## 更多交流
 
 企业如需定制部署，可联系WeChat: `laolei_forkway`，支持发票~
 
 遇到其他问题，可以加入飞书群沟通~
-<p align='center'>
-  <img src='./docs/talk.png' alt='' width='300' align='left'/>
-</p>
 
+<img src='./docs/talk.png' alt='' width='300'/>
 
-### 赞助项目
+## 赞助项目
 
-如果你觉得这个项目对你有帮助，可以请作者买本书，谢谢你啦 😚 
+如果你觉得这个项目对你有帮助，可以请作者买本书~
+
+😚 谢谢你啦 😚
 
 <details>
     <summary>赞赏二维码</summary>
