@@ -29,7 +29,7 @@ func TestEitherCutPrefix(t *testing.T) {
 				s:      "扮演 bar",
 				prefix: []string{"扮演 "},
 			},
-			want:  "match",
+			want:  "bar",
 			want1: true,
 		},
 	}
