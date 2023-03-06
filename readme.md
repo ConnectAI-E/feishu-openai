@@ -133,13 +133,11 @@ docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/local
 --env APP_VERIFICATION_TOKEN=xxx \
 --env BOT_NAME=chatGpt \
 --env OPENAI_KEY=sk-xxx \
-leizhenpeng/feishu-chatgpt:amd64-latest
-    
-//如果arm替换为 
-//leizhenpeng/feishu-chatgpt:arm64-latest
+dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 ```
-事件回调地址是: http://IP:9000/webhook/event
-卡片回调地址是: http://IP:9000/webhook/card
+
+事件回调地址: http://IP:9000/webhook/event
+卡片回调地址: http://IP:9000/webhook/card
 
 把它填入飞书后台
 <br>
