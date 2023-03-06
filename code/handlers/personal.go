@@ -13,6 +13,124 @@ import (
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
+type ActionInfo struct {
+	p         *PersonalMessageHandler
+	msgId     *string
+	chatId    *string
+	qParsed   string
+	ctx       *context.Context
+	sessionId *string
+}
+
+type Action interface {
+	Execute(data *ActionInfo) bool
+}
+
+//消息唯一性
+type ProcessedAction struct {
+}
+
+func (*ProcessedAction) Execute(data *ActionInfo) bool {
+	if data.p.msgCache.IfProcessed(*data.msgId) {
+		data.p.msgCache.TagProcessed(*data.msgId)
+		return false
+	}
+	return true
+}
+
+//空消息
+type EmptyAction struct {
+}
+
+func (*EmptyAction) Execute(data *ActionInfo) bool {
+	if len(data.qParsed) != 0 {
+		sendMsg(*data.ctx, "🤖️：你想知道什么呢~", data.chatId)
+		fmt.Println("msgId", *data.msgId, "message.text is empty")
+		return false
+	}
+	return true
+}
+
+//清除消息
+type ClearAction struct {
+}
+
+func (*ClearAction) Execute(data *ActionInfo) bool {
+	if _, foundClear := utils.EitherTrimEqual(data.qParsed, "/clear", "清除"); foundClear {
+		sendClearCacheCheckCard(*data.ctx, data.sessionId, data.msgId)
+		return false
+	}
+	return true
+}
+
+//角色扮演
+type RolePlayAction struct {
+}
+
+func (*RolePlayAction) Execute(data *ActionInfo) bool {
+	if system, foundSystem := utils.EitherCutPrefix(data.qParsed, "/system ", "角色扮演 "); foundSystem {
+		data.p.sessionCache.Clear(*data.sessionId)
+		systemMsg := append([]services.Messages{}, services.Messages{
+			Role: "system", Content: system,
+		})
+		data.p.sessionCache.Set(*data.sessionId, systemMsg)
+		sendSystemInstructionCard(*data.ctx, data.sessionId, data.msgId, system)
+		return false
+	}
+	return true
+}
+
+//帮助
+type HelpAction struct {
+}
+
+func (*HelpAction) Execute(data *ActionInfo) bool {
+	if _, foundHelp := utils.EitherTrimEqual(data.qParsed, "/help", "帮助"); foundHelp {
+		sendHelpCard(*data.ctx, data.sessionId, data.msgId)
+		return false
+	}
+	return true
+}
+
+type MessageAction struct {
+}
+
+func (*MessageAction) Execute(data *ActionInfo) bool {
+	msg := data.p.sessionCache.Get(*data.sessionId)
+	msg = append(msg, services.Messages{
+		Role: "user", Content: data.qParsed,
+	})
+	completions, err := data.p.gpt.Completions(msg)
+	if err != nil {
+		replyMsg(*data.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), data.msgId)
+		return false
+	}
+	msg = append(msg, completions)
+	p.sessionCache.Set(*data.sessionId, msg)
+	//if new topic
+	if len(msg) == 2 {
+		fmt.Println("new topic", msg[1].Content)
+		sendNewTopicCard(*data.ctx, data.sessionId, data.msgId, completions.Content)
+		return false
+	}
+	err = replyMsg(*data.ctx, completions.Content, data.msgId)
+	if err != nil {
+		replyMsg(*data.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), data.msgId)
+		return false
+	}
+	return true
+}
+
+//责任链
+func chain(data *ActionInfo, actions ...Action) bool {
+	for _, v := range actions {
+		if !v.Execute(data) {
+			return false
+		}
+	}
+	return true
+}
+
 type PersonalMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
@@ -67,60 +185,23 @@ func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2Mess
 	if sessionId == nil || *sessionId == "" {
 		sessionId = msgId
 	}
-	if p.msgCache.IfProcessed(*msgId) {
-		fmt.Println("msgId", *msgId, "processed")
-		return nil
+	//责任链重构示例
+	data := &ActionInfo{
+		p:         &p,
+		msgId:     msgId,
+		qParsed:   strings.Trim(parseContent(*content), " "),
+		ctx:       &ctx,
+		chatId:    chatId,
+		sessionId: sessionId,
 	}
-	p.msgCache.TagProcessed(*msgId)
-	qParsed := strings.Trim(parseContent(*content), " ")
-	if len(qParsed) == 0 {
-		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
-		fmt.Println("msgId", *msgId, "message.text is empty")
-		return nil
+	actions := []Action{
+		&ProcessedAction{}, //唯一处理
+		&EmptyAction{},     //空消息处理
+		&ClearAction{},     //清除消息处理
+		&RolePlayAction{},  //角色扮演处理
+		&MessageAction{},   //消息处理
 	}
-
-	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {
-		sendClearCacheCheckCard(ctx, sessionId, msgId)
-		return nil
-	}
-
-	if system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ", "角色扮演 "); foundSystem {
-		p.sessionCache.Clear(*sessionId)
-		systemMsg := append([]services.Messages{}, services.Messages{
-			Role: "system", Content: system,
-		})
-		p.sessionCache.Set(*sessionId, systemMsg)
-		sendSystemInstructionCard(ctx, sessionId, msgId, system)
-		return nil
-	}
-
-	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
-		sendHelpCard(ctx, sessionId, msgId)
-		return nil
-	}
-
-	msg := p.sessionCache.Get(*sessionId)
-	msg = append(msg, services.Messages{
-		Role: "user", Content: qParsed,
-	})
-	completions, err := p.gpt.Completions(msg)
-	if err != nil {
-		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
-		return nil
-	}
-	msg = append(msg, completions)
-	p.sessionCache.Set(*sessionId, msg)
-	//if new topic
-	if len(msg) == 2 {
-		fmt.Println("new topic", msg[1].Content)
-		sendNewTopicCard(ctx, sessionId, msgId, completions.Content)
-		return nil
-	}
-	err = replyMsg(ctx, completions.Content, msgId)
-	if err != nil {
-		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
-		return nil
-	}
+	chain(data, actions...)
 	return nil
 
 }
