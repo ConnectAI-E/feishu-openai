@@ -194,3 +194,13 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 <p align='center'>
   <img src='./docs/talk.png' alt='' width='300' align='left'/>
 </p>
+
+
+### 赞助项目
+
+如果你觉得这个项目对你有帮助，可以请作者买本书，谢谢你啦 😚 
+
+<details>
+    <summary>赞赏二维码</summary>
+    <img width="400" src="https://user-images.githubusercontent.com/50035229/222702169-cec777f9-cb0c-4f6a-90e5-418959e668e5.png">
+</details>
