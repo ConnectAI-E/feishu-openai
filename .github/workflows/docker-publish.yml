@@ -2,9 +2,9 @@ name: build docker image
 
 # release 事件触发 + Master 分支触发 + 手动触发
 on:
-  push:
-    branches:
-      - master
+#  push:
+#    branches:
+#      - master
   release:
     types: [created,published]
 

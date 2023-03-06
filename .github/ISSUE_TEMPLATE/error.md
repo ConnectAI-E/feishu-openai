@@ -1,7 +1,7 @@
 ---
 name: 错误报告
 about: 提出关于此项目的错误报告
-title: "[🐞 错误报告] "
+title: "🐞 错误报告"
 labels: ["bug"]
 ---
 
