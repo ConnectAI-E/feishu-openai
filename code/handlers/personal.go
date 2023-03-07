@@ -58,7 +58,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	return nil, nil, false
 }
 
-func (p PersonalMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+func (p PersonalMessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
 	rootId := event.Event.Message.RootId
