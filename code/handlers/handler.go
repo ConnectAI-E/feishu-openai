@@ -3,6 +3,8 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"strings"
 
@@ -21,19 +23,20 @@ func chain(data *ActionInfo, actions ...Action) bool {
 	return true
 }
 
-type PersonalMessageHandler struct {
+type MessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
 	gpt          services.ChatGPT
+	config       initialization.Config
 }
 
-func (p PersonalMessageHandler) cardHandler(_ context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
 	json.Unmarshal(actionValueJson, &cardMsg)
 	if cardMsg.Kind == ClearCardKind {
-		newCard, err, done := CommonProcessClearCache(cardMsg, p.sessionCache)
+		newCard, err, done := CommonProcessClearCache(cardMsg, m.sessionCache)
 		if done {
 			return newCard, err
 		}
@@ -63,26 +66,46 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	return nil, nil, false
 }
 
-func (p PersonalMessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+	handlerType := judgeChatType(event)
+	if handlerType == "otherChat" {
+		fmt.Println("unknown chat type")
+		return nil
+	}
+	msgType := judgeMsgType(event)
+	if msgType != "text" {
+		fmt.Println("unknown msg type")
+		return nil
+	}
+
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
 	rootId := event.Event.Message.RootId
 	chatId := event.Event.Message.ChatId
+	mention := event.Event.Message.Mentions
+
 	sessionId := rootId
 	if sessionId == nil || *sessionId == "" {
 		sessionId = msgId
 	}
+	msgInfo := MsgInfo{
+		handlerType: handlerType,
+		msgType:     msgType,
+		msgId:       msgId,
+		chatId:      chatId,
+		qParsed:     strings.Trim(parseContent(*content), " "),
+		sessionId:   sessionId,
+		mention:     mention,
+	}
 	//责任链重构示例
 	data := &ActionInfo{
-		p:         &p,
-		msgId:     msgId,
-		qParsed:   strings.Trim(parseContent(*content), " "),
-		ctx:       &ctx,
-		chatId:    chatId,
-		sessionId: sessionId,
+		ctx:     &ctx,
+		handler: &m,
+		info:    &msgInfo,
 	}
 	actions := []Action{
-		&ProcessedAction{}, //唯一处理
+		&ProcessedUnique{}, //避免重复处理
+		&ProcessMention{},  //判断机器人是否应该被调用
 		&EmptyAction{},     //空消息处理
 		&ClearAction{},     //清除消息处理
 		&HelpAction{},      //帮助处理
@@ -93,15 +116,24 @@ func (p PersonalMessageHandler) msgReceivedHandler(ctx context.Context, event *l
 	}
 	chain(data, actions...)
 	return nil
-
 }
 
-var _ MessageHandlerInterface = (*PersonalMessageHandler)(nil)
+var _ MessageHandlerInterface = (*MessageHandler)(nil)
 
-func NewPersonalMessageHandler(gpt services.ChatGPT) MessageHandlerInterface {
-	return &PersonalMessageHandler{
+func NewMessageHandler(gpt services.ChatGPT,
+	config initialization.Config) MessageHandlerInterface {
+	return &MessageHandler{
 		sessionCache: services.GetSessionCache(),
 		msgCache:     services.GetMsgCache(),
 		gpt:          gpt,
+		config:       config,
 	}
+}
+
+func (m MessageHandler) judgeIfMentionMe(mention []*larkim.
+	MentionEvent) bool {
+	if len(mention) != 1 {
+		return false
+	}
+	return *mention[0].Name == m.config.FeishuBotName
 }

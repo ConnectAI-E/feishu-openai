@@ -3,41 +3,67 @@ package handlers
 import (
 	"context"
 	"fmt"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/services"
 	"start-feishubot/utils"
 )
 
+type MsgInfo struct {
+	handlerType HandlerType
+	msgType     string
+	msgId       *string
+	chatId      *string
+	qParsed     string
+	sessionId   *string
+	mention     []*larkim.MentionEvent
+}
 type ActionInfo struct {
-	p         *PersonalMessageHandler
-	msgId     *string
-	chatId    *string
-	qParsed   string
-	ctx       *context.Context
-	sessionId *string
+	handler *MessageHandler
+	ctx     *context.Context
+	info    *MsgInfo
 }
 
 type Action interface {
-	Execute(data *ActionInfo) bool
+	Execute(a *ActionInfo) bool
 }
 
-type ProcessedAction struct { //消息唯一性
+type ProcessedUnique struct { //消息唯一性
 }
 
-func (*ProcessedAction) Execute(data *ActionInfo) bool {
-	if data.p.msgCache.IfProcessed(*data.msgId) {
+func (*ProcessedUnique) Execute(a *ActionInfo) bool {
+	if a.handler.msgCache.IfProcessed(*a.info.msgId) {
 		return false
 	}
-	data.p.msgCache.TagProcessed(*data.msgId)
+	a.handler.msgCache.TagProcessed(*a.info.msgId)
 	return true
+}
+
+type ProcessMention struct { //是否机器人应该处理
+}
+
+func (*ProcessMention) Execute(a *ActionInfo) bool {
+	// 私聊直接过
+	if a.info.handlerType == UserHandler {
+		return true
+	}
+	// 群聊判断是否提到机器人
+	if a.info.handlerType == GroupHandler {
+		if a.handler.judgeIfMentionMe(a.info.mention) {
+			return true
+		}
+		return false
+	}
+	return false
 }
 
 type EmptyAction struct { /*空消息*/
 }
 
-func (*EmptyAction) Execute(data *ActionInfo) bool {
-	if len(data.qParsed) == 0 {
-		sendMsg(*data.ctx, "🤖️：你想知道什么呢~", data.chatId)
-		fmt.Println("msgId", *data.msgId, "message.text is empty")
+func (*EmptyAction) Execute(a *ActionInfo) bool {
+	if len(a.info.qParsed) == 0 {
+		sendMsg(*a.ctx, "🤖️：你想知道什么呢~", a.info.chatId)
+		fmt.Println("msgId", *a.info.msgId,
+			"message.text is empty")
 		return false
 	}
 	return true
@@ -46,9 +72,11 @@ func (*EmptyAction) Execute(data *ActionInfo) bool {
 type ClearAction struct { /*清除消息*/
 }
 
-func (*ClearAction) Execute(data *ActionInfo) bool {
-	if _, foundClear := utils.EitherTrimEqual(data.qParsed, "/clear", "清除"); foundClear {
-		sendClearCacheCheckCard(*data.ctx, data.sessionId, data.msgId)
+func (*ClearAction) Execute(a *ActionInfo) bool {
+	if _, foundClear := utils.EitherTrimEqual(a.info.qParsed,
+		"/clear", "清除"); foundClear {
+		sendClearCacheCheckCard(*a.ctx, a.info.sessionId,
+			a.info.msgId)
 		return false
 	}
 	return true
@@ -57,14 +85,16 @@ func (*ClearAction) Execute(data *ActionInfo) bool {
 type RolePlayAction struct { /*角色扮演*/
 }
 
-func (*RolePlayAction) Execute(data *ActionInfo) bool {
-	if system, foundSystem := utils.EitherCutPrefix(data.qParsed, "/system ", "角色扮演 "); foundSystem {
-		data.p.sessionCache.Clear(*data.sessionId)
+func (*RolePlayAction) Execute(a *ActionInfo) bool {
+	if system, foundSystem := utils.EitherCutPrefix(a.info.qParsed,
+		"/system ", "角色扮演 "); foundSystem {
+		a.handler.sessionCache.Clear(*a.info.sessionId)
 		systemMsg := append([]services.Messages{}, services.Messages{
 			Role: "system", Content: system,
 		})
-		data.p.sessionCache.SetMsg(*data.sessionId, systemMsg)
-		sendSystemInstructionCard(*data.ctx, data.sessionId, data.msgId, system)
+		a.handler.sessionCache.SetMsg(*a.info.sessionId, systemMsg)
+		sendSystemInstructionCard(*a.ctx, a.info.sessionId,
+			a.info.msgId, system)
 		return false
 	}
 	return true
@@ -73,9 +103,10 @@ func (*RolePlayAction) Execute(data *ActionInfo) bool {
 type HelpAction struct { /*帮助*/
 }
 
-func (*HelpAction) Execute(data *ActionInfo) bool {
-	if _, foundHelp := utils.EitherTrimEqual(data.qParsed, "/help", "帮助"); foundHelp {
-		sendHelpCard(*data.ctx, data.sessionId, data.msgId)
+func (*HelpAction) Execute(a *ActionInfo) bool {
+	if _, foundHelp := utils.EitherTrimEqual(a.info.qParsed, "/help",
+		"帮助"); foundHelp {
+		sendHelpCard(*a.ctx, a.info.sessionId, a.info.msgId)
 		return false
 	}
 	return true
@@ -84,29 +115,29 @@ func (*HelpAction) Execute(data *ActionInfo) bool {
 type PicAction struct { /*图片*/
 }
 
-func (*PicAction) Execute(data *ActionInfo) bool {
+func (*PicAction) Execute(a *ActionInfo) bool {
 	// 开启图片创作模式
-	if _, foundPic := utils.EitherTrimEqual(data.qParsed,
+	if _, foundPic := utils.EitherTrimEqual(a.info.qParsed,
 		"/picture", "图片创作"); foundPic {
-		data.p.sessionCache.Clear(*data.sessionId)
-		data.p.sessionCache.SetMode(*data.sessionId,
+		a.handler.sessionCache.Clear(*a.info.sessionId)
+		a.handler.sessionCache.SetMode(*a.info.sessionId,
 			services.ModePicCreate)
-		sendPicCreateInstructionCard(*data.ctx, data.sessionId,
-			data.msgId)
+		sendPicCreateInstructionCard(*a.ctx, a.info.sessionId,
+			a.info.msgId)
 		return false
 	}
 
 	// 生成图片
-	mode := data.p.sessionCache.GetMode(*data.sessionId)
+	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
 	if mode == services.ModePicCreate {
-		bs64, err := data.p.gpt.GenerateOneImage(data.qParsed,
+		bs64, err := a.handler.gpt.GenerateOneImage(a.info.qParsed,
 			"256x256")
 		if err != nil {
-			replyMsg(*data.ctx, fmt.Sprintf(
-				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), data.msgId)
+			replyMsg(*a.ctx, fmt.Sprintf(
+				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
-		replayImageByBase64(*data.ctx, bs64, data.msgId)
+		replayImageByBase64(*a.ctx, bs64, a.info.msgId)
 		return false
 	}
 
@@ -116,27 +147,30 @@ func (*PicAction) Execute(data *ActionInfo) bool {
 type MessageAction struct { /*消息*/
 }
 
-func (*MessageAction) Execute(data *ActionInfo) bool {
-	msg := data.p.sessionCache.GetMsg(*data.sessionId)
+func (*MessageAction) Execute(a *ActionInfo) bool {
+	msg := a.handler.sessionCache.GetMsg(*a.info.sessionId)
 	msg = append(msg, services.Messages{
-		Role: "user", Content: data.qParsed,
+		Role: "user", Content: a.info.qParsed,
 	})
-	completions, err := data.p.gpt.Completions(msg)
+	completions, err := a.handler.gpt.Completions(msg)
 	if err != nil {
-		replyMsg(*data.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), data.msgId)
+		replyMsg(*a.ctx, fmt.Sprintf(
+			"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 		return false
 	}
 	msg = append(msg, completions)
-	data.p.sessionCache.SetMsg(*data.sessionId, msg)
+	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 	//if new topic
 	if len(msg) == 2 {
 		fmt.Println("new topic", msg[1].Content)
-		sendNewTopicCard(*data.ctx, data.sessionId, data.msgId, completions.Content)
+		sendNewTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
+			completions.Content)
 		return false
 	}
-	err = replyMsg(*data.ctx, completions.Content, data.msgId)
+	err = replyMsg(*a.ctx, completions.Content, a.info.msgId)
 	if err != nil {
-		replyMsg(*data.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), data.msgId)
+		replyMsg(*a.ctx, fmt.Sprintf(
+			"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 		return false
 	}
 	return true

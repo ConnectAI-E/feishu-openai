@@ -23,27 +23,14 @@ const (
 )
 
 // handlers 所有消息类型类型的处理器
-var handlers map[HandlerType]MessageHandlerInterface
+var handlers MessageHandlerInterface
 
 func InitHandlers(gpt services.ChatGPT, config initialization.Config) {
-	handlers = make(map[HandlerType]MessageHandlerInterface)
-	handlers[GroupHandler] = NewGroupMessageHandler(gpt, config)
-	handlers[UserHandler] = NewPersonalMessageHandler(gpt)
-
+	handlers = NewMessageHandler(gpt, config)
 }
 
 func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
-	handlerType := judgeChatType(event)
-	if handlerType == "otherChat" {
-		fmt.Println("unknown chat type")
-		return nil
-	}
-	msgType := judgeMsgType(event)
-	if msgType != "text" {
-		fmt.Println("unknown msg type")
-		return nil
-	}
-	return handlers[handlerType].msgReceivedHandler(ctx, event)
+	return handlers.msgReceivedHandler(ctx, event)
 }
 
 func ReadHandler(ctx context.Context, event *larkim.P2MessageReadV1) error {
@@ -55,8 +42,8 @@ func ReadHandler(ctx context.Context, event *larkim.P2MessageReadV1) error {
 func CardHandler() func(ctx context.Context,
 	cardAction *larkcard.CardAction) (interface{}, error) {
 	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
-		handlerType := judgeCardType(cardAction)
-		return handlers[handlerType].cardHandler(ctx, cardAction)
+		//handlerType := judgeCardType(cardAction)
+		return handlers.cardHandler(ctx, cardAction)
 	}
 }
 
