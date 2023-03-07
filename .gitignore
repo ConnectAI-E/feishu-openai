@@ -34,3 +34,4 @@ start-feishubot
 .env
 
 docker.md
+.DS_Store
