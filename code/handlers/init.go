@@ -11,7 +11,7 @@ import (
 )
 
 type MessageHandlerInterface interface {
-	handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error
+	msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error
 	cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error)
 }
 
@@ -25,7 +25,7 @@ const (
 // handlers 所有消息类型类型的处理器
 var handlers map[HandlerType]MessageHandlerInterface
 
-func InitHanders(gpt services.ChatGPT, config initialization.Config) {
+func InitHandlers(gpt services.ChatGPT, config initialization.Config) {
 	handlers = make(map[HandlerType]MessageHandlerInterface)
 	handlers[GroupHandler] = NewGroupMessageHandler(gpt, config)
 	handlers[UserHandler] = NewPersonalMessageHandler(gpt)
@@ -43,7 +43,13 @@ func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 		fmt.Println("unknown msg type")
 		return nil
 	}
-	return handlers[handlerType].handle(ctx, event)
+	return handlers[handlerType].msgReceivedHandler(ctx, event)
+}
+
+func ReadHandler(ctx context.Context, event *larkim.P2MessageReadV1) error {
+	_ = event.Event.Reader.ReaderId.OpenId
+	//fmt.Printf("msg is read by : %v \n", *readerId)
+	return nil
 }
 
 func CardHandler() func(ctx context.Context,
