@@ -103,6 +103,18 @@ mv config.example.yaml config.yaml
 # 安装severless cli
 npm install @serverless-devs/s -g
 ```
+
+修改`s.yaml`中的部署地区和部署秘钥
+```
+edition: 1.0.0
+name: feishuBot-chatGpt
+access: "aliyun" #  修改自定义的秘钥别称
+
+vars: # 全局变量
+  region: "cn-hongkong" #  修改云函数想要部署地区
+
+```
+
 一键部署
 ``` bash
 cd ..
