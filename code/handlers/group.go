@@ -36,7 +36,7 @@ func (p GroupMessageHandler) cardHandler(_ context.Context,
 	return nil, nil
 }
 
-func (p GroupMessageHandler) handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
+func (p GroupMessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	ifMention := p.judgeIfMentionMe(event)
 	if !ifMention {
 		return nil

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -26,11 +28,14 @@ func main() {
 	initialization.LoadLarkClient(*config)
 
 	gpt := &services.ChatGPT{ApiKey: config.OpenaiApiKey}
-	handlers.InitHanders(*gpt, *config)
+	handlers.InitHandlers(*gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
-		OnP2MessageReceiveV1(handlers.Handler)
+		OnP2MessageReceiveV1(handlers.Handler).
+		OnP2MessageReadV1(func(ctx context.Context, event *larkim.P2MessageReadV1) error {
+			return handlers.ReadHandler(ctx, event)
+		})
 
 	cardHandler := larkcard.NewCardActionHandler(
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey,
