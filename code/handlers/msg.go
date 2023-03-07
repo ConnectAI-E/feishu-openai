@@ -383,7 +383,7 @@ func sendSystemInstructionCard(ctx context.Context,
 }
 
 func sendPicCreateInstructionCard(ctx context.Context,
-	sessionId *string, msgId *string, content string) {
+	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
 		withHeader("🖼️  已进入图片创作模式", larkcard.TemplateBlue),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))

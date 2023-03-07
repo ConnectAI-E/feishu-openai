@@ -3,9 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"start-feishubot/services"
-	"start-feishubot/utils"
 	"strings"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
@@ -13,15 +11,23 @@ import (
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
+//责任链
+func chain(data *ActionInfo, actions ...Action) bool {
+	for _, v := range actions {
+		if !v.Execute(data) {
+			return false
+		}
+	}
+	return true
+}
+
 type PersonalMessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
 	gpt          services.ChatGPT
 }
 
-func (p PersonalMessageHandler) cardHandler(
-	_ context.Context,
-	cardAction *larkcard.CardAction) (interface{}, error) {
+func (p PersonalMessageHandler) cardHandler(_ context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
@@ -35,9 +41,8 @@ func (p PersonalMessageHandler) cardHandler(
 	return nil, nil
 }
 
-func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (interface{},
-	error,
-	bool) {
+func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (
+	interface{}, error, bool) {
 	if cardMsg.Value == "1" {
 		newCard, _ := newSendCard(
 			withHeader("️🆑 机器人提醒", larkcard.TemplateRed),
@@ -67,80 +72,26 @@ func (p PersonalMessageHandler) msgReceivedHandler(ctx context.Context, event *l
 	if sessionId == nil || *sessionId == "" {
 		sessionId = msgId
 	}
-	if p.msgCache.IfProcessed(*msgId) {
-		fmt.Println("msgId", *msgId, "processed")
-		return nil
+	//责任链重构示例
+	data := &ActionInfo{
+		p:         &p,
+		msgId:     msgId,
+		qParsed:   strings.Trim(parseContent(*content), " "),
+		ctx:       &ctx,
+		chatId:    chatId,
+		sessionId: sessionId,
 	}
-	p.msgCache.TagProcessed(*msgId)
-	qParsed := strings.Trim(parseContent(*content), " ")
-	if len(qParsed) == 0 {
-		sendMsg(ctx, "🤖️：你想知道什么呢~", chatId)
-		fmt.Println("msgId", *msgId, "message.text is empty")
-		return nil
-	}
+	actions := []Action{
+		&ProcessedAction{}, //唯一处理
+		&EmptyAction{},     //空消息处理
+		&ClearAction{},     //清除消息处理
+		&HelpAction{},      //帮助处理
+		&RolePlayAction{},  //角色扮演处理
+		&PicAction{},       //图片处理
+		&MessageAction{},   //消息处理
 
-	if _, foundClear := utils.EitherTrimEqual(qParsed, "/clear", "清除"); foundClear {
-		sendClearCacheCheckCard(ctx, sessionId, msgId)
-		return nil
 	}
-
-	if system, foundSystem := utils.EitherCutPrefix(qParsed, "/system ", "角色扮演 "); foundSystem {
-		p.sessionCache.Clear(*sessionId)
-		systemMsg := append([]services.Messages{}, services.Messages{
-			Role: "system", Content: system,
-		})
-		p.sessionCache.SetMsg(*sessionId, systemMsg)
-		sendSystemInstructionCard(ctx, sessionId, msgId, system)
-		return nil
-	}
-
-	if _, foundHelp := utils.EitherTrimEqual(qParsed, "/help", "帮助"); foundHelp {
-		p.sessionCache.Clear(*sessionId)
-		sendHelpCard(ctx, sessionId, msgId)
-		return nil
-	}
-
-	if pictureNew, foundPicture := utils.EitherTrimEqual(qParsed,
-		"/picture", "图片创作"); foundPicture {
-		p.sessionCache.Clear(*sessionId)
-		p.sessionCache.SetMode(*sessionId, services.ModePicCreate)
-		sendPicCreateInstructionCard(ctx, sessionId, msgId, pictureNew)
-		return nil
-	}
-
-	mode := p.sessionCache.GetMode(*sessionId)
-	if mode == services.ModePicCreate {
-		bs64, err := p.gpt.GenerateOneImage(qParsed, "256x256")
-		if err != nil {
-			replyMsg(ctx, fmt.Sprintf("🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), msgId)
-			return nil
-		}
-		replayImageByBase64(ctx, bs64, msgId)
-		return nil
-	}
-
-	msg := p.sessionCache.GetMsg(*sessionId)
-	msg = append(msg, services.Messages{
-		Role: "user", Content: qParsed,
-	})
-	completions, err := p.gpt.Completions(msg)
-	if err != nil {
-		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
-		return nil
-	}
-	msg = append(msg, completions)
-	p.sessionCache.SetMsg(*sessionId, msg)
-	//if new topic
-	if len(msg) == 2 {
-		fmt.Println("new topic", msg[1].Content)
-		sendNewTopicCard(ctx, sessionId, msgId, completions.Content)
-		return nil
-	}
-	err = replyMsg(ctx, completions.Content, msgId)
-	if err != nil {
-		replyMsg(ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), msgId)
-		return nil
-	}
+	chain(data, actions...)
 	return nil
 
 }

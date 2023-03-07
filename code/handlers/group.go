@@ -82,11 +82,11 @@ func (p GroupMessageHandler) msgReceivedHandler(ctx context.Context, event *lark
 		return nil
 	}
 
-	if pictureNew, foundPicture := utils.EitherTrimEqual(qParsed,
+	if _, foundPicture := utils.EitherTrimEqual(qParsed,
 		"/picture", "图片创作"); foundPicture {
 		p.sessionCache.Clear(*sessionId)
 		p.sessionCache.SetMode(*sessionId, services.ModePicCreate)
-		sendPicCreateInstructionCard(ctx, sessionId, msgId, pictureNew)
+		sendPicCreateInstructionCard(ctx, sessionId, msgId)
 		return nil
 	}
 	mode := p.sessionCache.GetMode(*sessionId)
