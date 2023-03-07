@@ -253,7 +253,10 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
      - `http://xxxx.r6.cpolar.top`为 cpolar 暴露的公网地址
      - `/webhook/card`为统一的应用路由
      - 最终的消息卡片请求网址为 `http://xxxx.r6.cpolar.top/webhook/card`
-  5. 在事件订阅板块，搜索三个词`机器人进群`,`接收消息`,`消息已读`, 把他们后面所有的权限全部勾选，最终会添加下列回调事件
+  5. 在事件订阅板块，搜索三个词`机器人进群`、 `接收消息`、 `消息已读`, 把他们后面所有的权限全部勾选。
+  进入权限管理界面，搜索`图片`, 勾选`获取与上传图片或文件资源`。
+  最终会添加下列回调事件
+     - im:resource(获取与上传图片或文件资源)
      - im:message
      - im:message.group_at_msg(获取群组中所有消息)
      - im:message.group_at_msg:readonly(接收群聊中@机器人消息事件)
@@ -262,6 +265,7 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
      - im:message:send_as_bot(获取用户在群组中@机器人的消息)
      - im:chat:readonly(获取群组信息)
      - im:chat(获取与更新群组信息)
+ 
 
 5. 发布版本，等待企业管理员审核通过
 
