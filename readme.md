@@ -9,10 +9,7 @@
    飞书 ×（GPT-3.5 + DALL·E + Whisper）
 <br>
 <br>
-=
-<br>
-<br>
-    Feishu ChatGpt
+    🚀 Feishu OpenAI 🚀
 </p>
 
 ## 👻 机器人功能
