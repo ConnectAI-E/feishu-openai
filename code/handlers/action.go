@@ -27,10 +27,10 @@ type Action interface {
 	Execute(a *ActionInfo) bool
 }
 
-type ProcessedUnique struct { //消息唯一性
+type ProcessedUniqueAction struct { //消息唯一性
 }
 
-func (*ProcessedUnique) Execute(a *ActionInfo) bool {
+func (*ProcessedUniqueAction) Execute(a *ActionInfo) bool {
 	if a.handler.msgCache.IfProcessed(*a.info.msgId) {
 		return false
 	}
@@ -38,10 +38,10 @@ func (*ProcessedUnique) Execute(a *ActionInfo) bool {
 	return true
 }
 
-type ProcessMention struct { //是否机器人应该处理
+type ProcessMentionAction struct { //是否机器人应该处理
 }
 
-func (*ProcessMention) Execute(a *ActionInfo) bool {
+func (*ProcessMentionAction) Execute(a *ActionInfo) bool {
 	// 私聊直接过
 	if a.info.handlerType == UserHandler {
 		return true

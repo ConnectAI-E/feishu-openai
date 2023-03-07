@@ -97,21 +97,20 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		sessionId:   sessionId,
 		mention:     mention,
 	}
-	//责任链重构示例
 	data := &ActionInfo{
 		ctx:     &ctx,
 		handler: &m,
 		info:    &msgInfo,
 	}
 	actions := []Action{
-		&ProcessedUnique{}, //避免重复处理
-		&ProcessMention{},  //判断机器人是否应该被调用
-		&EmptyAction{},     //空消息处理
-		&ClearAction{},     //清除消息处理
-		&HelpAction{},      //帮助处理
-		&RolePlayAction{},  //角色扮演处理
-		&PicAction{},       //图片处理
-		&MessageAction{},   //消息处理
+		&ProcessedUniqueAction{}, //避免重复处理
+		&ProcessMentionAction{},  //判断机器人是否应该被调用
+		&EmptyAction{},           //空消息处理
+		&ClearAction{},           //清除消息处理
+		&HelpAction{},            //帮助处理
+		&RolePlayAction{},        //角色扮演处理
+		&PicAction{},             //图片处理
+		&MessageAction{},         //消息处理
 
 	}
 	chain(data, actions...)
