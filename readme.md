@@ -6,7 +6,10 @@
 <br>
 
 <p align='center'>
-    在飞书上与ChatGPT随时对话
+   飞书 ×（GPT-3.5 + DALL·E + Whisper）
+<br>
+<br>
+=
 <br>
 <br>
     Feishu ChatGpt
