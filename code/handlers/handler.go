@@ -40,8 +40,25 @@ func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.Card
 		if done {
 			return newCard, err
 		}
+		return nil, nil
+	}
+	if cardMsg.Kind == PicResolutionKind {
+		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
+		return nil, nil
 	}
 	return nil, nil
+}
+
+func CommonProcessPicResolution(msg CardMsg,
+	cardAction *larkcard.CardAction,
+	cache services.SessionServiceCacheInterface) {
+	option := cardAction.Action.Option
+	//fmt.Println(larkcore.Prettify(msg))
+	cache.SetPicResolution(msg.SessionId, services.Resolution(option))
+	//fmt.Println(larkcore.Prettify(cardAction))
+	//send text
+	replyMsg(context.Background(), "已更新图片分辨率为"+option,
+		&msg.MsgId)
 }
 
 func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (

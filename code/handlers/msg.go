@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"start-feishubot/initialization"
+	"start-feishubot/services"
 
 	"github.com/google/uuid"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
@@ -16,7 +17,8 @@ type CardKind string
 type CardChatType string
 
 var (
-	ClearCardKind = CardKind("clear")
+	ClearCardKind     = CardKind("clear")
+	PicResolutionKind = CardKind("pic_resolution")
 )
 
 var (
@@ -29,6 +31,12 @@ type CardMsg struct {
 	ChatType  CardChatType
 	Value     interface{}
 	SessionId string
+	MsgId     string
+}
+
+type MenuOption struct {
+	value string
+	label string
 }
 
 func replyCard(ctx context.Context,
@@ -185,6 +193,34 @@ func withBtn(content string, value map[string]interface{},
 	return btn
 }
 
+func withMenu(
+	placeHolder string,
+	value map[string]interface{},
+	options ...MenuOption,
+) *larkcard.
+	MessageCardEmbedSelectMenuStatic {
+	var aOptionPool []*larkcard.MessageCardEmbedSelectOption
+	for _, option := range options {
+		aOption := larkcard.NewMessageCardEmbedSelectOption().
+			Value(option.value).
+			Text(larkcard.NewMessageCardPlainText().
+				Content(option.label).
+				Build())
+		aOptionPool = append(aOptionPool, aOption)
+
+	}
+	btn := larkcard.NewMessageCardEmbedSelectMenuStatic().
+		MessageCardEmbedSelectMenuStatic(larkcard.NewMessageCardEmbedSelectMenuBase().
+			Options(aOptionPool).
+			Placeholder(larkcard.NewMessageCardPlainText().
+				Content(placeHolder).
+				Build()).
+			Value(value).
+			Build()).
+		Build()
+	return btn
+}
+
 // 清除卡片按钮
 func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
 	confirmBtn := withBtn("确认清除", map[string]interface{}{
@@ -208,6 +244,74 @@ func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
 		Build()
 
 	return actions
+}
+
+//新建对话按钮
+func withNewTopicBtn(sessionID *string) larkcard.MessageCardElement {
+	cancelMenu := withMenu("默认分辨率",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      PicResolutionKind,
+			"sessionId": *sessionID,
+			"chatType":  UserChatType,
+		},
+		MenuOption{
+			label: "1小时",
+			value: "1",
+		},
+		MenuOption{
+			label: "12小时",
+			value: "12",
+		},
+		MenuOption{
+			label: "1天",
+			value: "24",
+		},
+		MenuOption{
+			label: "保持开启",
+			value: "0",
+		},
+	)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
+		Build()
+
+	return actions
+
+}
+
+func withPicResolutionBtn(sessionID *string, msgID *string) larkcard.
+	MessageCardElement {
+	cancelMenu := withMenu("默认分辨率",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      PicResolutionKind,
+			"sessionId": *sessionID,
+			"msgId":     *sessionID,
+		},
+		MenuOption{
+			label: "256x256",
+			value: string(services.Resolution256),
+		},
+		MenuOption{
+			label: "512x512",
+			value: string(services.Resolution512),
+		},
+		MenuOption{
+			label: "1024x1024",
+			value: string(services.Resolution1024),
+		},
+	)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
+		Build()
+
+	return actions
+
 }
 
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
@@ -386,7 +490,8 @@ func sendPicCreateInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
 		withHeader("🖼️  已进入图片创作模式", larkcard.TemplateBlue),
-		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
+		withPicResolutionBtn(sessionId, msgId),
+		withNote("提醒：在对话框中发送文本或图片，让AI生成更多相关的图片。"))
 	replyCard(
 		ctx,
 		msgId,
