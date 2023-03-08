@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
@@ -21,10 +22,42 @@ var handlers map[HandlerType]MessageHandlerInterface
 
 func init() {
 	handlers = make(map[HandlerType]MessageHandlerInterface)
-	//handlers[GroupHandler] = NewGroupMessageHandler()
+	handlers[GroupHandler] = NewGroupMessageHandler()
 	handlers[UserHandler] = NewPersonalMessageHandler()
+
 }
 
 func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
-	return handlers[UserHandler].handle(ctx, event)
+	handlerType := judgeChatType(event)
+	if handlerType == "otherChat" {
+		fmt.Println("unknown chat type")
+		return nil
+	}
+	msgType := judgeMsgType(event)
+	if msgType != "text" {
+		fmt.Println("unknown msg type")
+		return nil
+	}
+	return handlers[handlerType].handle(ctx, event)
+}
+
+func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
+	chatType := event.Event.Message.ChatType
+	fmt.Printf("chatType: %v", *chatType)
+	if *chatType == "group" {
+		return GroupHandler
+	}
+	if *chatType == "p2p" {
+		return UserHandler
+	}
+
+	return "otherChat"
+}
+
+func judgeMsgType(event *larkim.P2MessageReceiveV1) string {
+	msgType := event.Event.Message.MessageType
+	if *msgType == "text" {
+		return "text"
+	}
+	return ""
 }

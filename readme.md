@@ -1,36 +1,38 @@
 
 <p align='center'>
-  <img src='https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/91d1c7af087646aea2c550665c01796b~tplv-k3u1fbpfcp-watermark.image?' alt='' width='900'/>
+  <img src='./docs/image.png' alt='' width='800'/>
 </p>
 
 <br>
 
 <p align='center'>
-    在飞书与ChatGPT随时对话，智慧随身。
-    <br>
+    在飞书上与ChatGPT随时对话
+<br>
+<br>
     Feishu ChatGpt
 </p>
 
 ## 👻 机器人功能
 
-- [x] 群聊和私聊
-- [x] 引入持续对话功能
+- [x] 支持私人对话
+- [x] 支持群聊@机器人回复
+- [x] 持续对话联系上下文
 - [x] 超时自动结束对话
-- [x] 限制对话上下文长度
-- [x] 主动退出对话
+- [x] 用户主动开启新对话
+- [ ] 对接[prompts](https://github.com/f/awesome-chatgpt-prompts),允许自定义交流场景
+- [ ] markdown格式回复，重点支持代码场景
 
+
+<p align='center'>
+    <img src='./docs/image2.png' alt='' width='800'/>
+</p>
 
 
 
 ## 🌟 项目特点
-- 🍏 基于 OpenAi-[gpt3](https://platform.openai.com/account/api-keys) 接口
+- 🍏 基于 OpenAI-[Gpt3](https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)
-- 🥒 支持[Serverless](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多渠道部署
-- 🍐 基于[责任链](https://refactoringguru.cn/design-patterns/chain-of-responsibility/go/example)的消息处理器，轻松自定义扩展命令
-
-[//]: # (- 🍊 [zap]&#40;https://github.com/uber-go/zap&#41;日志记录)
-
-[//]: # (- )
+- 🥒 支持[Serverless云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/) 多种渠道部署
 - 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
 
 
@@ -82,9 +84,14 @@ kill -9 PID
 
 
 <details>
-    <summary>serverless部署</summary>
+    <summary>serverless云函数(阿里云等)部署</summary>
 <br>
 
+安装[severless](https://docs.serverless-devs.com/serverless-devs/quick_start)工具
+```bash
+npm install @serverless-devs/s -g
+```
+一键部署
 ``` bash
 cd ..
 s deploy
@@ -100,32 +107,17 @@ s deploy
     <summary>docker部署</summary>
 <br>
 
-待补充
+``` bash
+# 配置config.yaml
+mv config.example.yaml config.yaml
+# 构建运行
+cd ..
+docker build -t feishu-chatgpt:latest .
+docker run -d --name feishu-chatgpt -p 9000:9000 feishu-chatgpt:latest
+```
 <br>
 
 </details>
-
-
-## 功能解释
-
-### 责任链-设计模式
-
-划重点@bro
-
-千万不要用if else，这样的代码，不仅可读性差，而且，如果要增加一个处理器，就需要修改代码，违反了开闭原则
-
-用户发送的文本消息，根据消息内容，匹配到对应的处理器，处理器处理消息，返回结果给用户
-
-这种匹配，可以使用责任链模式，将匹配的逻辑抽象成一个个的处理器，然后将这些处理器串联起来，形成一个链条。
-
-用户发送的消息，从链条的头部开始，依次匹配，匹配到后，就不再继续匹配，直接返回结果给用户
-
-
-！！！切记！！！
-
-责任链模式[参考代码](https://refactoringguru.cn/design-patterns/chain-of-responsibility)
-
-
 
 ## 详细配置步骤
 
@@ -133,7 +125,10 @@ s deploy
 -  创建 [飞书](https://open.feishu.cn/) 机器人
     1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
     2. 前往`应用功能-机器人`, 创建机器人
-    3. 从cpolar或者serverless获得公网地址,例如`http://xxxx.r6.cpolar.top/webhook/event` ,在飞书机器人的 `事件订阅` 板块填写回调地址。
+    3. 从cpolar或者serverless获得公网地址,在飞书机器人后台的 `事件订阅` 板块填写。例如，
+        - `http://xxxx.r6.cpolar.top`为cpolar暴露的公网地址
+        - `/webhook/event`为统一的应用路由
+        - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
     4. 给订阅添加下列回调事件
         - im:message
         - im:message.group_at_msg(获取群组中所有消息)
@@ -158,3 +153,11 @@ s deploy
 - [飞书 User_ID、Open_ID 与 Union_ID 区别](https://www.feishu.cn/hc/zh-CN/articles/794300086214)
 
 - [飞书重复接受到消息](https://open.feishu.cn/document/uAjLw4CM/ukTMukTMukTM/reference/im-v1/message/events/receive)
+
+
+### 更多交流
+
+可以加入飞书群~
+<p align='center'>
+  <img src='./docs/talk.png' alt='' width='300' align='left'/>
+</p>
