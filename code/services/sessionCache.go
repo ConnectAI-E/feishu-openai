@@ -19,9 +19,22 @@ type SessionService struct {
 	cache *cache.Cache
 }
 
+type Resolution string
+
+const (
+	Resolution256  Resolution = "256x256"
+	Resolution512  Resolution = "512x512"
+	Resolution1024 Resolution = "1024x1024"
+)
+
+type PicSetting struct {
+	resolution Resolution
+}
+
 type SessionMeta struct {
-	Mode SessionMode
-	Msg  []Messages
+	Mode       SessionMode
+	Msg        []Messages
+	PicSetting PicSetting
 }
 
 var sessionServices *SessionService
@@ -80,6 +93,39 @@ func (s *SessionService) SetMsg(sessionId string, msg []Messages) {
 	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 }
 
+func (s *SessionService) SetPicResolution(sessionId string,
+	resolution Resolution) {
+	maxCacheTime := time.Hour * 12
+
+	//if not in [Resolution256, Resolution512, Resolution1024] then set
+	//to Resolution256
+	switch resolution {
+	case Resolution256, Resolution512, Resolution1024:
+	default:
+		resolution = Resolution256
+	}
+
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		sessionMeta := &SessionMeta{PicSetting: PicSetting{resolution: resolution}}
+		s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+		return
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	sessionMeta.PicSetting.resolution = resolution
+	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+}
+
+func (s *SessionService) GetPicResolution(sessionId string) string {
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		return string(Resolution256)
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	return string(sessionMeta.PicSetting.resolution)
+
+}
+
 func (s *SessionService) Clear(sessionID string) {
 	// Delete the session context from the cache.
 	s.cache.Delete(sessionID)
@@ -90,6 +136,8 @@ type SessionServiceCacheInterface interface {
 	SetMsg(sessionId string, msg []Messages)
 	SetMode(sessionId string, mode SessionMode)
 	GetMode(sessionId string) SessionMode
+	SetPicResolution(sessionId string, resolution Resolution)
+	GetPicResolution(sessionId string) string
 	Clear(sessionId string)
 }
 

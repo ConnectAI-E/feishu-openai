@@ -27,10 +27,10 @@ type Action interface {
 	Execute(a *ActionInfo) bool
 }
 
-type ProcessedUnique struct { //消息唯一性
+type ProcessedUniqueAction struct { //消息唯一性
 }
 
-func (*ProcessedUnique) Execute(a *ActionInfo) bool {
+func (*ProcessedUniqueAction) Execute(a *ActionInfo) bool {
 	if a.handler.msgCache.IfProcessed(*a.info.msgId) {
 		return false
 	}
@@ -38,10 +38,10 @@ func (*ProcessedUnique) Execute(a *ActionInfo) bool {
 	return true
 }
 
-type ProcessMention struct { //是否机器人应该处理
+type ProcessMentionAction struct { //是否机器人应该处理
 }
 
-func (*ProcessMention) Execute(a *ActionInfo) bool {
+func (*ProcessMentionAction) Execute(a *ActionInfo) bool {
 	// 私聊直接过
 	if a.info.handlerType == UserHandler {
 		return true
@@ -122,6 +122,8 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 		a.handler.sessionCache.Clear(*a.info.sessionId)
 		a.handler.sessionCache.SetMode(*a.info.sessionId,
 			services.ModePicCreate)
+		a.handler.sessionCache.SetPicResolution(*a.info.sessionId,
+			services.Resolution256)
 		sendPicCreateInstructionCard(*a.ctx, a.info.sessionId,
 			a.info.msgId)
 		return false
@@ -130,14 +132,19 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 	// 生成图片
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
 	if mode == services.ModePicCreate {
+		resolution := a.handler.sessionCache.GetPicResolution(*a.
+			info.sessionId)
 		bs64, err := a.handler.gpt.GenerateOneImage(a.info.qParsed,
-			"256x256")
+			resolution)
 		if err != nil {
 			replyMsg(*a.ctx, fmt.Sprintf(
 				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
-		replayImageByBase64(*a.ctx, bs64, a.info.msgId)
+		replayImageByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
+			a.info.qParsed)
+
+		//replayImageByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
 		return false
 	}
 

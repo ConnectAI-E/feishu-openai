@@ -30,7 +30,8 @@ type MessageHandler struct {
 	config       initialization.Config
 }
 
-func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+func (m MessageHandler) cardHandler(_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
@@ -40,8 +41,41 @@ func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.Card
 		if done {
 			return newCard, err
 		}
+		return nil, nil
 	}
+	if cardMsg.Kind == PicResolutionKind {
+		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
+		return nil, nil
+	}
+	if cardMsg.Kind == PicMoreKind {
+		go func() {
+			m.CommonProcessPicMore(cardMsg)
+		}()
+	}
+
 	return nil, nil
+
+}
+
+func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
+	resolution := m.sessionCache.GetPicResolution(msg.SessionId)
+	//fmt.Println("resolution: ", resolution)
+	//fmt.Println("msg: ", msg)
+	question := msg.Value.(string)
+	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
+	replayImageByBase64(context.Background(), bs64, &msg.MsgId,
+		&msg.SessionId, question)
+}
+
+func CommonProcessPicResolution(msg CardMsg,
+	cardAction *larkcard.CardAction,
+	cache services.SessionServiceCacheInterface) {
+	option := cardAction.Action.Option
+	//fmt.Println(larkcore.Prettify(msg))
+	cache.SetPicResolution(msg.SessionId, services.Resolution(option))
+	//send text
+	replyMsg(context.Background(), "已更新图片分辨率为"+option,
+		&msg.MsgId)
 }
 
 func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (
@@ -97,21 +131,20 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		sessionId:   sessionId,
 		mention:     mention,
 	}
-	//责任链重构示例
 	data := &ActionInfo{
 		ctx:     &ctx,
 		handler: &m,
 		info:    &msgInfo,
 	}
 	actions := []Action{
-		&ProcessedUnique{}, //避免重复处理
-		&ProcessMention{},  //判断机器人是否应该被调用
-		&EmptyAction{},     //空消息处理
-		&ClearAction{},     //清除消息处理
-		&HelpAction{},      //帮助处理
-		&RolePlayAction{},  //角色扮演处理
-		&PicAction{},       //图片处理
-		&MessageAction{},   //消息处理
+		&ProcessedUniqueAction{}, //避免重复处理
+		&ProcessMentionAction{},  //判断机器人是否应该被调用
+		&EmptyAction{},           //空消息处理
+		&ClearAction{},           //清除消息处理
+		&HelpAction{},            //帮助处理
+		&RolePlayAction{},        //角色扮演处理
+		&PicAction{},             //图片处理
+		&MessageAction{},         //消息处理
 
 	}
 	chain(data, actions...)
