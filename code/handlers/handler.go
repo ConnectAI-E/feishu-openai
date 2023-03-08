@@ -30,7 +30,8 @@ type MessageHandler struct {
 	config       initialization.Config
 }
 
-func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+func (m MessageHandler) cardHandler(_ context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
 	var cardMsg CardMsg
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
@@ -46,7 +47,24 @@ func (m MessageHandler) cardHandler(_ context.Context, cardAction *larkcard.Card
 		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
 		return nil, nil
 	}
+	if cardMsg.Kind == PicMoreKind {
+		go func() {
+			m.CommonProcessPicMore(cardMsg)
+		}()
+	}
+
 	return nil, nil
+
+}
+
+func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
+	resolution := m.sessionCache.GetPicResolution(msg.SessionId)
+	//fmt.Println("resolution: ", resolution)
+	//fmt.Println("msg: ", msg)
+	question := msg.Value.(string)
+	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
+	replayImageByBase64(context.Background(), bs64, &msg.MsgId,
+		&msg.SessionId, question)
 }
 
 func CommonProcessPicResolution(msg CardMsg,
@@ -55,7 +73,6 @@ func CommonProcessPicResolution(msg CardMsg,
 	option := cardAction.Action.Option
 	//fmt.Println(larkcore.Prettify(msg))
 	cache.SetPicResolution(msg.SessionId, services.Resolution(option))
-	//fmt.Println(larkcore.Prettify(cardAction))
 	//send text
 	replyMsg(context.Background(), "已更新图片分辨率为"+option,
 		&msg.MsgId)

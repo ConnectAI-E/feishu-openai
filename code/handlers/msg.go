@@ -17,8 +17,9 @@ type CardKind string
 type CardChatType string
 
 var (
-	ClearCardKind     = CardKind("clear")
-	PicResolutionKind = CardKind("pic_resolution")
+	ClearCardKind     = CardKind("clear")          // 清空上下文
+	PicResolutionKind = CardKind("pic_resolution") // 图片分辨率调整
+	PicMoreKind       = CardKind("pic_more")       // 重新生成图片
 )
 
 var (
@@ -84,6 +85,28 @@ func newSendCard(
 	cardContent, err := larkcard.NewMessageCard().
 		Config(config).
 		Header(header).
+		Elements(
+			aElementPool,
+		).
+		String()
+	return cardContent, err
+}
+
+func newSimpleSendCard(
+	elements ...larkcard.MessageCardElement) (string,
+	error) {
+	config := larkcard.NewMessageCardConfig().
+		WideScreenMode(false).
+		EnableForward(true).
+		UpdateMulti(false).
+		Build()
+	var aElementPool []larkcard.MessageCardElement
+	for _, element := range elements {
+		aElementPool = append(aElementPool, element)
+	}
+	// 卡片消息体
+	cardContent, err := larkcard.NewMessageCard().
+		Config(config).
 		Elements(
 			aElementPool,
 		).
@@ -159,6 +182,17 @@ func withMainText(msg string) larkcard.MessageCardElement {
 	return mainElement
 }
 
+func withImageDiv(imageKey string) larkcard.MessageCardElement {
+	imageElement := larkcard.NewMessageCardImage().
+		ImgKey(imageKey).
+		Alt(larkcard.NewMessageCardPlainText().Content("").
+			Build()).
+		Preview(true).
+		Mode(larkcard.MessageCardImageModelFitHorizontal).
+		Build()
+	return imageElement
+}
+
 // withMdAndExtraBtn 用于生成带有额外按钮的消息体
 func withMdAndExtraBtn(msg string, btn *larkcard.
 	MessageCardEmbedButton) larkcard.MessageCardElement {
@@ -181,7 +215,7 @@ func withMdAndExtraBtn(msg string, btn *larkcard.
 	return mainElement
 }
 
-func withBtn(content string, value map[string]interface{},
+func newBtn(content string, value map[string]interface{},
 	typename larkcard.MessageCardButtonType) *larkcard.
 	MessageCardEmbedButton {
 	btn := larkcard.NewMessageCardEmbedButton().
@@ -193,7 +227,7 @@ func withBtn(content string, value map[string]interface{},
 	return btn
 }
 
-func withMenu(
+func newMenu(
 	placeHolder string,
 	value map[string]interface{},
 	options ...MenuOption,
@@ -223,14 +257,14 @@ func withMenu(
 
 // 清除卡片按钮
 func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
-	confirmBtn := withBtn("确认清除", map[string]interface{}{
+	confirmBtn := newBtn("确认清除", map[string]interface{}{
 		"value":     "1",
 		"kind":      ClearCardKind,
 		"chatType":  UserChatType,
 		"sessionId": *sessionID,
 	}, larkcard.MessageCardButtonTypeDanger,
 	)
-	cancelBtn := withBtn("我再想想", map[string]interface{}{
+	cancelBtn := newBtn("我再想想", map[string]interface{}{
 		"value":     "0",
 		"kind":      ClearCardKind,
 		"sessionId": *sessionID,
@@ -245,46 +279,20 @@ func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
 
 	return actions
 }
-
-//新建对话按钮
-func withNewTopicBtn(sessionID *string) larkcard.MessageCardElement {
-	cancelMenu := withMenu("默认分辨率",
-		map[string]interface{}{
-			"value":     "0",
-			"kind":      PicResolutionKind,
-			"sessionId": *sessionID,
-			"chatType":  UserChatType,
-		},
-		MenuOption{
-			label: "1小时",
-			value: "1",
-		},
-		MenuOption{
-			label: "12小时",
-			value: "12",
-		},
-		MenuOption{
-			label: "1天",
-			value: "24",
-		},
-		MenuOption{
-			label: "保持开启",
-			value: "0",
-		},
-	)
-
+func withOneBtn(btn *larkcard.MessageCardEmbedButton) larkcard.
+	MessageCardElement {
 	actions := larkcard.NewMessageCardAction().
-		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Actions([]larkcard.MessageCardActionElement{btn}).
 		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
 		Build()
-
 	return actions
-
 }
+
+//新建对话按钮
 
 func withPicResolutionBtn(sessionID *string, msgID *string) larkcard.
 	MessageCardElement {
-	cancelMenu := withMenu("默认分辨率",
+	cancelMenu := newMenu("默认分辨率",
 		map[string]interface{}{
 			"value":     "0",
 			"kind":      PicResolutionKind,
@@ -378,7 +386,7 @@ func uploadImage(base64Str string) (*string, error) {
 }
 func replyImage(ctx context.Context, ImageKey *string,
 	msgId *string) error {
-	fmt.Println("sendMsg", ImageKey, msgId)
+	//fmt.Println("sendMsg", ImageKey, msgId)
 
 	msgImage := larkim.MessageImage{ImageKey: *ImageKey}
 	content, err := msgImage.String()
@@ -412,12 +420,16 @@ func replyImage(ctx context.Context, ImageKey *string,
 
 }
 
-func replayImageByBase64(ctx context.Context, base64Str string, msgId *string) error {
+func replayImageByBase64(ctx context.Context, base64Str string,
+	msgId *string, sessionId *string, question string) error {
 	imageKey, err := uploadImage(base64Str)
 	if err != nil {
 		return err
 	}
-	err = replyImage(ctx, imageKey, msgId)
+	//example := "img_v2_041b28e3-5680-48c2-9af2-497ace79333g"
+	//imageKey := &example
+	fmt.Println("imageKey", *imageKey)
+	err = sendImageCard(ctx, *imageKey, msgId, sessionId, question)
 	if err != nil {
 		return err
 	}
@@ -491,7 +503,7 @@ func sendPicCreateInstructionCard(ctx context.Context,
 	newCard, _ := newSendCard(
 		withHeader("🖼️  已进入图片创作模式", larkcard.TemplateBlue),
 		withPicResolutionBtn(sessionId, msgId),
-		withNote("提醒：在对话框中发送文本或图片，让AI生成更多相关的图片。"))
+		withNote("提醒：在对话框中发送文本或图片，让AI生成相关的图片。"))
 	replyCard(
 		ctx,
 		msgId,
@@ -520,7 +532,7 @@ func sendHelpCard(ctx context.Context,
 		withSplitLine(),
 		withMdAndExtraBtn(
 			"** 🆑 清除话题上下文**\n文本回复 *清除* 或 */clear*",
-			withBtn("立刻清除", map[string]interface{}{
+			newBtn("立刻清除", map[string]interface{}{
 				"value":     "1",
 				"kind":      ClearCardKind,
 				"chatType":  UserChatType,
@@ -548,4 +560,26 @@ func sendHelpCard(ctx context.Context,
 		msgId,
 		newCard,
 	)
+}
+
+func sendImageCard(ctx context.Context, imageKey string,
+	msgId *string, sessionId *string, question string) error {
+	newCard, _ := newSimpleSendCard(
+		withImageDiv(imageKey),
+		withSplitLine(),
+		//再来一张
+		withOneBtn(newBtn("再来一张", map[string]interface{}{
+			"value":     question,
+			"kind":      PicMoreKind,
+			"chatType":  UserChatType,
+			"msgId":     *msgId,
+			"sessionId": *sessionId,
+		}, larkcard.MessageCardButtonTypePrimary)),
+	)
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+	return nil
 }

@@ -141,7 +141,10 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
-		replayImageByBase64(*a.ctx, bs64, a.info.msgId)
+		replayImageByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
+			a.info.qParsed)
+
+		//replayImageByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
 		return false
 	}
 
