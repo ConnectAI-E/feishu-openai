@@ -2,6 +2,17 @@
     <img src='./docs/img3.png' alt='' width='800'/>
 </p>
 
+<details align='center'>
+    <summary> 📷 点击展开完整功能截图</summary>
+    <br>
+    <p align='center'>
+    <img src='https://user-images.githubusercontent.com/50035229/223590381-ed38db74-39f3-4e77-bd3a-aaa54d679286.png' alt='' width='800'/>
+    <img src='https://user-images.githubusercontent.com/50035229/223590817-37a56eac-ab6e-4293-862a-de0988ac50b7.png' alt='' width='800'/>
+    <img src='https://user-images.githubusercontent.com/50035229/223591272-88e4218c-5cb6-4925-8ede-18359bdf9097.png' alt='' width='800'/>
+    </p>
+
+</details>
+
 <br>
 
 <p align='center'>
@@ -10,6 +21,7 @@
 <br>
     🚀 Feishu OpenAI 🚀
 </p>
+
 
 ## 👻 机器人功能
 
@@ -35,18 +47,6 @@
 
 🔒 管理员模式：内置管理员模式，使用更安全可靠 🚧
 
-<p align='center'>
-    <img src='./docs/help.png' alt='' width='600'/>
-</p>
-<details align='center'>
-    <summary>查看更多功能截图</summary>
-    <br>
-    <p align='center'>
-    <img src='https://user-images.githubusercontent.com/50035229/223590381-ed38db74-39f3-4e77-bd3a-aaa54d679286.png' alt='' width='600'/>
-    <img src='https://user-images.githubusercontent.com/50035229/223590817-37a56eac-ab6e-4293-862a-de0988ac50b7.png' alt='' width='600'/>
-    </p>
-
-</details>
 
 ## 🌟 项目特点
 
