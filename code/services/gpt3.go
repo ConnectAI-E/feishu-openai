@@ -59,90 +59,132 @@ type ChatGPT struct {
 }
 
 func (gpt *ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
-	// 检查当前apikey的调用次数是否超过限制，如果超过限制则重新计算权重
-	currentApiKey := gpt.ApiKeys[gpt.currentApiKeyIndex]
-	gpt.apiKeyUsageMutex.Lock()
-	if gpt.apiKeyUsage[currentApiKey] >= 3 {
-		gpt.calculateApiKeyWeights()
-	}
-	// 构造请求体
-	requestBody := ChatGPTRequestBody{
-		Model:            engine,
-		Messages:         msg,
-		MaxTokens:        maxTokens,
-		Temperature:      temperature,
-		TopP:             1,
-		FrequencyPenalty: 0,
-		PresencePenalty:  0,
-	}
-	requestData, err := json.Marshal(requestBody)
-	if err != nil {
+	if len(gpt.ApiKeys) == 1 {
+		// 如果只有一个apikey，则直接使用该apikey进行请求
+		apiKey := gpt.ApiKeys[0]
+		requestBody := ChatGPTRequestBody{
+			Model:            engine,
+			Messages:         msg,
+			MaxTokens:        maxTokens,
+			Temperature:      temperature,
+			TopP:             1,
+			FrequencyPenalty: 0,
+			PresencePenalty:  0,
+		}
+		requestData, err := json.Marshal(requestBody)
+		if err != nil {
+			return resp, err
+		}
+		req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
+		if err != nil {
+			return resp, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+apiKey)
+		client := &http.Client{Timeout: 110 * time.Second}
+		response, err := client.Do(req)
+		if err != nil {
+			return resp, err
+		}
+		defer response.Body.Close()
+		if response.StatusCode/2 != 100 {
+			return resp, fmt.Errorf("gtp api %s", response.Status)
+		}
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return resp, err
+		}
+		gptResponseBody := &ChatGPTResponseBody{}
+		err = json.Unmarshal(body, gptResponseBody)
+		if err != nil {
+			return resp, err
+		}
+		resp = gptResponseBody.Choices[0].Message
+		return resp, nil
+	} else {
+		// 如果有多个apikey，则进行负载均衡操作
+		currentApiKey := gpt.ApiKeys[gpt.currentApiKeyIndex]
+		gpt.apiKeyUsageMutex.Lock()
+		if gpt.apiKeyUsage[currentApiKey] >= 3 {
+			gpt.calculateApiKeyWeights()
+		}
+		requestBody := ChatGPTRequestBody{
+			Model:            engine,
+			Messages:         msg,
+			MaxTokens:        maxTokens,
+			Temperature:      temperature,
+			TopP:             1,
+			FrequencyPenalty: 0,
+			PresencePenalty:  0,
+		}
+		requestData, err := json.Marshal(requestBody)
+		if err != nil {
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, err
+		}
+		log.Printf("request gtp json string : %v", string(requestData))
+		req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
+		if err != nil {
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		apiKey := gpt.getApiKey()
+		req.Header.Set("Authorization", "Bearer "+apiKey)
+		client := &http.Client{Timeout: 110 * time.Second}
+		response, err := client.Do(req)
+		if err != nil {
+			gpt.apiKeyUsage[currentApiKey]--
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, err
+		}
+		defer response.Body.Close()
+		if response.StatusCode/2 != 100 {
+			gpt.apiKeyUsage[currentApiKey]--
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, fmt.Errorf("gtp api %s", response.Status)
+		}
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, err
+		}
+		gptResponseBody := &ChatGPTResponseBody{}
+		err = json.Unmarshal(body, gptResponseBody)
+		if err != nil {
+			gpt.apiKeyUsageMutex.Unlock()
+			return resp, err
+		}
+		resp = gptResponseBody.Choices[0].Message
+		gpt.apiKeyUsage[currentApiKey]++
 		gpt.apiKeyUsageMutex.Unlock()
-		return resp, err
+		err = gpt.updateApiKeyUsage()
+		if err != nil {
+			log.Printf("update api key usage failed: %v", err)
+		}
+		return resp, nil
 	}
-	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
-	if err != nil {
-		gpt.apiKeyUsageMutex.Unlock()
-		return resp, err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	// 获取apikey并设置到header中
-	apiKey := gpt.getApiKey()
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	client := &http.Client{Timeout: 110 * time.Second}
-	response, err := client.Do(req)
-	if err != nil {
-		// 请求出错时，将当前apikey的调用次数减1
-		gpt.apiKeyUsage[currentApiKey]--
-		gpt.apiKeyUsageMutex.Unlock()
-		return resp, err
-	}
-	defer response.Body.Close()
-	if response.StatusCode/2 != 100 {
-		// 请求出错时，将当前apikey的调用次数减1
-		gpt.apiKeyUsage[currentApiKey]--
-		gpt.apiKeyUsageMutex.Unlock()
-		return resp, fmt.Errorf("gtp api %s", response.Status)
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		gpt.apiKeyUsageMutex.Unlock()
-		return resp, err
-	}
-	gptResponseBody := &ChatGPTResponseBody{}
-	err = json.Unmarshal(body, gptResponseBody)
-	if err != nil {
-		gpt.apiKeyUsageMutex.Unlock()
-		return resp, err
-	}
-	resp = gptResponseBody.Choices[0].Message
-	// 当前apikey的调用次数加1
-	gpt.apiKeyUsage[currentApiKey]++
-	gpt.apiKeyUsageMutex.Unlock()
-	// 更新ApiKeyUsage并写入文件
-	err = gpt.updateApiKeyUsage()
-	if err != nil {
-		log.Printf("update api key usage failed: %v", err)
-	}
-	return resp, nil
 }
 
 func (gpt *ChatGPT) getApiKey() string {
-	// 加权随机选择可用apikey
-	totalWeight := 0
-	for _, weight := range gpt.apiKeyWeights {
-		totalWeight += weight
-	}
-	randNum := rand.Intn(totalWeight)
-	for i, weight := range gpt.apiKeyWeights {
-		if randNum < weight {
-			gpt.currentApiKeyIndex = i
-			break
+	if len(gpt.ApiKeys) == 1 {
+		// 如果只有一个apikey，则直接返回该apikey
+		return gpt.ApiKeys[0]
+	} else {
+		totalWeight := 0
+		for _, weight := range gpt.apiKeyWeights {
+			totalWeight += weight
 		}
-		randNum -= weight
+		randNum := rand.Intn(totalWeight)
+		for i, weight := range gpt.apiKeyWeights {
+			if randNum < weight {
+				gpt.currentApiKeyIndex = i
+				break
+			}
+			randNum -= weight
+		}
+		return gpt.ApiKeys[gpt.currentApiKeyIndex]
 	}
-	return gpt.ApiKeys[gpt.currentApiKeyIndex]
 }
 
 func (gpt *ChatGPT) calculateApiKeyWeights() {
