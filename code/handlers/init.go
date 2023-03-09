@@ -50,7 +50,7 @@ func CardHandler() func(ctx context.Context,
 func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
 	actionValue := cardAction.Action.Value
 	chatType := actionValue["chatType"]
-	fmt.Printf("chatType: %v", chatType)
+	//fmt.Printf("chatType: %v", chatType)
 	if chatType == "group" {
 		return GroupHandler
 	}
