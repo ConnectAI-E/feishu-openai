@@ -27,7 +27,7 @@ func main() {
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
 
-	gpt := &services.ChatGPT{ApiKey: config.OpenaiApiKey}
+	gpt := services.NewChatGPT(config.OpenaiApiKey)
 	handlers.InitHandlers(*gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
