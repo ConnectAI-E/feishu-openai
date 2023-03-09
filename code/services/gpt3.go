@@ -129,10 +129,7 @@ func (gpt *ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 			return resp, err
 		}
 		req.Header.Set("Content-Type", "application/json")
-		apiKey, err := gpt.getApiKey()
-		if err != nil {
-			return resp, err
-		}
+		apiKey := gpt.getApiKey()
 		req.Header.Set("Authorization", "Bearer "+apiKey)
 		client := &http.Client{Timeout: 110 * time.Second}
 		response, err := client.Do(req)
@@ -161,33 +158,33 @@ func (gpt *ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		resp = gptResponseBody.Choices[0].Message
 		gpt.apiKeyUsage[currentApiKey]++
 		gpt.apiKeyUsageMutex.Unlock()
-		gpt.updateApiKeyUsage(apiKey)
+		err = gpt.updateApiKeyUsage()
+		if err != nil {
+			log.Printf("update api key usage failed: %v", err)
+		}
 		return resp, nil
 	}
 }
 
-func (gpt *ChatGPT) getApiKey() (string, error) {
-	// 获取可用的apikey
-	if len(gpt.ApiKeys) == 0 {
-		return "", fmt.Errorf("no api keys provided")
-	}
+func (gpt *ChatGPT) getApiKey() string {
 	if len(gpt.ApiKeys) == 1 {
 		// 如果只有一个apikey，则直接返回该apikey
-		return gpt.ApiKeys[0], nil
-	}
-	totalWeight := 0
-	for _, weight := range gpt.apiKeyWeights {
-		totalWeight += weight
-	}
-	randNum := rand.Intn(totalWeight)
-	for i, weight := range gpt.apiKeyWeights {
-		if randNum < weight {
-			gpt.currentApiKeyIndex = i
-			break
+		return gpt.ApiKeys[0]
+	} else {
+		totalWeight := 0
+		for _, weight := range gpt.apiKeyWeights {
+			totalWeight += weight
 		}
-		randNum -= weight
+		randNum := rand.Intn(totalWeight)
+		for i, weight := range gpt.apiKeyWeights {
+			if randNum < weight {
+				gpt.currentApiKeyIndex = i
+				break
+			}
+			randNum -= weight
+		}
+		return gpt.ApiKeys[gpt.currentApiKeyIndex]
 	}
-	return gpt.ApiKeys[gpt.currentApiKeyIndex], nil
 }
 
 func (gpt *ChatGPT) calculateApiKeyWeights() {
@@ -198,11 +195,13 @@ func (gpt *ChatGPT) calculateApiKeyWeights() {
 	}
 	gpt.apiKeyWeights = make([]int, len(gpt.ApiKeys))
 	for i, apiKey := range gpt.ApiKeys {
-		usage := gpt.apiKeyUsage[apiKey]
-		if usage >= 0 {
-			gpt.apiKeyWeights[i] = totalUsage - usage + 1
-		} else {
-			gpt.apiKeyWeights[i] = 0
+		usage, ok := gpt.apiKeyUsage[apiKey]
+		if ok {
+			if usage >= 0 {
+				gpt.apiKeyWeights[i] = totalUsage - usage + 1
+			} else {
+				gpt.apiKeyWeights[i] = 0
+			}
 		}
 	}
 }
@@ -210,80 +209,51 @@ func (gpt *ChatGPT) calculateApiKeyWeights() {
 func (gpt *ChatGPT) initApiKeyUsage() {
 	// 初始化apikey的调用次数和权重
 	gpt.apiKeyUsage = make(map[string]int)
+	gpt.apiKeyWeights = make([]int, len(gpt.ApiKeys))
+	for i := range gpt.ApiKeys {
+		gpt.apiKeyWeights[i] = 1
+	}
+}
+
+func (gpt *ChatGPT) checkApiKeyAvailability() {
 	for _, apiKey := range gpt.ApiKeys {
-		gpt.apiKeyUsage[apiKey] = 0
-	}
-}
-
-func (gpt *ChatGPT) checkApiKeyAvailability(apiKey string) bool {
-	// 检查apikey的可用性
-	req, err := http.NewRequest("GET", BASEURL+"engines", nil)
-	if err != nil {
-		log.Printf("check api key %s failed: %v", apiKey, err)
-		return false
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
-	client := &http.Client{Timeout: 10 * time.Second}
-	response, err := client.Do(req)
-	if err != nil {
-		log.Printf("check api key %s failed: %v", apiKey, err)
-		return false
-	}
-	if response.StatusCode/2 != 100 {
-		log.Printf("api key %s is not available: %s", apiKey, response.Status)
-		if response.StatusCode == 429 {
-			gpt.apiKeyUsage[apiKey] = -1
-			log.Printf("api key %s has been permanently disabled due to too many requests", apiKey)
-		}
-		return false
-	}
-	return true
-}
-
-func (gpt *ChatGPT) setApiKeyAvailability() {
-	// 检查apikey的可用性
-	for apiKey := range gpt.apiKeyUsage {
-		if usage := gpt.apiKeyUsage[apiKey]; usage < 0 {
-			// 如果apikey的调用次数小于0，则禁用它
+		// 检查apikey的可用性
+		req, err := http.NewRequest("GET", BASEURL+"engines", nil)
+		if err != nil {
+			log.Printf("check api key %s failed: %v", apiKey, err)
 			continue
 		}
-		if !gpt.checkApiKeyAvailability(apiKey) {
-			// 如果apikey不可用，则将其调用次数设为-1
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+apiKey)
+		client := &http.Client{Timeout: 10 * time.Second}
+		response, err := client.Do(req)
+		if err != nil {
+			log.Printf("check api key %s failed: %v", apiKey, err)
+			continue
+		}
+		// 如果apikey不可用，则将其调用次数设为-1
+		if response.StatusCode/2 != 100 {
+			log.Printf("api key %s is not available: %s", apiKey, response.Status)
+			gpt.apiKeyUsageMutex.Lock()
 			gpt.apiKeyUsage[apiKey] = -1
-			gpt.calculateApiKeyWeights()
+			gpt.apiKeyUsageMutex.Unlock()
+		} else {
+			// 如果apikey可用，则将其调用次数设为0
+			gpt.apiKeyUsageMutex.Lock()
+			gpt.apiKeyUsage[apiKey] = 0
+			gpt.apiKeyUsageMutex.Unlock()
 		}
 	}
-}
-
-func (gpt *ChatGPT) StartApiKeyAvailabilityCheck() {
-	// 初始化apikey的调用次数和权重，检查apikey的可用性，并定时检查apikey的可用性
-	if len(gpt.ApiKeys) == 0 {
-		log.Fatalf("no api keys provided")
-	}
-	gpt.initApiKeyUsage()
-	gpt.setApiKeyAvailability()
-	ticker := time.NewTicker(30 * time.Minute)
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				gpt.setApiKeyAvailability()
-			}
-		}
-	}()
-}
-
-func (gpt *ChatGPT) updateApiKeyUsage(apiKey string) {
-	// 更新ApiKeyUsage并写入文件
-	gpt.apiKeyUsage[apiKey]++
-	gpt.calculateApiKeyWeights()
 }
 
 func (gpt *ChatGPT) loadApiKeyUsage() error {
 	// 从本地文件中读取apikey的调用次数和权重信息
-	file, err := os.OpenFile("apikey_usage.json", os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.Open("apikey_usage.json")
 	if err != nil {
+		if os.IsNotExist(err) {
+			gpt.initApiKeyUsage()
+			return nil
+		}
 		return err
 	}
 	defer file.Close()
@@ -293,11 +263,6 @@ func (gpt *ChatGPT) loadApiKeyUsage() error {
 	}
 	if fileInfo.Size() == 0 {
 		gpt.initApiKeyUsage()
-		gpt.calculateApiKeyWeights()
-		err = gpt.saveApiKeyUsage(file)
-		if err != nil {
-			log.Printf("save api key usage failed: %v", err)
-		}
 		return nil
 	}
 	decoder := json.NewDecoder(file)
@@ -309,16 +274,65 @@ func (gpt *ChatGPT) loadApiKeyUsage() error {
 	return nil
 }
 
-func (gpt *ChatGPT) saveApiKeyUsage(file *os.File) error {
+func (gpt *ChatGPT) saveApiKeyUsage() error {
 	// 将apikey的调用次数和权重信息输出到本地文件
-	file.Truncate(0)
-	file.Seek(0, 0)
+	file, err := os.Create("apikey_usage.json")
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 	encoder := json.NewEncoder(file)
-	err := encoder.Encode(gpt.apiKeyUsage)
+	err = encoder.Encode(gpt.apiKeyUsage)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (gpt *ChatGPT) updateApiKeyUsage() error {
+	// 更新ApiKeyUsage并写入文件
+	gpt.apiKeyUsageMutex.Lock()
+	defer gpt.apiKeyUsageMutex.Unlock()
+	gpt.apiKeyUsage[gpt.ApiKeys[gpt.currentApiKeyIndex]]++
+	err := gpt.saveApiKeyUsage()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (gpt *ChatGPT) setApiKeyAvailability() {
+	// 检查apikey的可用性
+	gpt.checkApiKeyAvailability()
+	for apiKey, usage := range gpt.apiKeyUsage {
+		// 如果apikey的调用次数小于0，则禁用它，并输出信息
+		if usage < 0 {
+			log.Printf("api key %s is disabled", apiKey)
+			gpt.currentApiKeyIndex = (gpt.currentApiKeyIndex + 1) % len(gpt.ApiKeys)
+		}
+	}
+}
+
+func (gpt *ChatGPT) StartApiKeyAvailabilityCheck() {
+	// 初始化apikey的调用次数和权重，检查apikey的可用性，并定时检查apikey的可用性
+	err := gpt.loadApiKeyUsage()
+	if err != nil {
+		log.Printf("load api key usage failed: %v", err)
+	}
+	gpt.setApiKeyAvailability()
+	ticker := time.NewTicker(30 * time.Minute)
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				gpt.setApiKeyAvailability()
+				err := gpt.saveApiKeyUsage()
+				if err != nil {
+					log.Printf("save api key usage failed: %v", err)
+				}
+			}
+		}
+	}()
 }
 
 type ImageGenerationRequestBody struct {
@@ -355,10 +369,7 @@ func (gpt *ChatGPT) GenerateImage(prompt string, size string,
 
 	req.Header.Set("Content-Type", "application/json")
 	// 获取apikey并设置到header中
-	apiKey, err := gpt.getApiKey()
-	if err != nil {
-		return nil, err
-	}
+	apiKey := gpt.getApiKey()
 	req.Header.Set("Authorization", "Bearer "+apiKey)
 	client := &http.Client{Timeout: 110 * time.Second}
 	response, err := client.Do(req)
