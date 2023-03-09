@@ -14,7 +14,7 @@ func TestCompletions(t *testing.T) {
 		{Role: "user", Content: "翻译这段话: The assistant messages help store prior responses. They can also be written by a developer to help give examples of desired behavior."},
 	}
 
-	chatGpt := &ChatGPT{ApiKey: config.OpenaiApiKey}
+	chatGpt := NewChatGPT(config.OpenaiApiKeys)
 	resp, err := chatGpt.Completions(msgs)
 	if err != nil {
 		t.Errorf("TestCompletions failed with error: %v", err)
@@ -26,7 +26,7 @@ func TestCompletions(t *testing.T) {
 func TestGenerateOneImage(t *testing.T) {
 	config := initialization.LoadConfig("../config.yaml")
 
-	gpt := ChatGPT{ApiKey: config.OpenaiApiKey}
+	gpt := NewChatGPT(config.OpenaiApiKeys)
 	prompt := "a red apple"
 	size := "256x256"
 
