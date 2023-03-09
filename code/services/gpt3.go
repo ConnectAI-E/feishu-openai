@@ -51,6 +51,20 @@ type ChatGPT struct {
 	ApiKey string
 }
 
+type ImageGenerationRequestBody struct {
+	Prompt         string `json:"prompt"`
+	N              int    `json:"n"`
+	Size           string `json:"size"`
+	ResponseFormat string `json:"response_format"`
+}
+
+type ImageGenerationResponseBody struct {
+	Created int64 `json:"created"`
+	Data    []struct {
+		Base64Json string `json:"b64_json"`
+	} `json:"data"`
+}
+
 func (gpt ChatGPT) sendRequest(url, method string, requestBody interface{}, responseBody interface{}) error {
 	requestData, err := json.Marshal(requestBody)
 	if err != nil {
@@ -125,20 +139,6 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 		b64Pool = append(b64Pool, data.Base64Json)
 	}
 	return b64Pool, nil
-}
-
-type ImageGenerationRequestBody struct {
-	Prompt         string `json:"prompt"`
-	N              int    `json:"n"`
-	Size           string `json:"size"`
-	ResponseFormat string `json:"response_format"`
-}
-
-type ImageGenerationResponseBody struct {
-	Created int64 `json:"created"`
-	Data    []struct {
-		Base64Json string `json:"b64_json"`
-	} `json:"data"`
 }
 
 func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) {
