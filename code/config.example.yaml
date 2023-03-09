@@ -22,6 +22,6 @@ OPENAI_KEY:
 HTTP_PORT: 9000
 HTTPS_PORT: 9001
 USE_HTTPS: false
-CERT_FILE: /cert.pem
-KEY_FILE: /key.pem
+CERT_FILE: cert.pem
+KEY_FILE: key.pem
 
