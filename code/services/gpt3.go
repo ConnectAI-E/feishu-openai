@@ -179,6 +179,10 @@ func (gpt *ChatGPT) getApiKey() (string, error) {
 	for _, weight := range gpt.apiKeyWeights {
 		totalWeight += weight
 	}
+	if totalWeight == 0 {
+		// 如果所有apikey的权重都是0，则随机返回一个apikey
+		return gpt.ApiKeys[rand.Intn(len(gpt.ApiKeys))], nil
+	}
 	randNum := rand.Intn(totalWeight)
 	for i, weight := range gpt.apiKeyWeights {
 		if randNum < weight {
