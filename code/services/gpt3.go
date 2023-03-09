@@ -177,6 +177,10 @@ func (gpt *ChatGPT) getApiKey() (string, error) {
 	}
 	totalWeight := 0
 	for _, weight := range gpt.apiKeyWeights {
+		if weight <= 0 {
+			// 如果权重为0或负数，则永久禁用该apikey
+			continue
+		}
 		totalWeight += weight
 	}
 	if totalWeight == 0 {
@@ -185,6 +189,10 @@ func (gpt *ChatGPT) getApiKey() (string, error) {
 	}
 	randNum := rand.Intn(totalWeight)
 	for i, weight := range gpt.apiKeyWeights {
+		if weight <= 0 {
+			// 如果权重为0或负数，则跳过该apikey
+			continue
+		}
 		if randNum < weight {
 			gpt.currentApiKeyIndex = i
 			break
