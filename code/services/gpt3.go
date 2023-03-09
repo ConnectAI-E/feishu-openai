@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -17,24 +17,24 @@ const (
 	engine      = "gpt-3.5-turbo"
 )
 
+type Messages struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
 // ChatGPTResponseBody 请求体
 type ChatGPTResponseBody struct {
 	ID      string                 `json:"id"`
 	Object  string                 `json:"object"`
 	Created int                    `json:"created"`
 	Model   string                 `json:"model"`
-	Choices []ChoiceItem           `json:"choices"`
+	Choices []ChatGPTChoiceItem    `json:"choices"`
 	Usage   map[string]interface{} `json:"usage"`
 }
-type ChoiceItem struct {
+type ChatGPTChoiceItem struct {
 	Message      Messages `json:"message"`
 	Index        int      `json:"index"`
 	FinishReason string   `json:"finish_reason"`
-}
-
-type Messages struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
 }
 
 // ChatGPTRequestBody 响应体
@@ -51,58 +51,6 @@ type ChatGPT struct {
 	ApiKey string
 }
 
-func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
-	requestBody := ChatGPTRequestBody{
-		Model:            engine,
-		Messages:         msg,
-		MaxTokens:        maxTokens,
-		Temperature:      temperature,
-		TopP:             1,
-		FrequencyPenalty: 0,
-		PresencePenalty:  0,
-	}
-	requestData, err := json.Marshal(requestBody)
-
-	if err != nil {
-		return resp, err
-	}
-	log.Printf("request gtp json string : %v", string(requestData))
-	req, err := http.NewRequest("POST", BASEURL+"chat/completions", bytes.NewBuffer(requestData))
-	if err != nil {
-		return resp, err
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+gpt.ApiKey)
-	client := &http.Client{Timeout: 110 * time.Second}
-	response, err := client.Do(req)
-	if err != nil {
-		return resp, err
-	}
-	defer response.Body.Close()
-	if response.StatusCode/2 != 100 {
-		return resp, fmt.Errorf("gtp api %s", response.Status)
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return resp, err
-	}
-
-	gptResponseBody := &ChatGPTResponseBody{}
-	// log.Println(string(body))
-	err = json.Unmarshal(body, gptResponseBody)
-	if err != nil {
-		return resp, err
-	}
-
-	resp = gptResponseBody.Choices[0].Message
-	return resp, nil
-}
-
-func FormatQuestion(question string) string {
-	return "Answer:" + question
-}
-
 type ImageGenerationRequestBody struct {
 	Prompt         string `json:"prompt"`
 	N              int    `json:"n"`
@@ -117,22 +65,15 @@ type ImageGenerationResponseBody struct {
 	} `json:"data"`
 }
 
-func (gpt ChatGPT) GenerateImage(prompt string, size string,
-	n int) ([]string, error) {
-	requestBody := ImageGenerationRequestBody{
-		Prompt:         prompt,
-		N:              n,
-		Size:           size,
-		ResponseFormat: "b64_json",
-	}
+func (gpt ChatGPT) sendRequest(url, method string, requestBody interface{}, responseBody interface{}) error {
 	requestData, err := json.Marshal(requestBody)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	req, err := http.NewRequest("POST", BASEURL+"images/generations", bytes.NewBuffer(requestData))
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(requestData))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -140,20 +81,55 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string,
 	client := &http.Client{Timeout: 110 * time.Second}
 	response, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer response.Body.Close()
 	if response.StatusCode/2 != 100 {
-		return nil, fmt.Errorf("image generation api %s",
-			response.Status)
+		return fmt.Errorf("%s api %s", strings.ToUpper(method), response.Status)
 	}
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	err = json.Unmarshal(body, responseBody)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
+	requestBody := ChatGPTRequestBody{
+		Model:            engine,
+		Messages:         msg,
+		MaxTokens:        maxTokens,
+		Temperature:      temperature,
+		TopP:             1,
+		FrequencyPenalty: 0,
+		PresencePenalty:  0,
+	}
+
+	gptResponseBody := &ChatGPTResponseBody{}
+	err = gpt.sendRequest(BASEURL+"chat/completions", "POST", requestBody, gptResponseBody)
+
+	if err == nil {
+		resp = gptResponseBody.Choices[0].Message
+	}
+	return resp, err
+}
+
+func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, error) {
+	requestBody := ImageGenerationRequestBody{
+		Prompt:         prompt,
+		N:              n,
+		Size:           size,
+		ResponseFormat: "b64_json",
 	}
 
 	imageResponseBody := &ImageGenerationResponseBody{}
-	err = json.Unmarshal(body, imageResponseBody)
+	err := gpt.sendRequest(BASEURL+"images/generations", "POST", requestBody, imageResponseBody)
+
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +139,6 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string,
 		b64Pool = append(b64Pool, data.Base64Json)
 	}
 	return b64Pool, nil
-
 }
 
 func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) {
@@ -172,4 +147,10 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 		return "", err
 	}
 	return b64s[0], nil
+}
+
+func NewChatGPT(apiKey string) *ChatGPT {
+	return &ChatGPT{
+		ApiKey: apiKey,
+	}
 }
