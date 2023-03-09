@@ -25,7 +25,7 @@ const (
 // handlers 所有消息类型类型的处理器
 var handlers MessageHandlerInterface
 
-func InitHandlers(gpt services.ChatGPT, config initialization.Config) {
+func InitHandlers(gpt *services.ChatGPT, config initialization.Config) {
 	handlers = NewMessageHandler(gpt, config)
 }
 

@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"net/http"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
@@ -27,8 +30,9 @@ func main() {
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
 
-	gpt := &services.ChatGPT{ApiKey: config.OpenaiApiKey}
-	handlers.InitHandlers(*gpt, *config)
+	gpt := &services.ChatGPT{ApiKeys: config.OpenaiApiKeys}
+	gpt.StartApiKeyAvailabilityCheck()
+	handlers.InitHandlers(gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
@@ -53,8 +57,33 @@ func main() {
 		sdkginext.NewCardActionHandlerFunc(
 			cardHandler))
 
-	fmt.Println("http server started",
-		"http://localhost:9000/webhook/event")
-	r.Run(":9000")
+	if config.UseHttps {
+		certFile := config.GetCertFile()
+		keyFile := config.GetKeyFile()
 
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			panic(err)
+		}
+
+		server := &http.Server{
+			Addr:    fmt.Sprintf(":%d", config.HttpsPort),
+			Handler: r,
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		}
+
+		fmt.Printf("https server started: https://localhost:%d/webhook/event\n", config.HttpsPort)
+		err = server.ListenAndServeTLS("", "")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		fmt.Printf("http server started: http://localhost:%d/webhook/event\n", config.HttpPort)
+		err := r.Run(fmt.Sprintf(":%d", config.HttpPort))
+		if err != nil {
+			panic(err)
+		}
+	}
 }
