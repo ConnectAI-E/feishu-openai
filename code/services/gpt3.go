@@ -55,7 +55,7 @@ type ChatGPT struct {
 	currentApiKeyIndex int
 	apiKeyUsage        map[string]int
 	apiKeyWeights      []int
-	apiKeyUsageMutex   sync.Mutex
+	apiKeyUsageMutex   sync.RWMutex
 }
 
 func (gpt *ChatGPT) Completions(msg []Messages) (resp Messages, err error) {

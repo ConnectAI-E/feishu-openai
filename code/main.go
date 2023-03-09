@@ -32,7 +32,7 @@ func main() {
 
 	gpt := &services.ChatGPT{ApiKeys: config.OpenaiApiKeys}
 	gpt.StartApiKeyAvailabilityCheck()
-	handlers.InitHandlers(*gpt, *config)
+	handlers.InitHandlers(gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
@@ -57,25 +57,33 @@ func main() {
 		sdkginext.NewCardActionHandlerFunc(
 			cardHandler))
 
-	// 加载证书和密钥文件
-	cert, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
-	if err != nil {
-		panic(err)
-	}
+	if config.UseHttps {
+		certFile := config.GetCertFile()
+		keyFile := config.GetKeyFile()
 
-	// 创建HTTPS服务器
-	server := &http.Server{
-		Addr:    ":9001",
-		Handler: r,
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{cert},
-		},
-	}
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+		if err != nil {
+			panic(err)
+		}
 
-	// 启动HTTPS服务器
-	fmt.Println("https server started", "https://localhost:9001/webhook/event")
-	err = server.ListenAndServeTLS("", "")
-	if err != nil {
-		panic(err)
+		server := &http.Server{
+			Addr:    fmt.Sprintf(":%d", config.HttpsPort),
+			Handler: r,
+			TLSConfig: &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			},
+		}
+
+		fmt.Printf("https server started: https://localhost:%d/webhook/event\n", config.HttpsPort)
+		err = server.ListenAndServeTLS("", "")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		fmt.Printf("http server started: http://localhost:%d/webhook/event\n", config.HttpPort)
+		err := r.Run(fmt.Sprintf(":%d", config.HttpPort))
+		if err != nil {
+			panic(err)
+		}
 	}
 }

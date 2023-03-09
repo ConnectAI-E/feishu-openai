@@ -81,10 +81,10 @@ mv config.example.yaml config.yaml
 
 //测试部署
 go run main.go
-cpolar http 9001
+cpolar http 9000
 
 //正式部署
-nohup cpolar http 9001 -log=stdout &
+nohup cpolar http 9000 -log=stdout &
 
 //查看服务器状态
 https://dashboard.cpolar.com/status
@@ -200,7 +200,7 @@ s deploy
 
 ```bash
 docker build -t feishu-chatgpt:latest .
-docker run -d --name feishu-chatgpt -p 9001:9001 \
+docker run -d --name feishu-chatgpt -p 9000:9000 \
 --env APP_ID=xxx \
 --env APP_SECRET=xxx \
 --env APP_ENCRYPT_KEY=xxx \
@@ -217,7 +217,7 @@ feishu-chatgpt:latest
 - docker 地址: https://hub.docker.com/r/leizhenpeng/feishu-chatgpt
 
 ```bash
-docker run -d --restart=always --name feishu-chatgpt2 -p 9001:9001 -v /etc/localtime:/etc/localtim:ro  \
+docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/localtime:/etc/localtim:ro  \
 --env APP_ID=xxx \
 --env APP_SECRET=xxx \
 --env APP_ENCRYPT_KEY=xxx \
@@ -227,8 +227,8 @@ docker run -d --restart=always --name feishu-chatgpt2 -p 9001:9001 -v /etc/local
 dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 ```
 
-事件回调地址: http://IP:9001/webhook/event
-卡片回调地址: http://IP:9001/webhook/card
+事件回调地址: http://IP:9000/webhook/event
+卡片回调地址: http://IP:9000/webhook/card
 
 把它填入飞书后台
 <br>
@@ -243,8 +243,8 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 2. 解压安装包,修改 config.example.yml 中配置信息,另存为 config.yml
 3. 运行程序入口文件 `feishu-chatgpt`
 
-事件回调地址: http://IP:9001/webhook/event
-卡片回调地址: http://IP:9001/webhook/card
+事件回调地址: http://IP:9000/webhook/event
+卡片回调地址: http://IP:9000/webhook/card
 
 </details>
 
