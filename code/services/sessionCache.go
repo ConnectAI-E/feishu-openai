@@ -8,40 +8,46 @@ import (
 )
 
 type SessionMode string
-
-var (
-	ModePicCreate SessionMode = "pic_create"
-	ModePicVary   SessionMode = "pic_vary"
-	ModeGPT       SessionMode = "gpt"
-)
-
 type SessionService struct {
 	cache *cache.Cache
 }
-
+type PicSetting struct {
+	resolution Resolution
+}
 type Resolution string
+
+type SessionMeta struct {
+	Mode       SessionMode `json:"mode"`
+	Msg        []Messages  `json:"msg,omitempty"`
+	PicSetting PicSetting  `json:"pic_setting,omitempty"`
+}
 
 const (
 	Resolution256  Resolution = "256x256"
 	Resolution512  Resolution = "512x512"
 	Resolution1024 Resolution = "1024x1024"
 )
+const (
+	ModePicCreate SessionMode = "pic_create"
+	ModePicVary   SessionMode = "pic_vary"
+	ModeGPT       SessionMode = "gpt"
+)
 
-type PicSetting struct {
-	resolution Resolution
-}
-
-type SessionMeta struct {
-	Mode       SessionMode
-	Msg        []Messages
-	PicSetting PicSetting
+type SessionServiceCacheInterface interface {
+	GetMsg(sessionId string) []Messages
+	SetMsg(sessionId string, msg []Messages)
+	SetMode(sessionId string, mode SessionMode)
+	GetMode(sessionId string) SessionMode
+	SetPicResolution(sessionId string, resolution Resolution)
+	GetPicResolution(sessionId string) string
+	Clear(sessionId string)
 }
 
 var sessionServices *SessionService
 
-func (s *SessionService) GetMode(sessionID string) SessionMode {
+func (s *SessionService) GetMode(sessionId string) SessionMode {
 	// Get the session mode from the cache.
-	sessionContext, ok := s.cache.Get(sessionID)
+	sessionContext, ok := s.cache.Get(sessionId)
 	if !ok {
 		return ModeGPT
 	}
@@ -49,19 +55,17 @@ func (s *SessionService) GetMode(sessionID string) SessionMode {
 	return sessionMeta.Mode
 }
 
-func (s *SessionService) SetMode(sessionID string, mode SessionMode) {
-	// Update the session mode in the cache.
+func (s *SessionService) SetMode(sessionId string, mode SessionMode) {
 	maxCacheTime := time.Hour * 12
-
-	sessionContext, ok := s.cache.Get(sessionID)
+	sessionContext, ok := s.cache.Get(sessionId)
 	if !ok {
 		sessionMeta := &SessionMeta{Mode: mode}
-		s.cache.Set(sessionID, sessionMeta, maxCacheTime)
+		s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 		return
 	}
 	sessionMeta := sessionContext.(*SessionMeta)
 	sessionMeta.Mode = mode
-	s.cache.Set(sessionID, sessionMeta, maxCacheTime)
+	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 }
 
 func (s *SessionService) GetMsg(sessionId string) (msg []Messages) {
@@ -126,19 +130,9 @@ func (s *SessionService) GetPicResolution(sessionId string) string {
 
 }
 
-func (s *SessionService) Clear(sessionID string) {
+func (s *SessionService) Clear(sessionId string) {
 	// Delete the session context from the cache.
-	s.cache.Delete(sessionID)
-}
-
-type SessionServiceCacheInterface interface {
-	GetMsg(sessionId string) []Messages
-	SetMsg(sessionId string, msg []Messages)
-	SetMode(sessionId string, mode SessionMode)
-	GetMode(sessionId string) SessionMode
-	SetPicResolution(sessionId string, resolution Resolution)
-	GetPicResolution(sessionId string) string
-	Clear(sessionId string)
+	s.cache.Delete(sessionId)
 }
 
 func GetSessionCache() SessionServiceCacheInterface {
