@@ -12,7 +12,7 @@ type Config struct {
 	FeishuAppEncryptKey        string
 	FeishuAppVerificationToken string
 	FeishuBotName              string
-	OpenaiApiKey               string
+	OpenaiApiKeys              []string
 }
 
 func LoadConfig(cfg string) *Config {
@@ -26,7 +26,7 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppEncryptKey:        getViperStringValue("APP_ENCRYPT_KEY"),
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN"),
 		FeishuBotName:              getViperStringValue("BOT_NAME"),
-		OpenaiApiKey:               getViperStringValue("OPENAI_KEY"),
+		OpenaiApiKeys:              getViperStringValueTable("OPENAI_KEY"),
 	}
 
 }
@@ -34,6 +34,14 @@ func LoadConfig(cfg string) *Config {
 func getViperStringValue(key string) string {
 	value := viper.GetString(key)
 	if value == "" {
+		panic(fmt.Errorf("%s MUST be provided in environment or config.yaml file", key))
+	}
+	return value
+}
+
+func getViperStringValueTable(key string) []string {
+	value := viper.GetStringSlice(key)
+	if len(value) == 0 {
 		panic(fmt.Errorf("%s MUST be provided in environment or config.yaml file", key))
 	}
 	return value

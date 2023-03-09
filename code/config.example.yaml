@@ -6,5 +6,15 @@ APP_VERIFICATION_TOKEN: xxx
 # 请确保和飞书应用管理平台中的设置一致 
 BOT_NAME: chatGpt
 # openAI
-OPENAI_KEY: sk-xxx
+OPENAI_KEY: 
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
+- sk-xxx
 
