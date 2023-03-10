@@ -24,29 +24,26 @@ type Config struct {
 
 func LoadConfig(cfg string) *Config {
 	viper.SetConfigFile(cfg)
-	viper.ReadInConfig()
+	if err := viper.ReadInConfig(); err != nil {
+		return nil
+	}
 	viper.AutomaticEnv()
 
-	httpPort := getViperIntValue("HTTP_PORT", 9000)
-	httpsPort := getViperIntValue("HTTPS_PORT", 9001)
-	useHttps := getViperBoolValue("USE_HTTPS", false)
-	certFile := getViperStringValue("CERT_FILE", "cert.pem")
-	keyFile := getViperStringValue("KEY_FILE", "key.pem")
-
-	return &Config{
+	config := &Config{
 		FeishuAppId:                getViperStringValue("APP_ID", ""),
 		FeishuAppSecret:            getViperStringValue("APP_SECRET", ""),
 		FeishuAppEncryptKey:        getViperStringValue("APP_ENCRYPT_KEY", ""),
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
 		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
 		OpenaiApiKeys:              getViperStringValueTable("OPENAI_KEY", nil),
-		HttpPort:                   httpPort,
-		HttpsPort:                  httpsPort,
-		UseHttps:                   useHttps,
-		CertFile:                   certFile,
-		KeyFile:                    keyFile,
+		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
+		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
+		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
+		CertFile:                   getViperStringValue("CERT_FILE", "cert.pem"),
+		KeyFile:                    getViperStringValue("KEY_FILE", "key.pem"),
 	}
 
+	return config
 }
 
 func getViperStringValue(key string, defaultValue string) string {
