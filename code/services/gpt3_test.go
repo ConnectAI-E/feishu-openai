@@ -14,7 +14,7 @@ func TestCompletions(t *testing.T) {
 		{Role: "user", Content: "翻译这段话: The assistant messages help store prior responses. They can also be written by a developer to help give examples of desired behavior."},
 	}
 
-	gpt := NewChatGPT(config.OpenaiApiKeys)
+	gpt := NewChatGPT(config.OpenaiApiKeys, config.OpenaiApiUrl)
 
 	resp, err := gpt.Completions(msgs)
 	if err != nil {
@@ -27,7 +27,7 @@ func TestCompletions(t *testing.T) {
 func TestGenerateOneImage(t *testing.T) {
 	config := initialization.LoadConfig("../config.yaml")
 
-	gpt := NewChatGPT(config.OpenaiApiKeys)
+	gpt := NewChatGPT(config.OpenaiApiKeys, config.OpenaiApiUrl)
 	prompt := "a red apple"
 	size := "256x256"
 

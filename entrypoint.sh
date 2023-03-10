@@ -16,6 +16,7 @@ HTTPS_PORT=${HTTPS_PORT:-""}
 USE_HTTPS=${USE_HTTPS:-""}
 CERT_FILE=${CERT_FILE:-""}
 KEY_FILE=${KEY_FILE:-""}
+API_URL=${API_URL:-""}
 CONFIG_PATH=${CONFIG_PATH:-"config.yaml"}
 
 
@@ -77,6 +78,10 @@ fi
 
 if [ "$KEY_FILE" != "" ] ; then
 sed -i "15c KEY_FILE: $KEY_FILE" $CONFIG_PATH
+fi
+
+if [ "$API_URL" != "" ] ; then
+    sed -i "17c   API_URL: $API_URL" $CONFIG_PATH
 fi
 
 echo -e "\033[32m[Success] Configuration file has been generated!\033[0m"
