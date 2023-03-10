@@ -26,7 +26,7 @@ func main() {
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
-	gpt := services.NewChatGPT(config.OpenaiApiKeys, config.OpenaiApiUrl)
+	gpt := services.NewChatGPT(*config)
 	handlers.InitHandlers(gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
