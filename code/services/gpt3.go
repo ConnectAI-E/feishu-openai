@@ -3,9 +3,11 @@ package services
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"start-feishubot/services/loadbalancer"
 	"strings"
 	"time"
 )
@@ -48,7 +50,8 @@ type ChatGPTRequestBody struct {
 	PresencePenalty  int        `json:"presence_penalty"`
 }
 type ChatGPT struct {
-	ApiKey string
+	Lb     *loadbalancer.LoadBalancer
+	ApiKey []string
 }
 
 type ImageGenerationRequestBody struct {
@@ -65,7 +68,13 @@ type ImageGenerationResponseBody struct {
 	} `json:"data"`
 }
 
-func (gpt ChatGPT) sendRequest(url, method string, requestBody interface{}, responseBody interface{}) error {
+func (gpt ChatGPT) sendRequest(url, method string,
+	requestBody interface{}, responseBody interface{}) error {
+	api := gpt.Lb.GetAPI()
+	if api == nil {
+		return errors.New("no available API")
+	}
+
 	requestData, err := json.Marshal(requestBody)
 	if err != nil {
 		return err
@@ -77,16 +86,20 @@ func (gpt ChatGPT) sendRequest(url, method string, requestBody interface{}, resp
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+gpt.ApiKey)
+	req.Header.Set("Authorization", "Bearer "+api.Key)
 	client := &http.Client{Timeout: 110 * time.Second}
 	response, err := client.Do(req)
 	if err != nil {
+		gpt.Lb.SetAvailability(api.Key, false)
 		return err
 	}
 	defer response.Body.Close()
+
 	if response.StatusCode/2 != 100 {
+		gpt.Lb.SetAvailability(api.Key, false)
 		return fmt.Errorf("%s api %s", strings.ToUpper(method), response.Status)
 	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return err
@@ -96,6 +109,8 @@ func (gpt ChatGPT) sendRequest(url, method string, requestBody interface{}, resp
 	if err != nil {
 		return err
 	}
+
+	gpt.Lb.SetAvailability(api.Key, true)
 	return nil
 }
 
@@ -109,9 +124,9 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		FrequencyPenalty: 0,
 		PresencePenalty:  0,
 	}
-
 	gptResponseBody := &ChatGPTResponseBody{}
-	err = gpt.sendRequest(BASEURL+"chat/completions", "POST", requestBody, gptResponseBody)
+	err = gpt.sendRequest(BASEURL+"chat/completions", "POST",
+		requestBody, gptResponseBody)
 
 	if err == nil {
 		resp = gptResponseBody.Choices[0].Message
@@ -149,8 +164,10 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 	return b64s[0], nil
 }
 
-func NewChatGPT(apiKey string) *ChatGPT {
+func NewChatGPT(apiKeys []string) *ChatGPT {
+	lb := loadbalancer.NewLoadBalancer(apiKeys)
 	return &ChatGPT{
-		ApiKey: apiKey,
+		Lb:     lb,
+		ApiKey: apiKeys,
 	}
 }

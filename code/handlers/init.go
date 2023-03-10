@@ -25,7 +25,7 @@ const (
 // handlers 所有消息类型类型的处理器
 var handlers MessageHandlerInterface
 
-func InitHandlers(gpt services.ChatGPT, config initialization.Config) {
+func InitHandlers(gpt *services.ChatGPT, config initialization.Config) {
 	handlers = NewMessageHandler(gpt, config)
 }
 
@@ -50,7 +50,7 @@ func CardHandler() func(ctx context.Context,
 func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
 	actionValue := cardAction.Action.Value
 	chatType := actionValue["chatType"]
-	fmt.Printf("chatType: %v", chatType)
+	//fmt.Printf("chatType: %v", chatType)
 	if chatType == "group" {
 		return GroupHandler
 	}

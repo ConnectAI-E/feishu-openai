@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"log"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -26,9 +26,8 @@ func main() {
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
-
-	gpt := services.NewChatGPT(config.OpenaiApiKey)
-	handlers.InitHandlers(*gpt, *config)
+	gpt := services.NewChatGPT(config.OpenaiApiKeys)
+	handlers.InitHandlers(gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
@@ -53,8 +52,9 @@ func main() {
 		sdkginext.NewCardActionHandlerFunc(
 			cardHandler))
 
-	fmt.Println("http server started",
-		"http://localhost:9000/webhook/event")
-	r.Run(":9000")
+	err := initialization.StartServer(*config, r)
+	if err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 
 }
