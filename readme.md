@@ -208,10 +208,14 @@ docker run -d --name feishu-chatgpt -p 9000:9000 \
 --env BOT_NAME=chatGpt \
 --env OPENAI_KEY="sk-xxx1,sk-xxx2,sk-xxx3" \
 --env API_URL="https://api.openai.com" \
---env HTTP_PROXY="http://host.docker.internal:7890" \
+--env HTTP_PROXY="" \
 feishu-chatgpt:latest
 ```
-
+注意:
+- `BOT_NAME` 为飞书机器人名称，例如 `chatGpt`
+- `OPENAI_KEY` 为openai key，多个key用逗号分隔，例如 `sk-xxx1,sk-xxx2,sk-xxx3`
+- `HTTP_PROXY` 为宿主机的proxy地址，例如 `http://host.docker.internal:7890`
+- `API_URL` 为openai api 接口地址，例如 `https://api.openai.com`, 没有反向代理的话，可以不用设置
 ---
 
 小白简易化 docker 部署

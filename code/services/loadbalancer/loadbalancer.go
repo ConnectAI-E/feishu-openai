@@ -1,7 +1,10 @@
 package loadbalancer
 
 import (
+	"fmt"
+	"math/rand"
 	"sync"
+	"time"
 )
 
 type API struct {
@@ -36,7 +39,12 @@ func (lb *LoadBalancer) GetAPI() *API {
 		}
 	}
 	if len(availableAPIs) == 0 {
-		return nil
+		//随机复活一个
+		fmt.Printf("No available API, revive one randomly\n")
+		rand.Seed(time.Now().UnixNano())
+		index := rand.Intn(len(lb.apis))
+		lb.apis[index].Available = true
+		return lb.apis[index]
 	}
 
 	selectedAPI := availableAPIs[0]
