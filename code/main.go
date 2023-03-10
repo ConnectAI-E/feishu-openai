@@ -2,14 +2,11 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"fmt"
-	"net/http"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"log"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
-
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
@@ -57,33 +54,9 @@ func main() {
 		sdkginext.NewCardActionHandlerFunc(
 			cardHandler))
 
-	if config.UseHttps {
-		certFile := config.GetCertFile()
-		keyFile := config.GetKeyFile()
-
-		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
-		if err != nil {
-			panic(err)
-		}
-
-		server := &http.Server{
-			Addr:    fmt.Sprintf(":%d", config.HttpsPort),
-			Handler: r,
-			TLSConfig: &tls.Config{
-				Certificates: []tls.Certificate{cert},
-			},
-		}
-
-		fmt.Printf("https server started: https://localhost:%d/webhook/event\n", config.HttpsPort)
-		err = server.ListenAndServeTLS("", "")
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		fmt.Printf("http server started: http://localhost:%d/webhook/event\n", config.HttpPort)
-		err := r.Run(fmt.Sprintf(":%d", config.HttpPort))
-		if err != nil {
-			panic(err)
-		}
+	err := initialization.StartServer(*config, r)
+	if err != nil {
+		log.Fatalf("failed to start server: %v", err)
 	}
+
 }
