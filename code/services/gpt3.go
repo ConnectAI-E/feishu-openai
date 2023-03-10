@@ -229,7 +229,9 @@ func (gpt *ChatGPT) initApiKeyUsage() {
 
 func (gpt *ChatGPT) checkApiKeyAvailability(apiKey string) bool {
 	// 检查apikey的可用性
-	req, err := http.NewRequest("GET", BASEURL+"engines", nil)
+	fmt.Println("check api key availability" + apiKey)
+	req, err := http.NewRequest("GET", BASEURL+"models", nil)
+	fmt.Println("check api key availability" + req.URL.String())
 	if err != nil {
 		log.Printf("check api key %s failed: %v", apiKey, err)
 		return false
@@ -242,6 +244,7 @@ func (gpt *ChatGPT) checkApiKeyAvailability(apiKey string) bool {
 		log.Printf("check api key %s failed: %v", apiKey, err)
 		return false
 	}
+	fmt.Printf("check api key availability %s \n", response.Status)
 	if response.StatusCode/2 != 100 {
 		log.Printf("api key %s is not available: %s", apiKey, response.Status)
 		if response.StatusCode == 429 {
