@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -24,10 +25,13 @@ type Config struct {
 
 func LoadConfig(cfg string) *Config {
 	viper.SetConfigFile(cfg)
-	if err := viper.ReadInConfig(); err != nil {
-		return nil
-	}
+	viper.ReadInConfig()
 	viper.AutomaticEnv()
+	//content, err := ioutil.ReadFile("config.yaml")
+	//if err != nil {
+	//	fmt.Println("Error reading file:", err)
+	//}
+	//fmt.Println(string(content))
 
 	config := &Config{
 		FeishuAppId:                getViperStringValue("APP_ID", ""),
@@ -35,7 +39,7 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppEncryptKey:        getViperStringValue("APP_ENCRYPT_KEY", ""),
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
 		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
-		OpenaiApiKeys:              getViperStringValueTable("OPENAI_KEY", nil),
+		OpenaiApiKeys:              getViperStringArray("OPENAI_KEY", nil),
 		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
 		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
 		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
@@ -54,12 +58,14 @@ func getViperStringValue(key string, defaultValue string) string {
 	return value
 }
 
-func getViperStringValueTable(key string, defaultValue []string) []string {
-	value := viper.GetStringSlice(key)
-	if len(value) == 0 {
+//OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
+//result:[sk-xxx sk-xxx sk-xxx]
+func getViperStringArray(key string, defaultValue []string) []string {
+	value := viper.GetString(key)
+	if value == "" {
 		return defaultValue
 	}
-	return value
+	return strings.Split(value, ",")
 }
 
 func getViperIntValue(key string, defaultValue int) int {

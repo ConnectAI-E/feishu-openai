@@ -1,7 +1,6 @@
 package loadbalancer
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -49,11 +48,11 @@ func (lb *LoadBalancer) GetAPI() *API {
 		}
 	}
 	selectedAPI.Times++
-	fmt.Printf("API Availability:\n")
-	for _, api := range lb.apis {
-		fmt.Printf("%s: %v\n", api.Key, api.Available)
-		fmt.Printf("%s: %d\n", api.Key, api.Times)
-	}
+	//fmt.Printf("API Availability:\n")
+	//for _, api := range lb.apis {
+	//	fmt.Printf("%s: %v\n", api.Key, api.Available)
+	//	fmt.Printf("%s: %d\n", api.Key, api.Times)
+	//}
 
 	return selectedAPI
 }
