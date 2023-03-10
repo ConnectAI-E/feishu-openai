@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	BASEURL     = "https://api.openai.com/v1/"
 	maxTokens   = 2000
 	temperature = 0.7
 	engine      = "gpt-3.5-turbo"
@@ -52,6 +51,7 @@ type ChatGPTRequestBody struct {
 type ChatGPT struct {
 	Lb     *loadbalancer.LoadBalancer
 	ApiKey []string
+	ApiUrl string
 }
 
 type ImageGenerationRequestBody struct {
@@ -125,7 +125,7 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		PresencePenalty:  0,
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
-	err = gpt.sendRequest(BASEURL+"chat/completions", "POST",
+	err = gpt.sendRequest(gpt.ApiUrl+"/v1/chat/completions", "POST",
 		requestBody, gptResponseBody)
 
 	if err == nil {
@@ -143,7 +143,8 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 	}
 
 	imageResponseBody := &ImageGenerationResponseBody{}
-	err := gpt.sendRequest(BASEURL+"images/generations", "POST", requestBody, imageResponseBody)
+	err := gpt.sendRequest(gpt.ApiUrl+"/v1/images/generations",
+		"POST", requestBody, imageResponseBody)
 
 	if err != nil {
 		return nil, err
@@ -164,10 +165,11 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 	return b64s[0], nil
 }
 
-func NewChatGPT(apiKeys []string) *ChatGPT {
+func NewChatGPT(apiKeys []string, apiUrl string) *ChatGPT {
 	lb := loadbalancer.NewLoadBalancer(apiKeys)
 	return &ChatGPT{
 		Lb:     lb,
 		ApiKey: apiKeys,
+		ApiUrl: apiUrl,
 	}
 }

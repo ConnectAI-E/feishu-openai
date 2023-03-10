@@ -207,6 +207,7 @@ docker run -d --name feishu-chatgpt -p 9000:9000 \
 --env APP_VERIFICATION_TOKEN=xxx \
 --env BOT_NAME=chatGpt \
 --env OPENAI_KEY="sk-xxx1,sk-xxx2,sk-xxx3" \
+--env API_URL=https://api.openai.com \
 feishu-chatgpt:latest
 ```
 
@@ -224,6 +225,7 @@ docker run -d --restart=always --name feishu-chatgpt2 -p 9000:9000 -v /etc/local
 --env APP_VERIFICATION_TOKEN=xxx \
 --env BOT_NAME=chatGpt \
 --env OPENAI_KEY="sk-xxx1,sk-xxx2,sk-xxx3" \
+--env API_URL=https://api.openai.com \
 dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 ```
 

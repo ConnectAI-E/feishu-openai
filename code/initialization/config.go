@@ -21,6 +21,7 @@ type Config struct {
 	UseHttps                   bool
 	CertFile                   string
 	KeyFile                    string
+	OpenaiApiUrl               string
 }
 
 func LoadConfig(cfg string) *Config {
@@ -45,6 +46,7 @@ func LoadConfig(cfg string) *Config {
 		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
 		CertFile:                   getViperStringValue("CERT_FILE", "cert.pem"),
 		KeyFile:                    getViperStringValue("KEY_FILE", "key.pem"),
+		OpenaiApiUrl:               getViperStringValue("API_URL", "https://api.openai.com"),
 	}
 
 	return config
