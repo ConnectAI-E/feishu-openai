@@ -7,13 +7,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"start-feishubot/initialization"
 	"start-feishubot/services/loadbalancer"
 	"strings"
 	"time"
 )
 
 const (
-	BASEURL     = "https://api.openai.com/v1/"
 	maxTokens   = 2000
 	temperature = 0.7
 	engine      = "gpt-3.5-turbo"
@@ -50,8 +51,10 @@ type ChatGPTRequestBody struct {
 	PresencePenalty  int        `json:"presence_penalty"`
 }
 type ChatGPT struct {
-	Lb     *loadbalancer.LoadBalancer
-	ApiKey []string
+	Lb        *loadbalancer.LoadBalancer
+	ApiKey    []string
+	ApiUrl    string
+	HttpProxy string
 }
 
 type ImageGenerationRequestBody struct {
@@ -68,8 +71,9 @@ type ImageGenerationResponseBody struct {
 	} `json:"data"`
 }
 
-func (gpt ChatGPT) sendRequest(url, method string,
-	requestBody interface{}, responseBody interface{}) error {
+func (gpt ChatGPT) doRequest(url, method string,
+	requestBody interface{}, responseBody interface{},
+	client *http.Client) error {
 	api := gpt.Lb.GetAPI()
 	if api == nil {
 		return errors.New("no available API")
@@ -87,7 +91,7 @@ func (gpt ChatGPT) sendRequest(url, method string,
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+api.Key)
-	client := &http.Client{Timeout: 110 * time.Second}
+
 	response, err := client.Do(req)
 	if err != nil {
 		gpt.Lb.SetAvailability(api.Key, false)
@@ -114,6 +118,33 @@ func (gpt ChatGPT) sendRequest(url, method string,
 	return nil
 }
 
+func (gpt ChatGPT) sendRequest(link, method string,
+	requestBody interface{}, responseBody interface{}) error {
+	var err error
+	client := &http.Client{Timeout: 110 * time.Second}
+	if gpt.HttpProxy == "" {
+		err = gpt.doRequest(link, method, requestBody, responseBody, client)
+	} else {
+		//fmt.Println("using proxy: " + gpt.HttpProxy)
+		proxyUrl, err := url.Parse(gpt.HttpProxy)
+		if err != nil {
+			return err
+		}
+
+		transport := &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+		proxyClient := &http.Client{
+			Transport: transport,
+			Timeout:   110 * time.Second,
+		}
+
+		err = gpt.doRequest(link, method, requestBody, responseBody, proxyClient)
+	}
+
+	return err
+}
+
 func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            engine,
@@ -125,11 +156,14 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		PresencePenalty:  0,
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
-	err = gpt.sendRequest(BASEURL+"chat/completions", "POST",
+	err = gpt.sendRequest(gpt.ApiUrl+"/v1/chat/completions", "POST",
 		requestBody, gptResponseBody)
 
-	if err == nil {
+	if err == nil && len(gptResponseBody.Choices) > 0 {
 		resp = gptResponseBody.Choices[0].Message
+	} else {
+		resp = Messages{}
+		err = errors.New("openai 请求失败")
 	}
 	return resp, err
 }
@@ -143,7 +177,8 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 	}
 
 	imageResponseBody := &ImageGenerationResponseBody{}
-	err := gpt.sendRequest(BASEURL+"images/generations", "POST", requestBody, imageResponseBody)
+	err := gpt.sendRequest(gpt.ApiUrl+"/v1/images/generations",
+		"POST", requestBody, imageResponseBody)
 
 	if err != nil {
 		return nil, err
@@ -164,10 +199,15 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 	return b64s[0], nil
 }
 
-func NewChatGPT(apiKeys []string) *ChatGPT {
+func NewChatGPT(config initialization.Config) *ChatGPT {
+	apiKeys := config.OpenaiApiKeys
+	apiUrl := config.OpenaiApiUrl
+	httpProxy := config.HttpProxy
 	lb := loadbalancer.NewLoadBalancer(apiKeys)
 	return &ChatGPT{
-		Lb:     lb,
-		ApiKey: apiKeys,
+		Lb:        lb,
+		ApiKey:    apiKeys,
+		ApiUrl:    apiUrl,
+		HttpProxy: httpProxy,
 	}
 }

@@ -13,4 +13,7 @@ HTTPS_PORT: 9001
 USE_HTTPS: false
 CERT_FILE: cert.pem
 KEY_FILE: key.pem
-
+# openai 地址, 一般不需要修改, 除非你有自己的反向代理
+API_URL: https://api.openai.com
+# 代理设置, 例如 "http://127.0.0.1:7890", ""代表不使用代理
+HTTP_PROXY: ""
