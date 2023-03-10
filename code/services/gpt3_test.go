@@ -15,7 +15,6 @@ func TestCompletions(t *testing.T) {
 	}
 
 	gpt := NewChatGPT(config.OpenaiApiKeys)
-	gpt.StartApiKeyAvailabilityCheck()
 
 	resp, err := gpt.Completions(msgs)
 	if err != nil {
@@ -29,7 +28,6 @@ func TestGenerateOneImage(t *testing.T) {
 	config := initialization.LoadConfig("../config.yaml")
 
 	gpt := NewChatGPT(config.OpenaiApiKeys)
-	gpt.StartApiKeyAvailabilityCheck()
 	prompt := "a red apple"
 	size := "256x256"
 
