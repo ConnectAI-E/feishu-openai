@@ -17,6 +17,7 @@ USE_HTTPS=${USE_HTTPS:-""}
 CERT_FILE=${CERT_FILE:-""}
 KEY_FILE=${KEY_FILE:-""}
 API_URL=${API_URL:-""}
+HTTP_PROXY=${HTTP_PROXY:-""}
 CONFIG_PATH=${CONFIG_PATH:-"config.yaml"}
 
 
@@ -82,6 +83,10 @@ fi
 
 if [ "$API_URL" != "" ] ; then
     sed -i "17c   API_URL: $API_URL" $CONFIG_PATH
+fi
+
+if [ "$HTTP_PROXY" != "" ] ; then
+    sed -i "19c   HTTP_PROXY: $HTTP_PROXY" $CONFIG_PATH
 fi
 
 echo -e "\033[32m[Success] Configuration file has been generated!\033[0m"
