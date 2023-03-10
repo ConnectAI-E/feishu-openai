@@ -266,6 +266,7 @@ func (gpt *ChatGPT) setApiKeyAvailability() {
 			gpt.calculateApiKeyWeights()
 		}
 	}
+	fmt.Printf("api key usage: %v", gpt.apiKeyUsage)
 }
 
 func (gpt *ChatGPT) StartApiKeyAvailabilityCheck() {
