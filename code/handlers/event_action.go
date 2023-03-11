@@ -192,9 +192,9 @@ type AudioAction struct { /*语音*/
 
 func (*AudioAction) Execute(a *ActionInfo) bool {
 	// 只有私聊才解析语音,其他不解析
-	//if a.info.handlerType != UserHandler {
-	//	return true
-	//}
+	if a.info.handlerType != UserHandler {
+		return true
+	}
 
 	//判断是否是语音
 	if a.info.msgType == "audio" {
