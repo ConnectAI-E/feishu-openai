@@ -311,19 +311,17 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 
 ## 更多交流
 
-企业如需定制部署，可联系 WeChat: `laolei_forkway`，支持发票~
+如需协助部署，或者其他定制服务，可联系下面的WeChat，支持发票~
 
-遇到其他问题，可以加入飞书群沟通~
+遇到问题，可以加入飞书群沟通~
 
-<img src='./docs/talk.png' alt='' width='300'/>
+<img src='./docs/talk.png' alt='' width='200'/>
 
-## 赞助项目
+## 交朋友 或者 鼓励一下
 
 如果你觉得这个项目对你有帮助，可以请作者买本书~
 
+<img width="400" src="https://user-images.githubusercontent.com/50035229/224462896-28f7b2d5-f443-4cc2-9790-7b72e5c53f15.png">
+
 😚 谢谢你啦 😚
 
-<details>
-    <summary>赞赏二维码</summary>
-    <img width="400" src="https://user-images.githubusercontent.com/50035229/222702169-cec777f9-cb0c-4f6a-90e5-418959e668e5.png">
-</details>
