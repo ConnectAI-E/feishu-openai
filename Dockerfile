@@ -18,5 +18,6 @@ COPY --from=golang /build/config.example.yaml /dist/config.yaml
 COPY --from=golang /build/feishu_chatgpt /dist
 ADD entrypoint.sh /dist/entrypoint.sh
 
+RUN chmod +x /dist/entrypoint.sh
 EXPOSE 9000
 CMD /dist/entrypoint.sh
