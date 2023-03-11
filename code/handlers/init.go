@@ -77,5 +77,12 @@ func judgeMsgType(event *larkim.P2MessageReceiveV1) string {
 	if *msgType == "text" {
 		return "text"
 	}
+	if *msgType == "image" {
+		return "image"
+	}
+	if *msgType == "audio" {
+		return "audio"
+	}
+
 	return ""
 }

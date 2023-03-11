@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"strings"
@@ -107,10 +108,11 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		return nil
 	}
 	msgType := judgeMsgType(event)
-	if msgType != "text" {
+	if msgType != "text" && msgType != "audio" {
 		fmt.Println("unknown msg type")
 		return nil
 	}
+	fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
@@ -128,6 +130,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		msgId:       msgId,
 		chatId:      chatId,
 		qParsed:     strings.Trim(parseContent(*content), " "),
+		fileKey:     parseFileKey(*content),
 		sessionId:   sessionId,
 		mention:     mention,
 	}
@@ -139,6 +142,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 	actions := []Action{
 		&ProcessedUniqueAction{}, //避免重复处理
 		&ProcessMentionAction{},  //判断机器人是否应该被调用
+		&AudioAction{},           //语音处理
 		&EmptyAction{},           //空消息处理
 		&ClearAction{},           //清除消息处理
 		&HelpAction{},            //帮助处理
