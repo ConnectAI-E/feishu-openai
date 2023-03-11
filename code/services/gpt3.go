@@ -5,9 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/url"
+	"os"
 	"start-feishubot/initialization"
 	"start-feishubot/services/loadbalancer"
 	"strings"
@@ -71,37 +74,91 @@ type ImageGenerationResponseBody struct {
 	} `json:"data"`
 }
 
-func (gpt ChatGPT) doRequest(url, method string,
-	requestBody interface{}, responseBody interface{},
-	client *http.Client) error {
-	api := gpt.Lb.GetAPI()
+type AudioToTextRequestBody struct {
+	File           string `json:"file"`
+	Model          string `json:"model"`
+	ResponseFormat string `json:"response_format"`
+}
+
+type AudioToTextResponseBody struct {
+	Text string `json:"text"`
+}
+
+type requestBodyType int
+
+const (
+	jsonBody requestBodyType = iota
+	formDataBody
+)
+
+func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBodyType,
+	requestBody interface{}, responseBody interface{}, client *http.Client, maxRetries int) error {
+	var api *loadbalancer.API
+	var requestBodyData []byte
+	var err error
+	var writer *multipart.Writer
+
+	switch bodyType {
+	case jsonBody:
+		api = gpt.Lb.GetAPI()
+		requestBodyData, err = json.Marshal(requestBody)
+		if err != nil {
+			return err
+		}
+	case formDataBody:
+		api = gpt.Lb.GetAPI()
+		formBody := &bytes.Buffer{}
+		writer = multipart.NewWriter(formBody)
+		err = audioMultipartForm(requestBody.(AudioToTextRequestBody), writer)
+		if err != nil {
+			return err
+		}
+		err = writer.Close()
+		if err != nil {
+			return err
+		}
+		requestBodyData = formBody.Bytes()
+	default:
+		return errors.New("unknown request body type")
+	}
+
 	if api == nil {
 		return errors.New("no available API")
 	}
 
-	requestData, err := json.Marshal(requestBody)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(requestData))
+	req, err := http.NewRequest(method, url, bytes.NewReader(requestBodyData))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	if bodyType == formDataBody {
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+	}
 	req.Header.Set("Authorization", "Bearer "+api.Key)
 
-	response, err := client.Do(req)
-	if err != nil {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return err
+	var response *http.Response
+	var retry int
+	for retry = 0; retry <= maxRetries; retry++ {
+		response, err = client.Do(req)
+		//fmt.Println("req", req)
+		//fmt.Println("response", response, "err", err)
+		if err != nil || response.StatusCode < 200 || response.StatusCode >= 300 {
+			gpt.Lb.SetAvailability(api.Key, false)
+			if retry == maxRetries {
+				break
+			}
+			time.Sleep(time.Duration(retry+1) * time.Second)
+		} else {
+			break
+		}
 	}
-	defer response.Body.Close()
+	if response != nil {
+		defer response.Body.Close()
+	}
 
-	if response.StatusCode/2 != 100 {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return fmt.Errorf("%s api %s", strings.ToUpper(method), response.Status)
+	if response == nil || response.StatusCode < 200 || response.StatusCode >= 300 {
+		return fmt.Errorf("%s api failed after %d retries", strings.ToUpper(method), retry)
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
@@ -118,19 +175,18 @@ func (gpt ChatGPT) doRequest(url, method string,
 	return nil
 }
 
-func (gpt ChatGPT) sendRequest(link, method string,
+func (gpt ChatGPT) sendRequestWithBodyType(link, method string, bodyType requestBodyType,
 	requestBody interface{}, responseBody interface{}) error {
 	var err error
 	client := &http.Client{Timeout: 110 * time.Second}
 	if gpt.HttpProxy == "" {
-		err = gpt.doRequest(link, method, requestBody, responseBody, client)
+		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
+			requestBody, responseBody, client, 3)
 	} else {
-		//fmt.Println("using proxy: " + gpt.HttpProxy)
 		proxyUrl, err := url.Parse(gpt.HttpProxy)
 		if err != nil {
 			return err
 		}
-
 		transport := &http.Transport{
 			Proxy: http.ProxyURL(proxyUrl),
 		}
@@ -138,8 +194,8 @@ func (gpt ChatGPT) sendRequest(link, method string,
 			Transport: transport,
 			Timeout:   110 * time.Second,
 		}
-
-		err = gpt.doRequest(link, method, requestBody, responseBody, proxyClient)
+		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
+			requestBody, responseBody, proxyClient, 3)
 	}
 
 	return err
@@ -156,7 +212,8 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 		PresencePenalty:  0,
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
-	err = gpt.sendRequest(gpt.ApiUrl+"/v1/chat/completions", "POST",
+	err = gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/chat/completions", "POST",
+		jsonBody,
 		requestBody, gptResponseBody)
 
 	if err == nil && len(gptResponseBody.Choices) > 0 {
@@ -168,6 +225,37 @@ func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
 	return resp, err
 }
 
+// audioMultipartForm creates a form with audio file contents and the name of the model to use for
+// audio processing.
+func audioMultipartForm(request AudioToTextRequestBody, w *multipart.Writer) error {
+	f, err := os.Open(request.File)
+	if err != nil {
+		return fmt.Errorf("opening audio file: %w", err)
+	}
+
+	fw, err := w.CreateFormFile("file", f.Name())
+	if err != nil {
+		return fmt.Errorf("creating form file: %w", err)
+	}
+
+	if _, err = io.Copy(fw, f); err != nil {
+		return fmt.Errorf("reading from opened audio file: %w", err)
+	}
+
+	fw, err = w.CreateFormField("model")
+	if err != nil {
+		return fmt.Errorf("creating form field: %w", err)
+	}
+
+	modelName := bytes.NewReader([]byte(request.Model))
+	if _, err = io.Copy(fw, modelName); err != nil {
+		return fmt.Errorf("writing model name: %w", err)
+	}
+	w.Close()
+
+	return nil
+}
+
 func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, error) {
 	requestBody := ImageGenerationRequestBody{
 		Prompt:         prompt,
@@ -177,8 +265,8 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 	}
 
 	imageResponseBody := &ImageGenerationResponseBody{}
-	err := gpt.sendRequest(gpt.ApiUrl+"/v1/images/generations",
-		"POST", requestBody, imageResponseBody)
+	err := gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/images/generations",
+		"POST", jsonBody, requestBody, imageResponseBody)
 
 	if err != nil {
 		return nil, err
@@ -199,6 +287,23 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 	return b64s[0], nil
 }
 
+func (gpt ChatGPT) AudioToText(audio string) (string, error) {
+	requestBody := AudioToTextRequestBody{
+		File:           audio,
+		Model:          "whisper-1",
+		ResponseFormat: "text",
+	}
+	audioToTextResponseBody := &AudioToTextResponseBody{}
+	err := gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/audio/transcriptions",
+		"POST", formDataBody, requestBody, audioToTextResponseBody)
+	//fmt.Println(audioToTextResponseBody)
+	if err != nil {
+		//fmt.Println(err)
+		return "", err
+	}
+
+	return audioToTextResponseBody.Text, nil
+}
 func NewChatGPT(config initialization.Config) *ChatGPT {
 	apiKeys := config.OpenaiApiKeys
 	apiUrl := config.OpenaiApiUrl

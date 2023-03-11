@@ -23,6 +23,9 @@ func parseContent(content string) string {
 	if err != nil {
 		fmt.Println(err)
 	}
+	if contentMap["text"] == nil {
+		return ""
+	}
 	text := contentMap["text"].(string)
 	return msgFilter(text)
 }
@@ -66,4 +69,18 @@ func cleanTextBlock(msg string) string {
 	msg = processUnicode(msg)
 	msg = processQuote(msg)
 	return msg
+}
+
+func parseFileKey(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	if contentMap["file_key"] == nil {
+		return ""
+	}
+	fileKey := contentMap["file_key"].(string)
+	return fileKey
 }

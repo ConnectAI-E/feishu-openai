@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"os"
+	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/utils"
+	"start-feishubot/utils/audio"
 )
 
 type MsgInfo struct {
@@ -14,6 +17,7 @@ type MsgInfo struct {
 	msgId       *string
 	chatId      *string
 	qParsed     string
+	fileKey     string
 	sessionId   *string
 	mention     []*larkim.MentionEvent
 }
@@ -169,7 +173,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 	//if new topic
 	if len(msg) == 2 {
-		fmt.Println("new topic", msg[1].Content)
+		//fmt.Println("new topic", msg[1].Content)
 		sendNewTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
 			completions.Content)
 		return false
@@ -181,4 +185,54 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 		return false
 	}
 	return true
+}
+
+type AudioAction struct { /*语音*/
+}
+
+func (*AudioAction) Execute(a *ActionInfo) bool {
+	// 只有私聊才解析语音,其他不解析
+	if a.info.handlerType != UserHandler {
+		return true
+	}
+
+	//判断是否是语音
+	if a.info.msgType == "audio" {
+		fileKey := a.info.fileKey
+		//fmt.Printf("fileKey: %s \n", fileKey)
+		msgId := a.info.msgId
+		//fmt.Println("msgId: ", *msgId)
+		req := larkim.NewGetMessageResourceReqBuilder().MessageId(
+			*msgId).FileKey(fileKey).Type("file").Build()
+		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
+		//fmt.Println(resp, err)
+		if err != nil {
+			fmt.Println(err)
+			return true
+		}
+		f := fmt.Sprintf("%s.ogg", fileKey)
+		resp.WriteFile(f)
+		defer os.Remove(f)
+
+		//fmt.Println("f: ", f)
+		output := fmt.Sprintf("%s.mp3", fileKey)
+		// 等待转换完成
+		audio.OggToWavByPath(f, output)
+		defer os.Remove(output)
+		//fmt.Println("output: ", output)
+
+		text, err := a.handler.gpt.AudioToText(output)
+		if err != nil {
+			fmt.Println(err)
+			sendMsg(*a.ctx, "🤖️：语音转换失败，请稍后再试～", a.info.msgId)
+			return false
+		}
+		//删除文件
+		//fmt.Println("text: ", text)
+		a.info.qParsed = text
+		return true
+	}
+
+	return true
+
 }
