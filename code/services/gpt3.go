@@ -84,37 +84,81 @@ type AudioToTextResponseBody struct {
 	Text string `json:"text"`
 }
 
-func (gpt ChatGPT) doRequest(url, method string,
-	requestBody interface{}, responseBody interface{},
-	client *http.Client) error {
-	api := gpt.Lb.GetAPI()
+type requestBodyType int
+
+const (
+	jsonBody requestBodyType = iota
+	formDataBody
+)
+
+func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBodyType,
+	requestBody interface{}, responseBody interface{}, client *http.Client, maxRetries int) error {
+	var api *loadbalancer.API
+	var requestBodyData []byte
+	var err error
+	var writer *multipart.Writer
+
+	switch bodyType {
+	case jsonBody:
+		api = gpt.Lb.GetAPI()
+		requestBodyData, err = json.Marshal(requestBody)
+		if err != nil {
+			return err
+		}
+	case formDataBody:
+		api = gpt.Lb.GetAPI()
+		formBody := &bytes.Buffer{}
+		writer = multipart.NewWriter(formBody)
+		err = audioMultipartForm(requestBody.(AudioToTextRequestBody), writer)
+		if err != nil {
+			return err
+		}
+		err = writer.Close()
+		if err != nil {
+			return err
+		}
+		requestBodyData = formBody.Bytes()
+	default:
+		return errors.New("unknown request body type")
+	}
+
 	if api == nil {
 		return errors.New("no available API")
 	}
 
-	requestData, err := json.Marshal(requestBody)
-	if err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(requestData))
+	req, err := http.NewRequest(method, url, bytes.NewReader(requestBodyData))
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	if bodyType == formDataBody {
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+	}
 	req.Header.Set("Authorization", "Bearer "+api.Key)
 
-	response, err := client.Do(req)
-	if err != nil {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return err
+	var response *http.Response
+	var retry int
+	for retry = 0; retry <= maxRetries; retry++ {
+		response, err = client.Do(req)
+		//fmt.Println("req", req)
+		//fmt.Println("response", response, "err", err)
+		if err != nil || response.StatusCode < 200 || response.StatusCode >= 300 {
+			gpt.Lb.SetAvailability(api.Key, false)
+			if retry == maxRetries {
+				break
+			}
+			time.Sleep(time.Duration(retry+1) * time.Second)
+		} else {
+			break
+		}
 	}
-	defer response.Body.Close()
+	if response != nil {
+		defer response.Body.Close()
+	}
 
-	if response.StatusCode/2 != 100 {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return fmt.Errorf("%s api %s", strings.ToUpper(method), response.Status)
+	if response == nil || response.StatusCode < 200 || response.StatusCode >= 300 {
+		return fmt.Errorf("%s api failed after %d retries", strings.ToUpper(method), retry)
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
@@ -131,19 +175,18 @@ func (gpt ChatGPT) doRequest(url, method string,
 	return nil
 }
 
-func (gpt ChatGPT) sendRequest(link, method string,
+func (gpt ChatGPT) sendRequestWithBodyType(link, method string, bodyType requestBodyType,
 	requestBody interface{}, responseBody interface{}) error {
 	var err error
 	client := &http.Client{Timeout: 110 * time.Second}
 	if gpt.HttpProxy == "" {
-		err = gpt.doRequest(link, method, requestBody, responseBody, client)
+		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
+			requestBody, responseBody, client, 3)
 	} else {
-		//fmt.Println("using proxy: " + gpt.HttpProxy)
 		proxyUrl, err := url.Parse(gpt.HttpProxy)
 		if err != nil {
 			return err
 		}
-
 		transport := &http.Transport{
 			Proxy: http.ProxyURL(proxyUrl),
 		}
@@ -151,60 +194,35 @@ func (gpt ChatGPT) sendRequest(link, method string,
 			Transport: transport,
 			Timeout:   110 * time.Second,
 		}
-
-		err = gpt.doRequest(link, method, requestBody, responseBody, proxyClient)
+		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
+			requestBody, responseBody, proxyClient, 3)
 	}
 
 	return err
 }
 
-func (gpt ChatGPT) doFRequest(url, method string,
-	requestBody interface{}, responseBody interface{},
-	client *http.Client) error {
-	api := gpt.Lb.GetAPI()
-	var formBody bytes.Buffer
-	w := multipart.NewWriter(&formBody)
-	request := requestBody.(AudioToTextRequestBody)
-
-	if err := audioMultipartForm(request, w); err != nil {
-		return err
+func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
+	requestBody := ChatGPTRequestBody{
+		Model:            engine,
+		Messages:         msg,
+		MaxTokens:        maxTokens,
+		Temperature:      temperature,
+		TopP:             1,
+		FrequencyPenalty: 0,
+		PresencePenalty:  0,
 	}
-	if api == nil {
-		return errors.New("no available API")
+	gptResponseBody := &ChatGPTResponseBody{}
+	err = gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/chat/completions", "POST",
+		jsonBody,
+		requestBody, gptResponseBody)
+
+	if err == nil && len(gptResponseBody.Choices) > 0 {
+		resp = gptResponseBody.Choices[0].Message
+	} else {
+		resp = Messages{}
+		err = errors.New("openai 请求失败")
 	}
-
-	req, err := http.NewRequest(method, url, &formBody)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Content-Type", w.FormDataContentType())
-	req.Header.Set("Authorization", "Bearer "+api.Key)
-
-	response, err := client.Do(req)
-	if err != nil {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode/2 != 100 {
-		gpt.Lb.SetAvailability(api.Key, false)
-		return fmt.Errorf("%s api %s", strings.ToUpper(method), response.Status)
-	}
-
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal(body, responseBody)
-	if err != nil {
-		return err
-	}
-
-	gpt.Lb.SetAvailability(api.Key, true)
-	return nil
+	return resp, err
 }
 
 // audioMultipartForm creates a form with audio file contents and the name of the model to use for
@@ -237,57 +255,6 @@ func audioMultipartForm(request AudioToTextRequestBody, w *multipart.Writer) err
 
 	return nil
 }
-func (gpt ChatGPT) senFdRequest(link, method string,
-	requestBody interface{}, responseBody interface{}) error {
-	var err error
-	client := &http.Client{Timeout: 110 * time.Second}
-	if gpt.HttpProxy == "" {
-		err = gpt.doFRequest(link, method, requestBody,
-			responseBody, client)
-	} else {
-		//fmt.Println("using proxy: " + gpt.HttpProxy)
-		proxyUrl, err := url.Parse(gpt.HttpProxy)
-		if err != nil {
-			return err
-		}
-
-		transport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		proxyClient := &http.Client{
-			Transport: transport,
-			Timeout:   110 * time.Second,
-		}
-
-		err = gpt.doFRequest(link, method, requestBody,
-			responseBody, proxyClient)
-	}
-
-	return err
-}
-
-func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
-	requestBody := ChatGPTRequestBody{
-		Model:            engine,
-		Messages:         msg,
-		MaxTokens:        maxTokens,
-		Temperature:      temperature,
-		TopP:             1,
-		FrequencyPenalty: 0,
-		PresencePenalty:  0,
-	}
-	gptResponseBody := &ChatGPTResponseBody{}
-	err = gpt.sendRequest(gpt.ApiUrl+"/v1/chat/completions", "POST",
-		requestBody, gptResponseBody)
-
-	if err == nil && len(gptResponseBody.Choices) > 0 {
-		resp = gptResponseBody.Choices[0].Message
-	} else {
-		resp = Messages{}
-		err = errors.New("openai 请求失败")
-	}
-	return resp, err
-}
 
 func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, error) {
 	requestBody := ImageGenerationRequestBody{
@@ -298,8 +265,8 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 	}
 
 	imageResponseBody := &ImageGenerationResponseBody{}
-	err := gpt.sendRequest(gpt.ApiUrl+"/v1/images/generations",
-		"POST", requestBody, imageResponseBody)
+	err := gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/images/generations",
+		"POST", jsonBody, requestBody, imageResponseBody)
 
 	if err != nil {
 		return nil, err
@@ -327,11 +294,11 @@ func (gpt ChatGPT) AudioToText(audio string) (string, error) {
 		ResponseFormat: "text",
 	}
 	audioToTextResponseBody := &AudioToTextResponseBody{}
-	err := gpt.senFdRequest(gpt.ApiUrl+"/v1/audio/transcriptions",
-		"POST", requestBody, audioToTextResponseBody)
-	fmt.Println(audioToTextResponseBody)
+	err := gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/audio/transcriptions",
+		"POST", formDataBody, requestBody, audioToTextResponseBody)
+	//fmt.Println(audioToTextResponseBody)
 	if err != nil {
-		fmt.Println(err)
+		//fmt.Println(err)
 		return "", err
 	}
 

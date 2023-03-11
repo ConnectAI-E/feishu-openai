@@ -73,9 +73,7 @@ func cleanTextBlock(msg string) string {
 
 func parseFileKey(content string) string {
 	var contentMap map[string]interface{}
-	fmt.Println(contentMap)
 	err := json.Unmarshal([]byte(content), &contentMap)
-	fmt.Println(contentMap)
 	if err != nil {
 		fmt.Println(err)
 		return ""

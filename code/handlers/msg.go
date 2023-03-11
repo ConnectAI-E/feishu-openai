@@ -428,7 +428,7 @@ func replayImageByBase64(ctx context.Context, base64Str string,
 	}
 	//example := "img_v2_041b28e3-5680-48c2-9af2-497ace79333g"
 	//imageKey := &example
-	fmt.Println("imageKey", *imageKey)
+	//fmt.Println("imageKey", *imageKey)
 	err = sendImageCard(ctx, *imageKey, msgId, sessionId, question)
 	if err != nil {
 		return err

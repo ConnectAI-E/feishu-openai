@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 
@@ -62,7 +61,6 @@ func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
 
 func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
 	chatType := event.Event.Message.ChatType
-	fmt.Printf("chatType: %v", *chatType)
 	if *chatType == "group" {
 		return GroupHandler
 	}

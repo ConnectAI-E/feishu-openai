@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"strings"
@@ -112,7 +111,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		fmt.Println("unknown msg type")
 		return nil
 	}
-	fmt.Println(larkcore.Prettify(event.Event.Message))
+	//fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
