@@ -614,21 +614,25 @@ func sendHelpCard(ctx context.Context,
 				"sessionId": *sessionId,
 			}, larkcard.MessageCardButtonTypeDanger)),
 		withSplitLine(),
-		withMainMd("**🥷 开启角色扮演模式**\n文本回复*角色扮演* 或 */system*+空格+角色信息"),
+		withMainMd("🥷 **角色扮演模式**\n文本回复*角色扮演* 或 */system*+空格+角色信息"),
 		withSplitLine(),
-		withMainMd("**📮 常用角色管理** 🚧\n"+
+		withMainMd("🎤 **AI语音对话**\n私聊模式下直接发送语音"),
+		withSplitLine(),
+		withMainMd("🎨 **图片创作模式**\n回复*图片创作* 或 */picture*"),
+		withSplitLine(),
+		withMainMd("👨‍💼 **常用角色管理** 🚧\n"+
 			" 文本回复 *角色管理* 或 */manage*"),
 		withSplitLine(),
-		withMainMd("**🔃️ 历史话题回档** 🚧\n"+
+		withMainMd("🔃️ **历史话题回档** 🚧\n"+
 			" 进入话题的回复详情页,文本回复 *恢复* 或 */reload*"),
 		withSplitLine(),
-		withMainMd("**📤 话题内容导出** 🚧\n"+
+		withMainMd("📤 **话题内容导出** 🚧\n"+
 			" 文本回复 *导出* 或 */export*"),
 		withSplitLine(),
-		withMainMd("**🎰 连续对话与多话题模式**\n"+
+		withMainMd("🎰 **连续对话与多话题模式**\n"+
 			" 点击对话框参与回复，可保持话题连贯。同时，单独提问即可开启全新新话题"),
 		withSplitLine(),
-		withMainMd("**🎒 需要更多帮助**\n文本回复 *帮助* 或 */help*"),
+		withMainMd("🎒 **需要更多帮助**\n文本回复 *帮助* 或 */help*"),
 	)
 	replyCard(
 		ctx,
