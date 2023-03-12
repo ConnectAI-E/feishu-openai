@@ -19,6 +19,7 @@ type MsgInfo struct {
 	chatId      *string
 	qParsed     string
 	fileKey     string
+	imageKey    string
 	sessionId   *string
 	mention     []*larkim.MentionEvent
 }
@@ -136,10 +137,54 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
 
+	fmt.Println("mode: ", mode)
 	// 收到一张图片,且不在图片创作模式下, 提醒是否切换到图片创作模式
 	if a.info.msgType == "image" && mode != services.ModePicCreate {
 		sendPicModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
 		return false
+	}
+
+	if a.info.msgType == "image" && mode == services.ModePicCreate {
+		//保存图片
+		imageKey := a.info.imageKey
+		fmt.Printf("fileKey: %s \n", imageKey)
+		msgId := a.info.msgId
+		fmt.Println("msgId: ", *msgId)
+		req := larkim.NewGetMessageResourceReqBuilder().MessageId(
+			*msgId).FileKey(imageKey).Type("image").Build()
+		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
+		//fmt.Println(resp, err)
+		if err != nil {
+			//fmt.Println(err)
+			fmt.Sprintf("🤖️：图片解析失败，请稍后再试～\n错误信息: %v", err)
+			return false
+		}
+		f := fmt.Sprintf("%s.png", imageKey)
+		resp.WriteFile(f)
+		defer os.Remove(f)
+		resolution := a.handler.sessionCache.GetPicResolution(*a.
+			info.sessionId)
+
+		// 生成图片变体
+		fmt.Println("生成图片变体" + f)
+		openai.ConvertToRGBA(f, f)
+		openai.GetImageCompressionType(f)
+		err = openai.VerifyPngs([]string{f})
+		if err != nil {
+			replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片解析失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+			return false
+		}
+		bs64, err := a.handler.gpt.GenerateOneImageVariation(f, resolution)
+		if err != nil {
+			replyMsg(*a.ctx, fmt.Sprintf(
+				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+			return false
+		}
+		replayImagePlainByBase64(*a.ctx, bs64, a.info.msgId)
+		return false
+
+		//fmt.Println(resp)
+
 	}
 
 	// 生成图片
@@ -153,10 +198,10 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
-		replayImageByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
+		replayImageCardByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
 			a.info.qParsed)
 
-		//replayImageByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
+		//replayImageCardByBase64(*a.ctx, "", a.info.msgId, a.info.qParsed)
 		return false
 	}
 
@@ -232,7 +277,8 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 		text, err := a.handler.gpt.AudioToText(output)
 		if err != nil {
 			fmt.Println(err)
-			sendMsg(*a.ctx, "🤖️：语音转换失败，请稍后再试～", a.info.msgId)
+
+			sendMsg(*a.ctx, fmt.Sprintf("🤖️：语音转换失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
 		//fmt.Println("text: ", text)

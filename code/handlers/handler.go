@@ -38,6 +38,7 @@ func (m MessageHandler) cardHandler(_ context.Context,
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
 	json.Unmarshal(actionValueJson, &cardMsg)
+	fmt.Println("cardMsg: ", cardMsg)
 	if cardMsg.Kind == ClearCardKind {
 		newCard, err, done := CommonProcessClearCache(cardMsg, m.sessionCache)
 		if done {
@@ -46,10 +47,16 @@ func (m MessageHandler) cardHandler(_ context.Context,
 		return nil, nil
 	}
 	if cardMsg.Kind == PicResolutionKind {
-		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
+		//todo: 暂时不允许 以图搜图 模式下的 再来一张
+		//CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
 		return nil, nil
 	}
-	if cardMsg.Kind == PicMoreKind {
+	if cardMsg.Kind == PicTextMoreKind {
+		go func() {
+			m.CommonProcessPicMore(cardMsg)
+		}()
+	}
+	if cardMsg.Kind == PicVarMoreKind {
 		go func() {
 			m.CommonProcessPicMore(cardMsg)
 		}()
@@ -72,7 +79,7 @@ func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
 	//fmt.Println("msg: ", msg)
 	question := msg.Value.(string)
 	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
-	replayImageByBase64(context.Background(), bs64, &msg.MsgId,
+	replayImageCardByBase64(context.Background(), bs64, &msg.MsgId,
 		&msg.SessionId, question)
 }
 
@@ -113,6 +120,7 @@ func CommonProcessPicModeChange(cardMsg CardMsg,
 	session services.SessionServiceCacheInterface) (
 	interface{}, error, bool) {
 	if cardMsg.Value == "1" {
+
 		sessionId := cardMsg.SessionId
 		session.Clear(sessionId)
 		session.SetMode(sessionId,
@@ -124,8 +132,7 @@ func CommonProcessPicModeChange(cardMsg CardMsg,
 			newSendCard(
 				withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
 				withPicResolutionBtn(&sessionId),
-				withNote("提醒：在对话框中发送文本或图片，让AI生成相关的图片。"))
-		session.Clear(cardMsg.SessionId)
+				withNote("提醒：回复文本或图片，让AI生成相关的图片。"))
 		return newCard, nil, true
 	}
 	if cardMsg.Value == "0" {
@@ -181,6 +188,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		chatId:      chatId,
 		qParsed:     strings.Trim(parseContent(*content), " "),
 		fileKey:     parseFileKey(*content),
+		imageKey:    parseImageKey(*content),
 		sessionId:   sessionId,
 		mention:     mention,
 	}

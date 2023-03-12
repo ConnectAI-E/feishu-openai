@@ -20,7 +20,8 @@ var (
 	ClearCardKind     = CardKind("clear")           // 清空上下文
 	PicModeChangeKind = CardKind("pic_mode_change") // 切换图片创作模式
 	PicResolutionKind = CardKind("pic_resolution")  // 图片分辨率调整
-	PicMoreKind       = CardKind("pic_more")        // 重新生成图片
+	PicTextMoreKind   = CardKind("pic_text_more")   // 重新根据文本生成图片
+	PicVarMoreKind    = CardKind("pic_var_more")    // 变量图片
 )
 
 var (
@@ -447,7 +448,7 @@ func replyImage(ctx context.Context, ImageKey *string,
 
 }
 
-func replayImageByBase64(ctx context.Context, base64Str string,
+func replayImageCardByBase64(ctx context.Context, base64Str string,
 	msgId *string, sessionId *string, question string) error {
 	imageKey, err := uploadImage(base64Str)
 	if err != nil {
@@ -457,6 +458,38 @@ func replayImageByBase64(ctx context.Context, base64Str string,
 	//imageKey := &example
 	//fmt.Println("imageKey", *imageKey)
 	err = sendImageCard(ctx, *imageKey, msgId, sessionId, question)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func replayImagePlainByBase64(ctx context.Context, base64Str string,
+	msgId *string) error {
+	imageKey, err := uploadImage(base64Str)
+	if err != nil {
+		return err
+	}
+	//example := "img_v2_041b28e3-5680-48c2-9af2-497ace79333g"
+	//imageKey := &example
+	//fmt.Println("imageKey", *imageKey)
+	err = replyImage(ctx, imageKey, msgId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func replayVariantImageByBase64(ctx context.Context, base64Str string,
+	msgId *string, sessionId *string) error {
+	imageKey, err := uploadImage(base64Str)
+	if err != nil {
+		return err
+	}
+	//example := "img_v2_041b28e3-5680-48c2-9af2-497ace79333g"
+	//imageKey := &example
+	//fmt.Println("imageKey", *imageKey)
+	err = sendVarImageCard(ctx, *imageKey, msgId, sessionId)
 	if err != nil {
 		return err
 	}
@@ -530,7 +563,7 @@ func sendPicCreateInstructionCard(ctx context.Context,
 	newCard, _ := newSendCard(
 		withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
 		withPicResolutionBtn(sessionId),
-		withNote("提醒：在对话框中发送文本或图片，让AI生成相关的图片。"))
+		withNote("提醒：回复文本或图片，让AI生成相关的图片。"))
 	replyCard(
 		ctx,
 		msgId,
@@ -611,7 +644,29 @@ func sendImageCard(ctx context.Context, imageKey string,
 		//再来一张
 		withOneBtn(newBtn("再来一张", map[string]interface{}{
 			"value":     question,
-			"kind":      PicMoreKind,
+			"kind":      PicTextMoreKind,
+			"chatType":  UserChatType,
+			"msgId":     *msgId,
+			"sessionId": *sessionId,
+		}, larkcard.MessageCardButtonTypePrimary)),
+	)
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+	return nil
+}
+
+func sendVarImageCard(ctx context.Context, imageKey string,
+	msgId *string, sessionId *string) error {
+	newCard, _ := newSimpleSendCard(
+		withImageDiv(imageKey),
+		withSplitLine(),
+		//再来一张
+		withOneBtn(newBtn("再来一张", map[string]interface{}{
+			"value":     imageKey,
+			"kind":      PicVarMoreKind,
 			"chatType":  UserChatType,
 			"msgId":     *msgId,
 			"sessionId": *sessionId,

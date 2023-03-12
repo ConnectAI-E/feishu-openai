@@ -79,6 +79,8 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 		return errors.New("no available API")
 	}
 
+	fmt.Println("api", api)
+
 	req, err := http.NewRequest(method, url, bytes.NewReader(requestBodyData))
 	if err != nil {
 		return err
@@ -94,9 +96,15 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 	var retry int
 	for retry = 0; retry <= maxRetries; retry++ {
 		response, err = client.Do(req)
-		//fmt.Println("req", req)
-		//fmt.Println("response", response, "err", err)
+		//fmt.Println("--------------------")
+		//fmt.Println("req", req.Header)
+		//fmt.Printf("response: %v", response)
+		// read body
 		if err != nil || response.StatusCode < 200 || response.StatusCode >= 300 {
+
+			body, _ := ioutil.ReadAll(response.Body)
+			fmt.Println("body", string(body))
+
 			gpt.Lb.SetAvailability(api.Key, false)
 			if retry == maxRetries {
 				break

@@ -1,7 +1,10 @@
 package openai
 
 import (
+	"bufio"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"os"
@@ -124,6 +127,8 @@ func pictureMultipartForm(request ImageVariantRequestBody,
 		return fmt.Errorf("writing response_format: %w", err)
 	}
 
+	//err = w.WriteField("user", "user123456")
+
 	//fw, err = w.CreateFormField("model")
 	//if err != nil {
 	//	return fmt.Errorf("creating form field: %w", err)
@@ -138,4 +143,107 @@ func pictureMultipartForm(request ImageVariantRequestBody,
 	w.Close()
 
 	return nil
+}
+
+func VerifyPngs(pngPaths []string) error {
+	foundPng := false
+	var expectedWidth, expectedHeight int
+
+	for _, pngPath := range pngPaths {
+		f, err := os.Open(pngPath)
+		if err != nil {
+			return fmt.Errorf("os.Open: %v", err)
+		}
+
+		fi, err := f.Stat()
+		if err != nil {
+			return fmt.Errorf("f.Stat: %v", err)
+		}
+		if fi.Size() > 4*1024*1024 {
+			return fmt.Errorf("image size too large, "+
+				"must be under %d MB", 4)
+		}
+
+		image, err := png.Decode(f)
+		if err != nil {
+			return fmt.Errorf("image must be valid png, png.Decode: %v", err)
+		}
+		width := image.Bounds().Dx()
+		height := image.Bounds().Dy()
+		if width != height {
+			return fmt.Errorf("found non-square image with dimensions %dx%d", width, height)
+		}
+
+		if !foundPng {
+			foundPng = true
+			expectedWidth = width
+			expectedHeight = height
+		} else {
+			if width != expectedWidth || height != expectedHeight {
+				return fmt.Errorf("dimensions of all images must match, got both (%dx%d) and (%dx%d)", width, height, expectedWidth, expectedHeight)
+			}
+		}
+	}
+
+	return nil
+}
+
+func ConvertToRGBA(inputFilePath string, outputFilePath string) error {
+	// 打开输入文件
+	inputFile, err := os.Open(inputFilePath)
+	if err != nil {
+		return fmt.Errorf("打开文件时出错：%w", err)
+	}
+	defer inputFile.Close()
+
+	// 解码图像
+	img, _, err := image.Decode(inputFile)
+	if err != nil {
+		return fmt.Errorf("解码图像时出错：%w", err)
+	}
+
+	// 将图像转换为RGBA模式
+	rgba := image.NewRGBA(img.Bounds())
+	for x := 0; x < img.Bounds().Max.X; x++ {
+		for y := 0; y < img.Bounds().Max.Y; y++ {
+			rgba.Set(x, y, img.At(x, y))
+		}
+	}
+
+	// 创建输出文件
+	outputFile, err := os.Create(outputFilePath)
+	if err != nil {
+		return fmt.Errorf("创建输出文件时出错：%w", err)
+	}
+	defer outputFile.Close()
+
+	// 编码图像为 PNG 格式并写入输出文件
+	if err := png.Encode(outputFile, rgba); err != nil {
+		return fmt.Errorf("编码图像时出错：%w", err)
+	}
+
+	return nil
+}
+
+func GetImageCompressionType(path string) (string, error) {
+	// 打开文件
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	// 创建 bufio.Reader
+	reader := bufio.NewReader(file)
+
+	// 解码图像
+	_, format, err := image.DecodeConfig(reader)
+	if err != nil {
+		fmt.Println("err: ", err)
+		return "", err
+	}
+
+	fmt.Println("format: ", format)
+	// 返回压缩类型
+	return format, nil
 }

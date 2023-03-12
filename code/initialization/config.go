@@ -69,7 +69,8 @@ func getViperStringArray(key string, defaultValue []string) []string {
 	if value == "" {
 		return defaultValue
 	}
-	return strings.Split(value, ",")
+	raw := strings.Split(value, ",")
+	return filterFormatKey(raw)
 }
 
 func getViperIntValue(key string, defaultValue int) int {
@@ -118,4 +119,16 @@ func (config *Config) GetKeyFile() string {
 		return "key.pem"
 	}
 	return config.KeyFile
+}
+
+// 过滤出 "sk-" 开头的 key
+func filterFormatKey(keys []string) []string {
+	var result []string
+	for _, key := range keys {
+		if strings.HasPrefix(key, "sk-") {
+			result = append(result, key)
+		}
+	}
+	return result
+
 }
