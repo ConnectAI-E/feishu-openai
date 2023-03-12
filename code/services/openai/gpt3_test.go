@@ -58,13 +58,40 @@ func TestVariateOneImage(t *testing.T) {
 	gpt := NewChatGPT(*config)
 	image := "./test_file/img.png"
 	size := "256x256"
+	//compressionType, err := GetImageCompressionType(image)
+	//if err != nil {
+	//	return
+	//}
+	//fmt.Println("compressionType: ", compressionType)
+	ConvertToRGBA(image, image)
+	err := VerifyPngs([]string{image})
+	if err != nil {
+		t.Errorf("TestVariateOneImage failed with error: %v", err)
+		return
+	}
+
+	imageBs64, err := gpt.GenerateOneImageVariation(image, size)
+	if err != nil {
+		t.Errorf("TestVariateOneImage failed with error: %v", err)
+	}
+	//fmt.Printf("TestVariateOneImage returned imageBs64: %s \n", imageBs64)
+	if imageBs64 == "" {
+		t.Errorf("TestVariateOneImage returned empty imageURL")
+	}
+}
+
+func TestVariateOneImageWithJpg(t *testing.T) {
+	config := initialization.LoadConfig("../../config.yaml")
+	gpt := NewChatGPT(*config)
+	image := "./test_file/test.jpg"
+	size := "256x256"
 	compressionType, err := GetImageCompressionType(image)
 	if err != nil {
 		return
 	}
 	fmt.Println("compressionType: ", compressionType)
+	//ConvertJPGtoPNG(image)
 	ConvertToRGBA(image, image)
-
 	err = VerifyPngs([]string{image})
 	if err != nil {
 		t.Errorf("TestVariateOneImage failed with error: %v", err)
@@ -79,5 +106,4 @@ func TestVariateOneImage(t *testing.T) {
 	if imageBs64 == "" {
 		t.Errorf("TestVariateOneImage returned empty imageURL")
 	}
-
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"io"
 	"mime/multipart"
@@ -166,7 +167,7 @@ func VerifyPngs(pngPaths []string) error {
 
 		image, err := png.Decode(f)
 		if err != nil {
-			return fmt.Errorf("image must be valid png, png.Decode: %v", err)
+			return fmt.Errorf("image must be valid png, got error: %v", err)
 		}
 		width := image.Bounds().Dx()
 		height := image.Bounds().Dy()
@@ -220,6 +221,48 @@ func ConvertToRGBA(inputFilePath string, outputFilePath string) error {
 	// 编码图像为 PNG 格式并写入输出文件
 	if err := png.Encode(outputFile, rgba); err != nil {
 		return fmt.Errorf("编码图像时出错：%w", err)
+	}
+
+	return nil
+}
+
+func ConvertJpegToPNG(jpgPath string) error {
+	// Open the JPEG file for reading
+	f, err := os.Open(jpgPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// Check if the file is a JPEG image
+	_, err = jpeg.Decode(f)
+	if err != nil {
+		// The file is not a JPEG image, no need to convert it
+		return fmt.Errorf("file %s is not a JPEG image", jpgPath)
+	}
+
+	// Reset the file pointer to the beginning of the file
+	_, err = f.Seek(0, 0)
+	if err != nil {
+		return err
+	}
+
+	// Create a new PNG file for writing
+	pngPath := jpgPath[:len(jpgPath)-4] + ".png" // replace .jpg extension with .png
+	out, err := os.Create(pngPath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Decode the JPEG image and encode it as PNG
+	img, err := jpeg.Decode(f)
+	if err != nil {
+		return err
+	}
+	err = png.Encode(out, img)
+	if err != nil {
+		return err
 	}
 
 	return nil

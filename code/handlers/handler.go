@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
@@ -38,7 +37,7 @@ func (m MessageHandler) cardHandler(_ context.Context,
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
 	json.Unmarshal(actionValueJson, &cardMsg)
-	fmt.Println("cardMsg: ", cardMsg)
+	//fmt.Println("cardMsg: ", cardMsg)
 	if cardMsg.Kind == ClearCardKind {
 		newCard, err, done := CommonProcessClearCache(cardMsg, m.sessionCache)
 		if done {
@@ -163,7 +162,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		fmt.Println("unknown chat type")
 		return nil
 	}
-	fmt.Println(larkcore.Prettify(event.Event.Message))
+	//fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	msgType, err := judgeMsgType(event)
 	if err != nil {

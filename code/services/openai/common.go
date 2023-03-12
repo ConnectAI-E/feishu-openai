@@ -79,8 +79,6 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 		return errors.New("no available API")
 	}
 
-	fmt.Println("api", api)
-
 	req, err := http.NewRequest(method, url, bytes.NewReader(requestBodyData))
 	if err != nil {
 		return err
