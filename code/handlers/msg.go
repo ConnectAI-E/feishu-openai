@@ -17,9 +17,10 @@ type CardKind string
 type CardChatType string
 
 var (
-	ClearCardKind     = CardKind("clear")          // 清空上下文
-	PicResolutionKind = CardKind("pic_resolution") // 图片分辨率调整
-	PicMoreKind       = CardKind("pic_more")       // 重新生成图片
+	ClearCardKind     = CardKind("clear")           // 清空上下文
+	PicModeChangeKind = CardKind("pic_mode_change") // 切换图片创作模式
+	PicResolutionKind = CardKind("pic_resolution")  // 图片分辨率调整
+	PicMoreKind       = CardKind("pic_more")        // 重新生成图片
 )
 
 var (
@@ -256,7 +257,7 @@ func newMenu(
 }
 
 // 清除卡片按钮
-func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
+func withClearDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
 	confirmBtn := newBtn("确认清除", map[string]interface{}{
 		"value":     "1",
 		"kind":      ClearCardKind,
@@ -279,6 +280,32 @@ func withDoubleCheckBtn(sessionID *string) larkcard.MessageCardElement {
 
 	return actions
 }
+
+func withPicModeDoubleCheckBtn(sessionID *string) larkcard.
+	MessageCardElement {
+	confirmBtn := newBtn("切换模式", map[string]interface{}{
+		"value":     "1",
+		"kind":      PicModeChangeKind,
+		"chatType":  UserChatType,
+		"sessionId": *sessionID,
+	}, larkcard.MessageCardButtonTypeDanger,
+	)
+	cancelBtn := newBtn("我再想想", map[string]interface{}{
+		"value":     "0",
+		"kind":      PicModeChangeKind,
+		"sessionId": *sessionID,
+		"chatType":  UserChatType,
+	},
+		larkcard.MessageCardButtonTypeDefault)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{confirmBtn, cancelBtn}).
+		Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+		Build()
+
+	return actions
+}
+
 func withOneBtn(btn *larkcard.MessageCardEmbedButton) larkcard.
 	MessageCardElement {
 	actions := larkcard.NewMessageCardAction().
@@ -290,7 +317,7 @@ func withOneBtn(btn *larkcard.MessageCardEmbedButton) larkcard.
 
 //新建对话按钮
 
-func withPicResolutionBtn(sessionID *string, msgID *string) larkcard.
+func withPicResolutionBtn(sessionID *string) larkcard.
 	MessageCardElement {
 	cancelMenu := newMenu("默认分辨率",
 		map[string]interface{}{
@@ -477,7 +504,7 @@ func sendClearCacheCheckCard(ctx context.Context,
 		withHeader("🆑 机器人提醒", larkcard.TemplateBlue),
 		withMainMd("您确定要清除对话上下文吗？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
-		withDoubleCheckBtn(sessionId))
+		withClearDoubleCheckBtn(sessionId))
 	replyCard(
 		ctx,
 		msgId,
@@ -501,9 +528,23 @@ func sendSystemInstructionCard(ctx context.Context,
 func sendPicCreateInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
-		withHeader("🖼️  已进入图片创作模式", larkcard.TemplateBlue),
-		withPicResolutionBtn(sessionId, msgId),
+		withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
+		withPicResolutionBtn(sessionId),
 		withNote("提醒：在对话框中发送文本或图片，让AI生成相关的图片。"))
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+}
+
+func sendPicModeCheckCard(ctx context.Context,
+	sessionId *string, msgId *string) {
+	newCard, _ := newSendCard(
+		withHeader("🖼️ 机器人提醒", larkcard.TemplateBlue),
+		withMainMd("收到图片，是否进入图片创作模式？"),
+		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
+		withPicModeDoubleCheckBtn(sessionId))
 	replyCard(
 		ctx,
 		msgId,

@@ -134,8 +134,15 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 		return false
 	}
 
-	// 生成图片
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
+
+	// 收到一张图片,且不在图片创作模式下, 提醒是否切换到图片创作模式
+	if a.info.msgType == "image" && mode != services.ModePicCreate {
+		sendPicModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
+		return false
+	}
+
+	// 生成图片
 	if mode == services.ModePicCreate {
 		resolution := a.handler.sessionCache.GetPicResolution(*a.
 			info.sessionId)
@@ -228,7 +235,6 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 			sendMsg(*a.ctx, "🤖️：语音转换失败，请稍后再试～", a.info.msgId)
 			return false
 		}
-		//删除文件
 		//fmt.Println("text: ", text)
 		a.info.qParsed = text
 		return true

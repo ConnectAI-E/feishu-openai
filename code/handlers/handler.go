@@ -54,7 +54,14 @@ func (m MessageHandler) cardHandler(_ context.Context,
 			m.CommonProcessPicMore(cardMsg)
 		}()
 	}
+	if cardMsg.Kind == PicModeChangeKind {
+		newCard, err, done := CommonProcessPicModeChange(cardMsg, m.sessionCache)
+		if done {
+			return newCard, err
+		}
+		return nil, nil
 
+	}
 	return nil, nil
 
 }
@@ -102,6 +109,35 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	return nil, nil, false
 }
 
+func CommonProcessPicModeChange(cardMsg CardMsg,
+	session services.SessionServiceCacheInterface) (
+	interface{}, error, bool) {
+	if cardMsg.Value == "1" {
+		sessionId := cardMsg.SessionId
+		session.Clear(sessionId)
+		session.SetMode(sessionId,
+			services.ModePicCreate)
+		session.SetPicResolution(sessionId,
+			services.Resolution256)
+
+		newCard, _ :=
+			newSendCard(
+				withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
+				withPicResolutionBtn(&sessionId),
+				withNote("提醒：在对话框中发送文本或图片，让AI生成相关的图片。"))
+		session.Clear(cardMsg.SessionId)
+		return newCard, nil, true
+	}
+	if cardMsg.Value == "0" {
+		newCard, _ := newSendCard(
+			withHeader("️🎒 机器人提醒", larkcard.TemplateGreen),
+			withMainMd("依旧保留此话题的上下文信息"),
+			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
+		)
+		return newCard, nil, true
+	}
+	return nil, nil, false
+}
 func judgeMsgType(event *larkim.P2MessageReceiveV1) (string, error) {
 	msgType := event.Event.Message.MessageType
 
@@ -157,11 +193,11 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		&ProcessedUniqueAction{}, //避免重复处理
 		&ProcessMentionAction{},  //判断机器人是否应该被调用
 		&AudioAction{},           //语音处理
+		&PicAction{},             //图片处理
 		&EmptyAction{},           //空消息处理
 		&ClearAction{},           //清除消息处理
 		&HelpAction{},            //帮助处理
 		&RolePlayAction{},        //角色扮演处理
-		&PicAction{},             //图片处理
 		&MessageAction{},         //消息处理
 
 	}
