@@ -190,7 +190,8 @@ func withImageDiv(imageKey string) larkcard.MessageCardElement {
 		Alt(larkcard.NewMessageCardPlainText().Content("").
 			Build()).
 		Preview(true).
-		Mode(larkcard.MessageCardImageModelFitHorizontal).
+		Mode(larkcard.MessageCardImageModelCropCenter).
+		CompactWidth(true).
 		Build()
 	return imageElement
 }
