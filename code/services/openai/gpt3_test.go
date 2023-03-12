@@ -41,7 +41,7 @@ func TestGenerateOneImage(t *testing.T) {
 func TestAudioToText(t *testing.T) {
 	config := initialization.LoadConfig("../../config.yaml")
 	gpt := NewChatGPT(*config)
-	audio := "./test_file/test.mp3"
+	audio := "./test_file/test.wav"
 	text, err := gpt.AudioToText(audio)
 	if err != nil {
 		t.Errorf("TestAudioToText failed with error: %v", err)
@@ -49,6 +49,22 @@ func TestAudioToText(t *testing.T) {
 	fmt.Printf("TestAudioToText returned text: %s \n", text)
 	if text == "" {
 		t.Errorf("TestAudioToText returned empty text")
+	}
+
+}
+
+func TestVariateOneImage(t *testing.T) {
+	config := initialization.LoadConfig("../../config.yaml")
+	gpt := NewChatGPT(*config)
+	image := "./test_file/test.png"
+	size := "256x256"
+	imageBs64, err := gpt.GenerateOneImageVariation(image, size)
+	if err != nil {
+		t.Errorf("TestVariateOneImage failed with error: %v", err)
+	}
+	//fmt.Printf("TestVariateOneImage returned imageBs64: %s \n", imageBs64)
+	if imageBs64 == "" {
+		t.Errorf("TestVariateOneImage returned empty imageURL")
 	}
 
 }
