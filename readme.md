@@ -10,7 +10,7 @@
     <img src='https://user-images.githubusercontent.com/50035229/223590381-ed38db74-39f3-4e77-bd3a-aaa54d679286.png' alt='角色扮演' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/223590817-37a56eac-ab6e-4293-862a-de0988ac50b7.png' alt='文字成图' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/224531308-378a5bc3-2964-4e32-905f-8237dafc3f91.png' alt='图片变体' width='800'/>
-    <img src='https://user-images.githubusercontent.com/50035229/223591272-88e4218c-5cb6-4925-8ede-18359bdf9097.png' alt='帮助菜单' width='800'/>
+    <img src='https://user-images.githubusercontent.com/50035229/224531775-3f0e1e1b-a373-4774-a8f0-e120ccba6670.png' alt='帮助菜单' width='800'/>
     </p>
 
 </details>
