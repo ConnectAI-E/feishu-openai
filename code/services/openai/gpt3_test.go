@@ -1,4 +1,4 @@
-package services
+package openai
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestCompletions(t *testing.T) {
-	config := initialization.LoadConfig("../config.yaml")
+	config := initialization.LoadConfig("../../config.yaml")
 
 	msgs := []Messages{
 		{Role: "system", Content: "你是一个专业的翻译官，负责中英文翻译。"},
@@ -25,18 +25,30 @@ func TestCompletions(t *testing.T) {
 }
 
 func TestGenerateOneImage(t *testing.T) {
-	config := initialization.LoadConfig("../config.yaml")
-
+	config := initialization.LoadConfig("../../config.yaml")
 	gpt := NewChatGPT(*config)
 	prompt := "a red apple"
 	size := "256x256"
-
 	imageURL, err := gpt.GenerateOneImage(prompt, size)
 	if err != nil {
 		t.Errorf("TestGenerateOneImage failed with error: %v", err)
 	}
-
 	if imageURL == "" {
 		t.Errorf("TestGenerateOneImage returned empty imageURL")
 	}
+}
+
+func TestAudioToText(t *testing.T) {
+	config := initialization.LoadConfig("../../config.yaml")
+	gpt := NewChatGPT(*config)
+	audio := "./test_file/test.mp3"
+	text, err := gpt.AudioToText(audio)
+	if err != nil {
+		t.Errorf("TestAudioToText failed with error: %v", err)
+	}
+	fmt.Printf("TestAudioToText returned text: %s \n", text)
+	if text == "" {
+		t.Errorf("TestAudioToText returned empty text")
+	}
+
 }

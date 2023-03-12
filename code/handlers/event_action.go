@@ -7,6 +7,7 @@ import (
 	"os"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
+	"start-feishubot/services/openai"
 	"start-feishubot/utils"
 	"start-feishubot/utils/audio"
 )
@@ -93,7 +94,7 @@ func (*RolePlayAction) Execute(a *ActionInfo) bool {
 	if system, foundSystem := utils.EitherCutPrefix(a.info.qParsed,
 		"/system ", "角色扮演 "); foundSystem {
 		a.handler.sessionCache.Clear(*a.info.sessionId)
-		systemMsg := append([]services.Messages{}, services.Messages{
+		systemMsg := append([]openai.Messages{}, openai.Messages{
 			Role: "system", Content: system,
 		})
 		a.handler.sessionCache.SetMsg(*a.info.sessionId, systemMsg)
@@ -160,7 +161,7 @@ type MessageAction struct { /*消息*/
 
 func (*MessageAction) Execute(a *ActionInfo) bool {
 	msg := a.handler.sessionCache.GetMsg(*a.info.sessionId)
-	msg = append(msg, services.Messages{
+	msg = append(msg, openai.Messages{
 		Role: "user", Content: a.info.qParsed,
 	})
 	completions, err := a.handler.gpt.Completions(msg)

@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"start-feishubot/services/openai"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -17,9 +18,9 @@ type PicSetting struct {
 type Resolution string
 
 type SessionMeta struct {
-	Mode       SessionMode `json:"mode"`
-	Msg        []Messages  `json:"msg,omitempty"`
-	PicSetting PicSetting  `json:"pic_setting,omitempty"`
+	Mode       SessionMode       `json:"mode"`
+	Msg        []openai.Messages `json:"msg,omitempty"`
+	PicSetting PicSetting        `json:"pic_setting,omitempty"`
 }
 
 const (
@@ -34,8 +35,8 @@ const (
 )
 
 type SessionServiceCacheInterface interface {
-	GetMsg(sessionId string) []Messages
-	SetMsg(sessionId string, msg []Messages)
+	GetMsg(sessionId string) []openai.Messages
+	SetMsg(sessionId string, msg []openai.Messages)
 	SetMode(sessionId string, mode SessionMode)
 	GetMode(sessionId string) SessionMode
 	SetPicResolution(sessionId string, resolution Resolution)
@@ -68,7 +69,7 @@ func (s *SessionService) SetMode(sessionId string, mode SessionMode) {
 	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 }
 
-func (s *SessionService) GetMsg(sessionId string) (msg []Messages) {
+func (s *SessionService) GetMsg(sessionId string) (msg []openai.Messages) {
 	sessionContext, ok := s.cache.Get(sessionId)
 	if !ok {
 		return nil
@@ -77,7 +78,7 @@ func (s *SessionService) GetMsg(sessionId string) (msg []Messages) {
 	return sessionMeta.Msg
 }
 
-func (s *SessionService) SetMsg(sessionId string, msg []Messages) {
+func (s *SessionService) SetMsg(sessionId string, msg []openai.Messages) {
 	maxLength := 4096
 	maxCacheTime := time.Hour * 12
 
@@ -142,7 +143,7 @@ func GetSessionCache() SessionServiceCacheInterface {
 	return sessionServices
 }
 
-func getStrPoolTotalLength(strPool []Messages) int {
+func getStrPoolTotalLength(strPool []openai.Messages) int {
 	var total int
 	for _, v := range strPool {
 		bytes, _ := json.Marshal(v)

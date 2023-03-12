@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"start-feishubot/initialization"
-	"start-feishubot/services"
+	"start-feishubot/services/openai"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -24,7 +24,7 @@ const (
 // handlers 所有消息类型类型的处理器
 var handlers MessageHandlerInterface
 
-func InitHandlers(gpt *services.ChatGPT, config initialization.Config) {
+func InitHandlers(gpt *openai.ChatGPT, config initialization.Config) {
 	handlers = NewMessageHandler(gpt, config)
 }
 

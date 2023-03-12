@@ -6,7 +6,7 @@ import (
 	"log"
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
-	"start-feishubot/services"
+	"start-feishubot/services/openai"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 
@@ -26,7 +26,7 @@ func main() {
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
-	gpt := services.NewChatGPT(*config)
+	gpt := openai.NewChatGPT(*config)
 	handlers.InitHandlers(gpt, *config)
 
 	eventHandler := dispatcher.NewEventDispatcher(
