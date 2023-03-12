@@ -46,8 +46,7 @@ func (m MessageHandler) cardHandler(_ context.Context,
 		return nil, nil
 	}
 	if cardMsg.Kind == PicResolutionKind {
-		//todo: 暂时不允许 以图搜图 模式下的 再来一张
-		//CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
+		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
 		return nil, nil
 	}
 	if cardMsg.Kind == PicTextMoreKind {
@@ -55,11 +54,12 @@ func (m MessageHandler) cardHandler(_ context.Context,
 			m.CommonProcessPicMore(cardMsg)
 		}()
 	}
-	if cardMsg.Kind == PicVarMoreKind {
-		go func() {
-			m.CommonProcessPicMore(cardMsg)
-		}()
-	}
+	//if cardMsg.Kind == PicVarMoreKind {
+	//	//todo: 暂时不允许 以图搜图 模式下的 再来一张
+	//	go func() {
+	//		m.CommonProcessPicMore(cardMsg)
+	//	}()
+	//}
 	if cardMsg.Kind == PicModeChangeKind {
 		newCard, err, done := CommonProcessPicModeChange(cardMsg, m.sessionCache)
 		if done {
