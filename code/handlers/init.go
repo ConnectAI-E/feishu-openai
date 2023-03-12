@@ -69,18 +69,3 @@ func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
 	}
 	return "otherChat"
 }
-
-func judgeMsgType(event *larkim.P2MessageReceiveV1) string {
-	msgType := event.Event.Message.MessageType
-	if *msgType == "text" {
-		return "text"
-	}
-	if *msgType == "image" {
-		return "image"
-	}
-	if *msgType == "audio" {
-		return "audio"
-	}
-
-	return ""
-}

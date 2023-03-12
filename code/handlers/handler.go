@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
@@ -101,18 +102,31 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	return nil, nil, false
 }
 
+func judgeMsgType(event *larkim.P2MessageReceiveV1) (string, error) {
+	msgType := event.Event.Message.MessageType
+
+	switch *msgType {
+	case "text", "image", "audio":
+		return *msgType, nil
+	default:
+		return "", fmt.Errorf("unknown message type: %v", *msgType)
+	}
+
+}
+
 func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	handlerType := judgeChatType(event)
 	if handlerType == "otherChat" {
 		fmt.Println("unknown chat type")
 		return nil
 	}
-	msgType := judgeMsgType(event)
-	if msgType != "text" && msgType != "audio" {
-		fmt.Println("unknown msg type")
+	fmt.Println(larkcore.Prettify(event.Event.Message))
+
+	msgType, err := judgeMsgType(event)
+	if err != nil {
+		fmt.Printf("error getting message type: %v\n", err)
 		return nil
 	}
-	//fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
