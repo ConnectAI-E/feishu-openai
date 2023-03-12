@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
+	"start-feishubot/services/openai"
 	"strings"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
@@ -26,7 +27,7 @@ func chain(data *ActionInfo, actions ...Action) bool {
 type MessageHandler struct {
 	sessionCache services.SessionServiceCacheInterface
 	msgCache     services.MsgCacheInterface
-	gpt          *services.ChatGPT
+	gpt          *openai.ChatGPT
 	config       initialization.Config
 }
 
@@ -36,6 +37,7 @@ func (m MessageHandler) cardHandler(_ context.Context,
 	actionValue := cardAction.Action.Value
 	actionValueJson, _ := json.Marshal(actionValue)
 	json.Unmarshal(actionValueJson, &cardMsg)
+	//fmt.Println("cardMsg: ", cardMsg)
 	if cardMsg.Kind == ClearCardKind {
 		newCard, err, done := CommonProcessClearCache(cardMsg, m.sessionCache)
 		if done {
@@ -44,15 +46,28 @@ func (m MessageHandler) cardHandler(_ context.Context,
 		return nil, nil
 	}
 	if cardMsg.Kind == PicResolutionKind {
-		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
+		//todo: 暂时不允许 以图搜图 模式下的 再来一张
+		//CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
 		return nil, nil
 	}
-	if cardMsg.Kind == PicMoreKind {
+	if cardMsg.Kind == PicTextMoreKind {
 		go func() {
 			m.CommonProcessPicMore(cardMsg)
 		}()
 	}
+	if cardMsg.Kind == PicVarMoreKind {
+		go func() {
+			m.CommonProcessPicMore(cardMsg)
+		}()
+	}
+	if cardMsg.Kind == PicModeChangeKind {
+		newCard, err, done := CommonProcessPicModeChange(cardMsg, m.sessionCache)
+		if done {
+			return newCard, err
+		}
+		return nil, nil
 
+	}
 	return nil, nil
 
 }
@@ -63,7 +78,7 @@ func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
 	//fmt.Println("msg: ", msg)
 	question := msg.Value.(string)
 	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
-	replayImageByBase64(context.Background(), bs64, &msg.MsgId,
+	replayImageCardByBase64(context.Background(), bs64, &msg.MsgId,
 		&msg.SessionId, question)
 }
 
@@ -100,18 +115,60 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 	return nil, nil, false
 }
 
+func CommonProcessPicModeChange(cardMsg CardMsg,
+	session services.SessionServiceCacheInterface) (
+	interface{}, error, bool) {
+	if cardMsg.Value == "1" {
+
+		sessionId := cardMsg.SessionId
+		session.Clear(sessionId)
+		session.SetMode(sessionId,
+			services.ModePicCreate)
+		session.SetPicResolution(sessionId,
+			services.Resolution256)
+
+		newCard, _ :=
+			newSendCard(
+				withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
+				withPicResolutionBtn(&sessionId),
+				withNote("提醒：回复文本或图片，让AI生成相关的图片。"))
+		return newCard, nil, true
+	}
+	if cardMsg.Value == "0" {
+		newCard, _ := newSendCard(
+			withHeader("️🎒 机器人提醒", larkcard.TemplateGreen),
+			withMainMd("依旧保留此话题的上下文信息"),
+			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
+		)
+		return newCard, nil, true
+	}
+	return nil, nil, false
+}
+func judgeMsgType(event *larkim.P2MessageReceiveV1) (string, error) {
+	msgType := event.Event.Message.MessageType
+
+	switch *msgType {
+	case "text", "image", "audio":
+		return *msgType, nil
+	default:
+		return "", fmt.Errorf("unknown message type: %v", *msgType)
+	}
+
+}
+
 func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 	handlerType := judgeChatType(event)
 	if handlerType == "otherChat" {
 		fmt.Println("unknown chat type")
 		return nil
 	}
-	msgType := judgeMsgType(event)
-	if msgType != "text" && msgType != "audio" {
-		fmt.Println("unknown msg type")
+	//fmt.Println(larkcore.Prettify(event.Event.Message))
+
+	msgType, err := judgeMsgType(event)
+	if err != nil {
+		fmt.Printf("error getting message type: %v\n", err)
 		return nil
 	}
-	//fmt.Println(larkcore.Prettify(event.Event.Message))
 
 	content := event.Event.Message.Content
 	msgId := event.Event.Message.MessageId
@@ -130,6 +187,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		chatId:      chatId,
 		qParsed:     strings.Trim(parseContent(*content), " "),
 		fileKey:     parseFileKey(*content),
+		imageKey:    parseImageKey(*content),
 		sessionId:   sessionId,
 		mention:     mention,
 	}
@@ -142,11 +200,11 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		&ProcessedUniqueAction{}, //避免重复处理
 		&ProcessMentionAction{},  //判断机器人是否应该被调用
 		&AudioAction{},           //语音处理
+		&PicAction{},             //图片处理
 		&EmptyAction{},           //空消息处理
 		&ClearAction{},           //清除消息处理
 		&HelpAction{},            //帮助处理
 		&RolePlayAction{},        //角色扮演处理
-		&PicAction{},             //图片处理
 		&MessageAction{},         //消息处理
 
 	}
@@ -156,7 +214,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 
 var _ MessageHandlerInterface = (*MessageHandler)(nil)
 
-func NewMessageHandler(gpt *services.ChatGPT,
+func NewMessageHandler(gpt *openai.ChatGPT,
 	config initialization.Config) MessageHandlerInterface {
 	return &MessageHandler{
 		sessionCache: services.GetSessionCache(),

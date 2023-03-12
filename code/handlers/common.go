@@ -84,3 +84,17 @@ func parseFileKey(content string) string {
 	fileKey := contentMap["file_key"].(string)
 	return fileKey
 }
+
+func parseImageKey(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	if contentMap["image_key"] == nil {
+		return ""
+	}
+	imageKey := contentMap["image_key"].(string)
+	return imageKey
+}
