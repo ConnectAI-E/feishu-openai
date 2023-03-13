@@ -271,14 +271,26 @@ func (s *SpreadsheetAction) BuildSheetsMsg(a *ActionInfo, sheetsUrl string) ([]o
 	larkClient := initialization.GetLarkClient()
 
 	sheesResp, err := larkClient.Sheets.SpreadsheetSheet.Query(*a.ctx, larksheets.NewQuerySpreadsheetSheetReqBuilder().SpreadsheetToken(spreadsheetToken).Build())
-	if err != nil || len(sheesResp.Data.Sheets) == 0 {
-		return nil, errors.Errorf("🤖️：表格获取失败～\n错误信息: %v", err)
+	if err != nil || !sheesResp.Success() {
+		var errText string
+		if err != nil {
+			errText = err.Error()
+		} else {
+			errText = sheesResp.Error()
+		}
+		return nil, errors.Errorf("🤖️：表格获取失败～\n错误信息: %s", errText)
 	}
 
 	sheet := sheesResp.Data.Sheets[0]
 	valuesResp, err := a.handler.sheets.SpreadsheetSheet.GetValues(*a.ctx, larksheetsV2.NewGetSpreadsheetSheetValuesReqBuilder().SpreadsheetToken(spreadsheetToken).Range(*sheesResp.Data.Sheets[0].SheetId).Build())
-	if err != nil {
-		return nil, errors.Errorf("🤖️：表格读取失败～\n错误信息: %v", err)
+	if err != nil || !valuesResp.Success() {
+		var errText string
+		if err != nil {
+			errText = err.Error()
+		} else {
+			errText = sheesResp.Error()
+		}
+		return nil, errors.Errorf("🤖️：表格获取失败～\n错误信息: %s", errText)
 	}
 
 	type void struct{}
