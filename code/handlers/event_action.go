@@ -217,27 +217,27 @@ type SpreadsheetAction struct { /*表格*/
 }
 
 func (s *SpreadsheetAction) Execute(a *ActionInfo) bool {
+	var sheetsMsg []openai.Messages
+	var prompt string
 	if sheetsUrl, foundSpreadsheet := utils.EitherCutPrefix(a.info.qParsed, "/sheets", "分析表格"); foundSpreadsheet {
 		a.handler.sessionCache.Clear(*a.info.sessionId)
 		a.handler.sessionCache.SetMode(*a.info.sessionId, services.ModeSheets)
-		sheetsMsg, err := s.BuildSheetsMsg(a, sheetsUrl)
+		var err error
+		sheetsMsg, err = s.BuildSheetsMsg(a, sheetsUrl)
 		if err != nil {
 			replyMsg(*a.ctx, err.Error(), a.info.msgId)
 			return false
 		}
 		a.handler.sessionCache.SetMsg(*a.info.sessionId, sheetsMsg)
-		replyMsg(*a.ctx, "🤖️：表格加载成功，可以开始分析了～", a.info.msgId)
-		return false
-	}
-
-	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
-	if mode != services.ModeSheets {
+		prompt = `1.对数据进行统计分析 2.分析数据, 比较不同产品之间的差异 3.总结结果, 提炼出主要的结论。`
+	} else if mode := a.handler.sessionCache.GetMode(*a.info.sessionId); mode == services.ModeSheets {
+		sheetsMsg = a.handler.sessionCache.GetMsg(*a.info.sessionId)
+		prompt = a.info.qParsed
+	} else {
 		return true
 	}
 
-	sheetsMsg := a.handler.sessionCache.GetMsg(*a.info.sessionId)
-	sheetsMsg = append(sheetsMsg, openai.Messages{Role: "user", Content: a.info.qParsed})
-
+	sheetsMsg = append(sheetsMsg, openai.Messages{Role: "user", Content: prompt})
 	completions, err := a.handler.gpt.Completions(sheetsMsg)
 	if err != nil {
 		replyMsg(*a.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
@@ -318,7 +318,7 @@ func (s *SpreadsheetAction) BuildSheetsMsg(a *ActionInfo, sheetsUrl string) ([]o
 				continue
 			}
 			v := fmt.Sprintf("%v", cell)
-			if cell == nil || v == "没差别" {
+			if cell == nil {
 				v = ""
 			}
 			newRow = append(newRow, v)
