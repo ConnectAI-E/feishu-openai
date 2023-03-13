@@ -1,15 +1,22 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/csv"
 	"fmt"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	larksheets "github.com/larksuite/oapi-sdk-go/v3/service/sheets/v3"
+	"github.com/pkg/errors"
+	"net/url"
 	"os"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
+	larksheetsV2 "start-feishubot/services/larksheets/v2"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
 	"start-feishubot/utils/audio"
+	"strings"
 )
 
 type MsgInfo struct {
@@ -204,6 +211,116 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 	}
 
 	return true
+}
+
+type SpreadsheetAction struct { /*表格*/
+}
+
+func (s *SpreadsheetAction) Execute(a *ActionInfo) bool {
+	if sheetsUrl, foundSpreadsheet := utils.EitherCutPrefix(a.info.qParsed, "/sheets", "分析表格"); foundSpreadsheet {
+		a.handler.sessionCache.Clear(*a.info.sessionId)
+		a.handler.sessionCache.SetMode(*a.info.sessionId, services.ModeSheets)
+		sheetsMsg, err := s.BuildSheetsMsg(a, sheetsUrl)
+		if err != nil {
+			replyMsg(*a.ctx, err.Error(), a.info.msgId)
+			return false
+		}
+		a.handler.sessionCache.SetMsg(*a.info.sessionId, sheetsMsg)
+		replyMsg(*a.ctx, "🤖️：表格加载成功，可以开始分析了～", a.info.msgId)
+		return false
+	}
+
+	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
+	if mode != services.ModeSheets {
+		return true
+	}
+
+	sheetsMsg := a.handler.sessionCache.GetMsg(*a.info.sessionId)
+	sheetsMsg = append(sheetsMsg, openai.Messages{Role: "user", Content: a.info.qParsed})
+
+	completions, err := a.handler.gpt.Completions(sheetsMsg)
+	if err != nil {
+		replyMsg(*a.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+		return false
+	}
+	err = replyMsg(*a.ctx, completions.Content, a.info.msgId)
+	if err != nil {
+		replyMsg(*a.ctx, fmt.Sprintf("🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+		return false
+	}
+	return false
+}
+
+func (*SpreadsheetAction) ParseSpreadsheetTokenFromUrl(sheetsUrl string) (string, error) {
+	u, err := url.Parse(strings.TrimSpace(sheetsUrl))
+	if err != nil {
+		return "", errors.New("sheets url invalid")
+	}
+	paths := strings.Split(u.Path, "/")
+	if len(paths) != 3 || paths[1] != "sheets" {
+		return "", errors.New("sheets url invalid. path not match")
+	}
+	return paths[2], nil
+}
+
+func (s *SpreadsheetAction) BuildSheetsMsg(a *ActionInfo, sheetsUrl string) ([]openai.Messages, error) {
+	spreadsheetToken, err := s.ParseSpreadsheetTokenFromUrl(sheetsUrl)
+	if err != nil {
+		return nil, errors.Errorf("🤖️：表格分析失败，请检查链接是否正确～\n错误信息: %v", err)
+	}
+	larkClient := initialization.GetLarkClient()
+
+	sheesResp, err := larkClient.Sheets.SpreadsheetSheet.Query(*a.ctx, larksheets.NewQuerySpreadsheetSheetReqBuilder().SpreadsheetToken(spreadsheetToken).Build())
+	if err != nil || len(sheesResp.Data.Sheets) == 0 {
+		return nil, errors.Errorf("🤖️：表格获取失败～\n错误信息: %v", err)
+	}
+
+	sheet := sheesResp.Data.Sheets[0]
+	valuesResp, err := a.handler.sheets.SpreadsheetSheet.GetValues(*a.ctx, larksheetsV2.NewGetSpreadsheetSheetValuesReqBuilder().SpreadsheetToken(spreadsheetToken).Range(*sheesResp.Data.Sheets[0].SheetId).Build())
+	if err != nil {
+		return nil, errors.Errorf("🤖️：表格读取失败～\n错误信息: %v", err)
+	}
+
+	type void struct{}
+	var member void
+	ignoreColumns := map[string]void{
+		"填写者邮箱":  member,
+		"填写者部门":  member,
+		"填写者 ID": member,
+		"收集来源":   member,
+		"提交时间":   member,
+	}
+	ignoreColumnsIndex := make(map[int]any, len(ignoreColumns))
+	for iColumn, cell := range valuesResp.Data.ValueRange.Values[0] {
+		v := strings.TrimSpace(fmt.Sprintf("%v", cell))
+		if _, ok := ignoreColumns[v]; ok {
+			ignoreColumnsIndex[iColumn] = member
+		}
+	}
+
+	csvRecords := make([][]string, 0, len(valuesResp.Data.ValueRange.Values))
+	for _, row := range valuesResp.Data.ValueRange.Values {
+		newRow := make([]string, 0, len(row))
+		for iColumn, cell := range row {
+			if _, ok := ignoreColumnsIndex[iColumn]; ok {
+				continue
+			}
+			v := fmt.Sprintf("%v", cell)
+			if cell == nil || v == "没差别" {
+				v = ""
+			}
+			newRow = append(newRow, v)
+		}
+		csvRecords = append(csvRecords, newRow)
+	}
+	var buf bytes.Buffer
+	csvWriter := csv.NewWriter(&buf)
+	csvWriter.WriteAll(csvRecords)
+
+	return []openai.Messages{
+		{Role: "system", Content: fmt.Sprintf("我希望你充当基于文本的 excel。文件名为 %s，以下CSV文本为你的数据, 第一行为表头，其他行为数据行", *sheet.Title)},
+		{Role: "user", Content: buf.String()},
+	}, nil
 }
 
 type MessageAction struct { /*消息*/
