@@ -3,7 +3,7 @@ name: feishuBot-chatGpt
 access: "aliyun" #  秘钥别名
 
 vars: # 全局变量
-  region: "cn-hongkong"
+  region: "ap-southeast-1"
 
 services:
   helloworld:
