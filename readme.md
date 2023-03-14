@@ -201,6 +201,32 @@ s deploy
 
 更多详细介绍，参考[仅需 1min，用 Serverless 部署基于 gin 的飞书机器人](https://www.bilibili.com/video/BV1nW4y1378T/)
 <br>
+</details>
+
+<details>
+    <summary>使用 Railway 平台一键部署</summary>
+
+
+Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键将 Github 上的代码仓库部署到 Railway 平台，然后在 Railway 平台上配置环境变量即可。部署本项目的流程如下：
+
+#### 1. 生成 Railway 项目
+点击下方按钮即可创建一个对应的 Railway 项目，其会自动 Fork 本项目到你的 Github 账号下。
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/10D-TF?referralCode=oMcVS2)
+
+#### 2. 配置环境变量
+
+在打开的页面中，配置环境变量，每个变量的说明如下图所示：
+
+<img src='docs/railway-environment.png' alt='Railway 环境变量' width='500px'/>
+
+#### 3. 部署项目
+
+填写完环境变量后，点击 Deploy 就完成了项目的部署。部署完成后还需获取对应的域名用于飞书机器人访问，如下图所示：
+
+<img src='docs/railway-hostname.png' alt='Railway 域名' width='500px'/>
+
+如果不确定自己部署是否成功，可以通过访问上述获取到的域名 (https://xxxxxxxx.railway.app/ping) 来查看是否返回了`pong`，如果返回了`pong`，说明部署成功。
 
 </details>
 
@@ -293,7 +319,7 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 - 创建 [飞书](https://open.feishu.cn/) 机器人
   1. 前往[开发者平台](https://open.feishu.cn/app?lang=zh-CN)创建应用,并获取到 APPID 和 Secret
   2. 前往`应用功能-机器人`, 创建机器人
-  3. 从 cpolar 或者 serverless 获得公网地址,在飞书机器人后台的 `事件订阅` 板块填写。例如，
+  3. 从 cpolar、serverless 或 Railway 获得公网地址，在飞书机器人后台的 `事件订阅` 板块填写。例如，
      - `http://xxxx.r6.cpolar.top`为 cpolar 暴露的公网地址
      - `/webhook/event`为统一的应用路由
      - 最终的回调地址为 `http://xxxx.r6.cpolar.top/webhook/event`
