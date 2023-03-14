@@ -226,7 +226,7 @@ feishu-chatgpt:latest
 注意:
 - `BOT_NAME` 为飞书机器人名称，例如 `chatGpt`
 - `OPENAI_KEY` 为openai key，多个key用逗号分隔，例如 `sk-xxx1,sk-xxx2,sk-xxx3`
-- `HTTP_PROXY` 为宿主机的proxy地址，例如 `http://host.docker.internal:7890`
+- `HTTP_PROXY` 为宿主机的proxy地址，例如 `http://host.docker.internal:7890`,没有代理的话，可以不用设置
 - `API_URL` 为openai api 接口地址，例如 `https://api.openai.com`, 没有反向代理的话，可以不用设置
 ---
 
