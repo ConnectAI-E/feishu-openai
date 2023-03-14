@@ -229,6 +229,7 @@ func (s *SpreadsheetAction) Execute(a *ActionInfo) bool {
 			return false
 		}
 		a.handler.sessionCache.SetMsg(*a.info.sessionId, sheetsMsg)
+		go replyMsg(*a.ctx, "🤖️：表格加载成功，可以开始分析了～", a.info.msgId)
 		prompt = `1.对数据进行统计分析 2.分析数据, 比较不同产品之间的差异 3.总结结果, 提炼出主要的结论。`
 	} else if mode := a.handler.sessionCache.GetMode(*a.info.sessionId); mode == services.ModeSheets {
 		sheetsMsg = a.handler.sessionCache.GetMsg(*a.info.sessionId)
