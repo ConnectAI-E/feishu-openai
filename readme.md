@@ -210,6 +210,7 @@ s deploy
 Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键将 Github 上的代码仓库部署到 Railway 平台，然后在 Railway 平台上配置环境变量即可。部署本项目的流程如下：
 
 #### 1. 生成 Railway 项目
+
 点击下方按钮即可创建一个对应的 Railway 项目，其会自动 Fork 本项目到你的 Github 账号下。
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/10D-TF?referralCode=oMcVS2)
@@ -218,13 +219,14 @@ Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键
 
 在打开的页面中，配置环境变量，每个变量的说明如下图所示：
 
-<img src='docs/railway-environment.png' alt='Railway 环境变量' width='500px'/>
+
+<img src='https://user-images.githubusercontent.com/50035229/225005602-88d8678f-9d17-4dc5-8d1e-4abf64fb84fd.png' alt='Railway 环境变量' width='500px'/>
 
 #### 3. 部署项目
 
 填写完环境变量后，点击 Deploy 就完成了项目的部署。部署完成后还需获取对应的域名用于飞书机器人访问，如下图所示：
 
-<img src='docs/railway-hostname.png' alt='Railway 域名' width='500px'/>
+<img src='https://user-images.githubusercontent.com/50035229/225006236-57cb3c8a-1b7d-4bfe-9c9b-099cb9179027.png' alt='Railway 域名' width='500px'/>
 
 如果不确定自己部署是否成功，可以通过访问上述获取到的域名 (https://xxxxxxxx.railway.app/ping) 来查看是否返回了`pong`，如果返回了`pong`，说明部署成功。
 
