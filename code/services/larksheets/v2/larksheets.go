@@ -57,9 +57,7 @@ func NewGetSpreadsheetSheetValuesReqBuilder() *GetSpreadsheetSheetValuesReqBuild
 	return builder
 }
 
-// 电子表格的token
-//
-// 示例值：shtxxxxxxxxxxxxxxxx
+// 电子表格的token 示例值：shtxxxxxxxxxxxxxxxx
 func (builder *GetSpreadsheetSheetValuesReqBuilder) SpreadsheetToken(spreadsheetToken string) *GetSpreadsheetSheetValuesReqBuilder {
 	builder.apiReq.PathParams.Set("spreadsheet_token", fmt.Sprint(spreadsheetToken))
 	return builder
