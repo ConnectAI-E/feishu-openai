@@ -16,7 +16,8 @@ func TestCompletions(t *testing.T) {
 
 	gpt := NewChatGPT(*config)
 
-	resp, err := gpt.Completions(msgs)
+	requestBody := NewChatGPTRequestBody(msgs)
+	resp, err := gpt.Completions(requestBody)
 	if err != nil {
 		t.Errorf("TestCompletions failed with error: %v", err)
 	}

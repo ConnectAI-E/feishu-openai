@@ -5,9 +5,16 @@ import (
 )
 
 const (
-	maxTokens   = 2000
-	temperature = 0.7
-	engine      = "gpt-3.5-turbo"
+	defaultMaxTokens = 2000
+	temperature      = 0.7
+)
+
+type Model string
+
+const (
+	Gpt4       Model = "gpt-4"
+	Gpt432k    Model = "gpt-4-32k"
+	Gpt35Turbo Model = "gpt-3.5-turbo"
 )
 
 type Messages struct {
@@ -32,7 +39,7 @@ type ChatGPTChoiceItem struct {
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
-	Model            string     `json:"model"`
+	Model            Model      `json:"model"`
 	Messages         []Messages `json:"messages"`
 	MaxTokens        int        `json:"max_tokens"`
 	Temperature      float32    `json:"temperature"`
@@ -41,16 +48,20 @@ type ChatGPTRequestBody struct {
 	PresencePenalty  int        `json:"presence_penalty"`
 }
 
-func (gpt ChatGPT) Completions(msg []Messages) (resp Messages, err error) {
-	requestBody := ChatGPTRequestBody{
-		Model:            engine,
+func NewChatGPTRequestBody(msg []Messages) *ChatGPTRequestBody {
+	return &ChatGPTRequestBody{
+		Model:            Gpt35Turbo,
 		Messages:         msg,
-		MaxTokens:        maxTokens,
+		MaxTokens:        defaultMaxTokens,
 		Temperature:      temperature,
 		TopP:             1,
 		FrequencyPenalty: 0,
 		PresencePenalty:  0,
 	}
+
+}
+
+func (gpt ChatGPT) Completions(requestBody *ChatGPTRequestBody) (resp Messages, err error) {
 	gptResponseBody := &ChatGPTResponseBody{}
 	err = gpt.sendRequestWithBodyType(gpt.ApiUrl+"/v1/chat/completions", "POST",
 		jsonBody,
