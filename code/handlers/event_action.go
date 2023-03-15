@@ -219,7 +219,8 @@ type SpreadsheetAction struct { /*表格*/
 func (s *SpreadsheetAction) Execute(a *ActionInfo) bool {
 	var sheetsMsg []openai.Messages
 	var prompt string
-	if sheetsUrl, foundSpreadsheet := utils.EitherCutPrefix(a.info.qParsed, "/sheets", "分析表格"); foundSpreadsheet {
+	if sheetsUrl, foundSpreadsheet := utils.EitherCutPrefix(a.info.
+		qParsed, "/table", "表格分析"); foundSpreadsheet {
 		a.handler.sessionCache.Clear(*a.info.sessionId)
 		a.handler.sessionCache.SetMode(*a.info.sessionId, services.ModeSheets)
 		var err error
