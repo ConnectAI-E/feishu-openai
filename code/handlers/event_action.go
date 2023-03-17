@@ -231,7 +231,7 @@ func (s *SpreadsheetAction) Execute(a *ActionInfo) bool {
 		}
 		a.handler.sessionCache.SetMsg(*a.info.sessionId, sheetsMsg)
 		go replyMsg(*a.ctx, "🤖️：表格加载成功，可以开始分析了～", a.info.msgId)
-		prompt = `1.对数据进行统计分析 2.分析数据, 比较不同产品之间的差异 3.总结结果, 提炼出主要的结论。`
+		prompt = `您的任务是对数据进行统计分析，比较不同产品之间的差异，并总结结果并提炼出主要结论。请提供一个清晰、简明且易于理解的报告，包括以下三个方面： 1. 数据统计分析：使用适当的方法和工具对数据集进行详细分析，例如描述性统计、回归分析或其他相关技术。 2. 不同产品之间的比较：将数据按照不同产品分类并进行比较。您应该考虑哪些因素可能影响这些差异，并尝试解释它们背后的原因。 3. 结果总结与主要结论提取：根据您的分析结果，总结您发现了什么，并从中提炼出主要结论。请确保您所得到的结论能够帮助决策者做出更好的商业决策。 请注意，在撰写报告时，请务必遵循良好的学术规范和标准。`
 	} else if mode := a.handler.sessionCache.GetMode(*a.info.sessionId); mode == services.ModeSheets {
 		sheetsMsg = a.handler.sessionCache.GetMsg(*a.info.sessionId)
 		prompt = a.info.qParsed
