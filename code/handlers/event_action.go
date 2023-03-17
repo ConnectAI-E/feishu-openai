@@ -3,13 +3,14 @@ package handlers
 import (
 	"context"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"os"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
 	"start-feishubot/utils/audio"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type MsgInfo struct {
@@ -279,6 +280,8 @@ func (*AudioAction) Execute(a *ActionInfo) bool {
 			sendMsg(*a.ctx, fmt.Sprintf("🤖️：语音转换失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
+
+		replyMsg(*a.ctx, fmt.Sprintf("🤖️：识别结果:\n\n %s", text), a.info.msgId)
 		//fmt.Println("text: ", text)
 		a.info.qParsed = text
 		return true
