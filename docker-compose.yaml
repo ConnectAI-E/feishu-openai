@@ -1,0 +1,9 @@
+version: '3.3'
+services:
+  feishu-chatgpt:
+    container_name: feishu-chatgpt
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000/tcp"
