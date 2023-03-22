@@ -284,23 +284,10 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 </details>
 
 <details>
-    <summary>二进制安装包部署</summary>
+    <summary>docker-compose部署</summary>
 <br>
 
-1. 进入[release 页面](https://github.com/Leizhenpeng/feishu-chatgpt/releases/) 下载对应的安装包
-2. 解压安装包,修改 config.example.yml 中配置信息,另存为 config.yml
-3. 运行程序入口文件 `feishu-chatgpt`
-
-事件回调地址: http://IP:9000/webhook/event
-卡片回调地址: http://IP:9000/webhook/card
-
-</details>
-
-
-<details>
-    <summary>docker compose</summary>
-<br>
-
+直接在config.example.yml中配置好环境变量，然后运行下面的命令即可
 ```bash
 # 构建镜像
 docker compose build
@@ -316,6 +303,22 @@ docker compose down
 卡片回调地址: http://IP:9000/webhook/card
 
 </details>
+
+<details>
+    <summary>二进制安装包部署</summary>
+<br>
+
+1. 进入[release 页面](https://github.com/Leizhenpeng/feishu-chatgpt/releases/) 下载对应的安装包
+2. 解压安装包,修改 config.example.yml 中配置信息,另存为 config.yml
+3. 运行程序入口文件 `feishu-chatgpt`
+
+事件回调地址: http://IP:9000/webhook/event
+卡片回调地址: http://IP:9000/webhook/card
+
+</details>
+
+
+
 
 ## 详细配置步骤
 
