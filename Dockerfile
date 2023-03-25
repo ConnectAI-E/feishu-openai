@@ -7,7 +7,7 @@ ENV GO111MODULE=on \
 WORKDIR /build
 ADD /code /build
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags '-w -s' -o feishu_chatgpt
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-w -s' -o feishu_chatgpt
 
 FROM alpine:latest
 
