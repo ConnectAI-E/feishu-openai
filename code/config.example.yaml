@@ -1,4 +1,4 @@
-#  飞书  # 不要随意修改example中配置的顺序和空格，否则docker的sed脚本会执行出错
+#  飞书
 APP_ID: cli_axxx
 APP_SECRET: xxx
 APP_ENCRYPT_KEY: xxx

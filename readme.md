@@ -284,10 +284,10 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 </details>
 
 <details>
-    <summary>docker-compose部署</summary>
+    <summary>docker-compose 部署</summary>
 <br>
 
-直接在config.example.yml中配置好环境变量，然后运行下面的命令即可
+编辑 docker-compose.yaml，通过 environment 配置相应环境变量（或者通过 volumes 挂载相应配置文件），然后运行下面的命令即可
 ```bash
 # 构建镜像
 docker compose build
