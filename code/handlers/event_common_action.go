@@ -113,3 +113,20 @@ func (*HelpAction) Execute(a *ActionInfo) bool {
 	}
 	return true
 }
+
+type BalanceAction struct { /*余额*/
+}
+
+func (*BalanceAction) Execute(a *ActionInfo) bool {
+	if _, foundBalance := utils.EitherTrimEqual(a.info.qParsed,
+		"/balance", "余额"); foundBalance {
+		balanceResp, err := a.handler.gpt.GetBalance()
+		if err != nil {
+			replyMsg(*a.ctx, "查询余额失败，请稍后再试", a.info.msgId)
+			return false
+		}
+		sendBalanceCard(*a.ctx, a.info.sessionId, *balanceResp)
+		return false
+	}
+	return true
+}

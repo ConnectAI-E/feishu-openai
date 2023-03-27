@@ -27,6 +27,8 @@ const (
 	jsonBody requestBodyType = iota
 	formVoiceDataBody
 	formPictureDataBody
+
+	nilBody
 )
 
 func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBodyType,
@@ -35,16 +37,15 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 	var requestBodyData []byte
 	var err error
 	var writer *multipart.Writer
+	api = gpt.Lb.GetAPI()
 
 	switch bodyType {
 	case jsonBody:
-		api = gpt.Lb.GetAPI()
 		requestBodyData, err = json.Marshal(requestBody)
 		if err != nil {
 			return err
 		}
 	case formVoiceDataBody:
-		api = gpt.Lb.GetAPI()
 		formBody := &bytes.Buffer{}
 		writer = multipart.NewWriter(formBody)
 		err = audioMultipartForm(requestBody.(AudioToTextRequestBody), writer)
@@ -58,7 +59,6 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 		requestBodyData = formBody.Bytes()
 
 	case formPictureDataBody:
-		api = gpt.Lb.GetAPI()
 		formBody := &bytes.Buffer{}
 		writer = multipart.NewWriter(formBody)
 		err = pictureMultipartForm(requestBody.(ImageVariantRequestBody), writer)
@@ -70,6 +70,8 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 			return err
 		}
 		requestBodyData = formBody.Bytes()
+	case nilBody:
+		requestBodyData = nil
 
 	default:
 		return errors.New("unknown request body type")

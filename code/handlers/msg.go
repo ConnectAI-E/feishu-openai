@@ -5,12 +5,12 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"start-feishubot/initialization"
-	"start-feishubot/services"
-
 	"github.com/google/uuid"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"start-feishubot/initialization"
+	"start-feishubot/services"
+	"start-feishubot/services/openai"
 )
 
 type CardKind string
@@ -683,4 +683,28 @@ func sendVarImageCard(ctx context.Context, imageKey string,
 		newCard,
 	)
 	return nil
+}
+
+//TotalGranted   float64   `json:"total_granted"`
+//TotalUsed      float64   `json:"total_used"`
+//TotalAvailable float64   `json:"total_available"`
+//EffectiveAt    time.Time `json:"effective_at"`
+//ExpiresAt      time.Time `json:"expires_at"`
+func sendBalanceCard(ctx context.Context, msgId *string,
+	balance openai.BalanceResponse) {
+	newCard, _ := newSendCard(
+		withHeader("🎰️ 余额查询", larkcard.TemplateBlue),
+		withMainMd(fmt.Sprintf("总额度: %.2f$", balance.TotalGranted)),
+		withMainMd(fmt.Sprintf("已用额度: %.2f$", balance.TotalUsed)),
+		withMainMd(fmt.Sprintf("可用额度: %.2f$",
+			balance.TotalAvailable)),
+		withNote(fmt.Sprintf("有效期: %s - %s",
+			balance.EffectiveAt.Format("2006-01-02 15:04:05"),
+			balance.ExpiresAt.Format("2006-01-02 15:04:05"))),
+	)
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
 }

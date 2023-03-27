@@ -107,3 +107,13 @@ func TestVariateOneImageWithJpg(t *testing.T) {
 		t.Errorf("TestVariateOneImage returned empty imageURL")
 	}
 }
+
+func TestChatGPT_GetBalance(t *testing.T) {
+	config := initialization.LoadConfig("../../config.yaml")
+	gpt := NewChatGPT(*config)
+	balance, err := gpt.GetBalance()
+	if err != nil {
+		t.Errorf("TestChatGPT_GetBalance failed with error: %v", err)
+	}
+	fmt.Println("balance: ", balance)
+}
