@@ -620,6 +620,8 @@ func sendHelpCard(ctx context.Context,
 		withSplitLine(),
 		withMainMd("🎨 **图片创作模式**\n回复*图片创作* 或 */picture*"),
 		withSplitLine(),
+		withMainMd("🎰 **Token余额查询**\n回复*余额* 或 */balance*"),
+		withSplitLine(),
 		withMainMd("👨‍💼 **常用角色管理** 🚧\n"+
 			" 文本回复 *角色管理* 或 */manage*"),
 		withSplitLine(),
