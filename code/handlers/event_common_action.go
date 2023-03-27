@@ -145,8 +145,8 @@ func (*RoleListAction) Execute(a *ActionInfo) bool {
 		//a.handler.sessionCache.SetMsg(*a.info.sessionId, systemMsg)
 		//sendSystemInstructionCard(*a.ctx, a.info.sessionId,
 		//	a.info.msgId, system)
-		fmt.Println(initialization.GetAllTags())
-		replyMsg(*a.ctx, "暂未开放", a.info.msgId)
+		tags := initialization.GetAllUniqueTags()
+		SendRoleTagsCard(*a.ctx, a.info.sessionId, a.info.msgId, *tags)
 		return false
 	}
 	return true

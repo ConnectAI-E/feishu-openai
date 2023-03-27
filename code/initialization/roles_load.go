@@ -1,10 +1,10 @@
 package initialization
 
 import (
+	"github.com/duke-git/lancet/v2/slice"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
-
-	"gopkg.in/yaml.v2"
 )
 
 type Role struct {
@@ -32,12 +32,13 @@ func InitRoleList() *[]Role {
 func GetRoleList() *[]Role {
 	return RoleList
 }
-func GetAllTags() *[]string {
+func GetAllUniqueTags() *[]string {
 	tags := make([]string, 0)
 	for _, role := range *RoleList {
 		tags = append(tags, role.Tags...)
 	}
-	return &tags
+	result := slice.Union(tags)
+	return &result
 }
 
 func GetRoleByTitle(title string) *Role {

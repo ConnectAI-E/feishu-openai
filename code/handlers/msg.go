@@ -17,11 +17,13 @@ type CardKind string
 type CardChatType string
 
 var (
-	ClearCardKind     = CardKind("clear")           // 清空上下文
-	PicModeChangeKind = CardKind("pic_mode_change") // 切换图片创作模式
-	PicResolutionKind = CardKind("pic_resolution")  // 图片分辨率调整
-	PicTextMoreKind   = CardKind("pic_text_more")   // 重新根据文本生成图片
-	PicVarMoreKind    = CardKind("pic_var_more")    // 变量图片
+	ClearCardKind      = CardKind("clear")            // 清空上下文
+	PicModeChangeKind  = CardKind("pic_mode_change")  // 切换图片创作模式
+	PicResolutionKind  = CardKind("pic_resolution")   // 图片分辨率调整
+	PicTextMoreKind    = CardKind("pic_text_more")    // 重新根据文本生成图片
+	PicVarMoreKind     = CardKind("pic_var_more")     // 变量图片
+	RoleTagsChooseKind = CardKind("role_tags_choose") // 内置角色所属标签选择
+	RoleChooseKind     = CardKind("role_choose")      // 内置角色选择
 )
 
 var (
@@ -346,13 +348,36 @@ func withPicResolutionBtn(sessionID *string) larkcard.
 		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
 		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
 		Build()
-
 	return actions
+}
+func withRoleTagsBtn(sessionID *string, tags ...string) larkcard.
+	MessageCardElement {
+	var menuOptions []MenuOption
 
+	for _, tag := range tags {
+		menuOptions = append(menuOptions, MenuOption{
+			label: tag,
+			value: tag,
+		})
+	}
+	cancelMenu := newMenu("选择角色分类",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      RoleTagsChooseKind,
+			"sessionId": *sessionID,
+			"msgId":     *sessionID,
+		},
+		menuOptions...,
+	)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
+		Build()
+	return actions
 }
 
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
-	//fmt.Println("sendMsg", msg, msgId)
 	msg, i := processMessage(msg)
 	if i != nil {
 		return i
@@ -687,11 +712,6 @@ func sendVarImageCard(ctx context.Context, imageKey string,
 	return nil
 }
 
-//TotalGranted   float64   `json:"total_granted"`
-//TotalUsed      float64   `json:"total_used"`
-//TotalAvailable float64   `json:"total_available"`
-//EffectiveAt    time.Time `json:"effective_at"`
-//ExpiresAt      time.Time `json:"expires_at"`
 func sendBalanceCard(ctx context.Context, msgId *string,
 	balance openai.BalanceResponse) {
 	newCard, _ := newSendCard(
@@ -704,6 +724,19 @@ func sendBalanceCard(ctx context.Context, msgId *string,
 			balance.EffectiveAt.Format("2006-01-02 15:04:05"),
 			balance.ExpiresAt.Format("2006-01-02 15:04:05"))),
 	)
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+}
+
+func SendRoleTagsCard(ctx context.Context,
+	sessionId *string, msgId *string, roleTags []string) {
+	newCard, _ := newSendCard(
+		withHeader("🧸 角色列表", larkcard.TemplateBlue),
+		withRoleTagsBtn(sessionId, roleTags...),
+		withNote("提醒：请选择角色所属分类，以便我们为您推荐更多相关角色。"))
 	replyCard(
 		ctx,
 		msgId,
