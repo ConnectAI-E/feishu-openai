@@ -352,7 +352,7 @@ func withPicResolutionBtn(sessionID *string) larkcard.
 }
 
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
-	fmt.Println("sendMsg", msg, msgId)
+	//fmt.Println("sendMsg", msg, msgId)
 	msg, i := processMessage(msg)
 	if i != nil {
 		return i
