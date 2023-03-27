@@ -591,11 +591,7 @@ func sendClearCacheCheckCard(ctx context.Context,
 		withMainMd("您确定要清除对话上下文吗？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
 		withClearDoubleCheckBtn(sessionId))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendSystemInstructionCard(ctx context.Context,
@@ -604,11 +600,7 @@ func sendSystemInstructionCard(ctx context.Context,
 		withHeader("🥷  已进入角色扮演模式", larkcard.TemplateIndigo),
 		withMainText(content),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendPicCreateInstructionCard(ctx context.Context,
@@ -617,11 +609,7 @@ func sendPicCreateInstructionCard(ctx context.Context,
 		withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
 		withPicResolutionBtn(sessionId),
 		withNote("提醒：回复文本或图片，让AI生成相关的图片。"))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendPicModeCheckCard(ctx context.Context,
@@ -631,11 +619,7 @@ func sendPicModeCheckCard(ctx context.Context,
 		withMainMd("收到图片，是否进入图片创作模式？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
 		withPicModeDoubleCheckBtn(sessionId))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendNewTopicCard(ctx context.Context,
@@ -644,11 +628,7 @@ func sendNewTopicCard(ctx context.Context,
 		withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
 		withMainText(content),
 		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendHelpCard(ctx context.Context,
@@ -666,6 +646,8 @@ func sendHelpCard(ctx context.Context,
 				"sessionId": *sessionId,
 			}, larkcard.MessageCardButtonTypeDanger)),
 		withSplitLine(),
+		withMainMd("🛖 **内置角色列表** \n"+" 文本回复 *角色列表* 或 */roles*"),
+		withSplitLine(),
 		withMainMd("🥷 **角色扮演模式**\n文本回复*角色扮演* 或 */system*+空格+角色信息"),
 		withSplitLine(),
 		withMainMd("🎤 **AI语音对话**\n私聊模式下直接发送语音"),
@@ -674,25 +656,15 @@ func sendHelpCard(ctx context.Context,
 		withSplitLine(),
 		withMainMd("🎰 **Token余额查询**\n回复*余额* 或 */balance*"),
 		withSplitLine(),
-		withMainMd("👨‍💼 **常用角色管理** 🚧\n"+
-			" 文本回复 *角色管理* 或 */manage*"),
+		withMainMd("🔃️ **历史话题回档** 🚧\n"+" 进入话题的回复详情页,文本回复 *恢复* 或 */reload*"),
 		withSplitLine(),
-		withMainMd("🔃️ **历史话题回档** 🚧\n"+
-			" 进入话题的回复详情页,文本回复 *恢复* 或 */reload*"),
+		withMainMd("📤 **话题内容导出** 🚧\n"+" 文本回复 *导出* 或 */export*"),
 		withSplitLine(),
-		withMainMd("📤 **话题内容导出** 🚧\n"+
-			" 文本回复 *导出* 或 */export*"),
-		withSplitLine(),
-		withMainMd("🎰 **连续对话与多话题模式**\n"+
-			" 点击对话框参与回复，可保持话题连贯。同时，单独提问即可开启全新新话题"),
+		withMainMd("🎰 **连续对话与多话题模式**\n"+" 点击对话框参与回复，可保持话题连贯。同时，单独提问即可开启全新新话题"),
 		withSplitLine(),
 		withMainMd("🎒 **需要更多帮助**\n文本回复 *帮助* 或 */help*"),
 	)
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func sendImageCard(ctx context.Context, imageKey string,
@@ -709,11 +681,7 @@ func sendImageCard(ctx context.Context, imageKey string,
 			"sessionId": *sessionId,
 		}, larkcard.MessageCardButtonTypePrimary)),
 	)
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 	return nil
 }
 
@@ -731,11 +699,7 @@ func sendVarImageCard(ctx context.Context, imageKey string,
 			"sessionId": *sessionId,
 		}, larkcard.MessageCardButtonTypePrimary)),
 	)
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 	return nil
 }
 
@@ -751,11 +715,7 @@ func sendBalanceCard(ctx context.Context, msgId *string,
 			balance.EffectiveAt.Format("2006-01-02 15:04:05"),
 			balance.ExpiresAt.Format("2006-01-02 15:04:05"))),
 	)
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func SendRoleTagsCard(ctx context.Context,
@@ -764,11 +724,7 @@ func SendRoleTagsCard(ctx context.Context,
 		withHeader("🛖 请选择角色类别", larkcard.TemplateIndigo),
 		withRoleTagsBtn(sessionId, roleTags...),
 		withNote("提醒：选择角色所属分类，以便我们为您推荐更多相关角色。"))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
 
 func SendRoleListCard(ctx context.Context,
@@ -777,9 +733,5 @@ func SendRoleListCard(ctx context.Context,
 		withHeader("🛖 角色列表"+" - "+roleTag, larkcard.TemplateIndigo),
 		withRoleBtn(sessionId, roleList...),
 		withNote("提醒：选择内置场景，快速进入角色扮演模式。"))
-	replyCard(
-		ctx,
-		msgId,
-		newCard,
-	)
+	replyCard(ctx, msgId, newCard)
 }
