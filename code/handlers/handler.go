@@ -96,12 +96,13 @@ func CommonProcessPicResolution(msg CardMsg,
 func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (
 	interface{}, error, bool) {
 	if cardMsg.Value == "1" {
+		session.Clear(cardMsg.SessionId)
 		newCard, _ := newSendCard(
-			withHeader("️🆑 机器人提醒", larkcard.TemplateRed),
+			withHeader("️🆑 机器人提醒", larkcard.TemplateGrey),
 			withMainMd("已删除此话题的上下文信息"),
 			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
 		)
-		session.Clear(cardMsg.SessionId)
+		//fmt.Printf("session: %v", newCard)
 		return newCard, nil, true
 	}
 	if cardMsg.Value == "0" {
