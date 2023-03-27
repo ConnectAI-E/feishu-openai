@@ -20,6 +20,8 @@ func NewCardHandler(m MessageHandler) CardHandlerFunc {
 		NewPicResolutionHandler,
 		NewPicTextMoreHandler,
 		NewPicModeChangeHandler,
+		NewRoleTagCardHandler,
+		NewRoleCardHandler,
 	}
 
 	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
@@ -27,6 +29,7 @@ func NewCardHandler(m MessageHandler) CardHandlerFunc {
 		actionValue := cardAction.Action.Value
 		actionValueJson, _ := json.Marshal(actionValue)
 		json.Unmarshal(actionValueJson, &cardMsg)
+		//pp.Println(cardMsg)
 		for _, handler := range handlers {
 			h := handler(cardMsg, m)
 			i, err := h(ctx, cardAction)

@@ -1,7 +1,9 @@
 package initialization
 
 import (
+	"errors"
 	"github.com/duke-git/lancet/v2/slice"
+	"github.com/duke-git/lancet/v2/validator"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -50,14 +52,25 @@ func GetRoleByTitle(title string) *Role {
 	return nil
 }
 
-func GetRolesByTag(tag string) *[]string {
+func GetTitleListByTag(tags string) *[]string {
 	roles := make([]string, 0)
+	//pp.Println(RoleList)
 	for _, role := range *RoleList {
 		for _, roleTag := range role.Tags {
-			if roleTag == tag {
+			if roleTag == tags && !validator.IsEmptyString(role.
+				Title) {
 				roles = append(roles, role.Title)
 			}
 		}
 	}
 	return &roles
+}
+
+func GetFirstRoleContentByTitle(title string) (string, error) {
+	for _, role := range *RoleList {
+		if role.Title == title {
+			return role.Content, nil
+		}
+	}
+	return "", errors.New("role not found")
 }

@@ -377,6 +377,33 @@ func withRoleTagsBtn(sessionID *string, tags ...string) larkcard.
 	return actions
 }
 
+func withRoleBtn(sessionID *string, titles ...string) larkcard.
+	MessageCardElement {
+	var menuOptions []MenuOption
+
+	for _, tag := range titles {
+		menuOptions = append(menuOptions, MenuOption{
+			label: tag,
+			value: tag,
+		})
+	}
+	cancelMenu := newMenu("查看内置角色",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      RoleChooseKind,
+			"sessionId": *sessionID,
+			"msgId":     *sessionID,
+		},
+		menuOptions...,
+	)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
+		Build()
+	return actions
+}
+
 func replyMsg(ctx context.Context, msg string, msgId *string) error {
 	msg, i := processMessage(msg)
 	if i != nil {
@@ -574,7 +601,7 @@ func sendClearCacheCheckCard(ctx context.Context,
 func sendSystemInstructionCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
-		withHeader("🥷  已进入角色扮演模式", larkcard.TemplateBlue),
+		withHeader("🥷  已进入角色扮演模式", larkcard.TemplateIndigo),
 		withMainText(content),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"))
 	replyCard(
@@ -734,9 +761,22 @@ func sendBalanceCard(ctx context.Context, msgId *string,
 func SendRoleTagsCard(ctx context.Context,
 	sessionId *string, msgId *string, roleTags []string) {
 	newCard, _ := newSendCard(
-		withHeader("🧸 角色列表", larkcard.TemplateBlue),
+		withHeader("🛖 请选择角色类别", larkcard.TemplateIndigo),
 		withRoleTagsBtn(sessionId, roleTags...),
-		withNote("提醒：请选择角色所属分类，以便我们为您推荐更多相关角色。"))
+		withNote("提醒：选择角色所属分类，以便我们为您推荐更多相关角色。"))
+	replyCard(
+		ctx,
+		msgId,
+		newCard,
+	)
+}
+
+func SendRoleListCard(ctx context.Context,
+	sessionId *string, msgId *string, roleTag string, roleList []string) {
+	newCard, _ := newSendCard(
+		withHeader("🛖 角色列表"+" - "+roleTag, larkcard.TemplateIndigo),
+		withRoleBtn(sessionId, roleList...),
+		withNote("提醒：选择内置场景，快速进入角色扮演模式。"))
 	replyCard(
 		ctx,
 		msgId,

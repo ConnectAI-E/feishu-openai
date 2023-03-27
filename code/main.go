@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/k0kubun/pp/v3"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"log"
 	"start-feishubot/handlers"
@@ -24,6 +25,7 @@ var (
 
 func main() {
 	initialization.InitRoleList()
+	pp.Println(initialization.RoleList)
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)
