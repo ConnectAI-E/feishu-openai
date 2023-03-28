@@ -8,7 +8,6 @@ require (
 	github.com/duke-git/lancet/v2 v2.1.17
 	github.com/gin-gonic/gin v1.8.2
 	github.com/google/uuid v1.3.0
-	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/larksuite/oapi-sdk-gin v1.0.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pion/opus v0.0.0-20230123082803-1052c3e89e58
@@ -28,7 +27,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
