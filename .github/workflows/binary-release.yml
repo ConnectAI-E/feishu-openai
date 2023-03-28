@@ -36,4 +36,4 @@ jobs:
           md5sum: false
           project_path: "./code"
           binary_name: "feishu-chatgpt"
-          extra_files: ./code/config.example.yaml readme.md
+          extra_files: ./code/config.example.yaml readme.md LICENSE ./code/role_list.yaml
