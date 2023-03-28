@@ -15,5 +15,6 @@ WORKDIR /app
 
 RUN apk add --no-cache bash
 COPY --from=golang /build/feishu_chatgpt /app
+COPY --from=golang /build/role_list.yaml /app
 EXPOSE 9000
 ENTRYPOINT ["/app/feishu_chatgpt"]
