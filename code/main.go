@@ -23,6 +23,7 @@ var (
 )
 
 func main() {
+	initialization.InitRoleList()
 	pflag.Parse()
 	config := initialization.LoadConfig(*cfg)
 	initialization.LoadLarkClient(*config)

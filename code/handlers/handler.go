@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -31,120 +30,12 @@ type MessageHandler struct {
 	config       initialization.Config
 }
 
-func (m MessageHandler) cardHandler(_ context.Context,
+func (m MessageHandler) cardHandler(ctx context.Context,
 	cardAction *larkcard.CardAction) (interface{}, error) {
-	var cardMsg CardMsg
-	actionValue := cardAction.Action.Value
-	actionValueJson, _ := json.Marshal(actionValue)
-	json.Unmarshal(actionValueJson, &cardMsg)
-	//fmt.Println("cardMsg: ", cardMsg)
-	if cardMsg.Kind == ClearCardKind {
-		newCard, err, done := CommonProcessClearCache(cardMsg, m.sessionCache)
-		if done {
-			return newCard, err
-		}
-		return nil, nil
-	}
-	if cardMsg.Kind == PicResolutionKind {
-		CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
-		return nil, nil
-	}
-	if cardMsg.Kind == PicTextMoreKind {
-		go func() {
-			m.CommonProcessPicMore(cardMsg)
-		}()
-	}
-	//if cardMsg.Kind == PicVarMoreKind {
-	//	//todo: 暂时不允许 以图搜图 模式下的 再来一张
-	//	go func() {
-	//		m.CommonProcessPicMore(cardMsg)
-	//	}()
-	//}
-	if cardMsg.Kind == PicModeChangeKind {
-		newCard, err, done := CommonProcessPicModeChange(cardMsg, m.sessionCache)
-		if done {
-			return newCard, err
-		}
-		return nil, nil
-
-	}
-	return nil, nil
-
+	messageHandler := NewCardHandler(m)
+	return messageHandler(ctx, cardAction)
 }
 
-func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
-	resolution := m.sessionCache.GetPicResolution(msg.SessionId)
-	//fmt.Println("resolution: ", resolution)
-	//fmt.Println("msg: ", msg)
-	question := msg.Value.(string)
-	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
-	replayImageCardByBase64(context.Background(), bs64, &msg.MsgId,
-		&msg.SessionId, question)
-}
-
-func CommonProcessPicResolution(msg CardMsg,
-	cardAction *larkcard.CardAction,
-	cache services.SessionServiceCacheInterface) {
-	option := cardAction.Action.Option
-	//fmt.Println(larkcore.Prettify(msg))
-	cache.SetPicResolution(msg.SessionId, services.Resolution(option))
-	//send text
-	replyMsg(context.Background(), "已更新图片分辨率为"+option,
-		&msg.MsgId)
-}
-
-func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (
-	interface{}, error, bool) {
-	if cardMsg.Value == "1" {
-		session.Clear(cardMsg.SessionId)
-		newCard, _ := newSendCard(
-			withHeader("️🆑 机器人提醒", larkcard.TemplateGrey),
-			withMainMd("已删除此话题的上下文信息"),
-			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
-		)
-		//fmt.Printf("session: %v", newCard)
-		return newCard, nil, true
-	}
-	if cardMsg.Value == "0" {
-		newCard, _ := newSendCard(
-			withHeader("️🆑 机器人提醒", larkcard.TemplateGreen),
-			withMainMd("依旧保留此话题的上下文信息"),
-			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
-		)
-		return newCard, nil, true
-	}
-	return nil, nil, false
-}
-
-func CommonProcessPicModeChange(cardMsg CardMsg,
-	session services.SessionServiceCacheInterface) (
-	interface{}, error, bool) {
-	if cardMsg.Value == "1" {
-
-		sessionId := cardMsg.SessionId
-		session.Clear(sessionId)
-		session.SetMode(sessionId,
-			services.ModePicCreate)
-		session.SetPicResolution(sessionId,
-			services.Resolution256)
-
-		newCard, _ :=
-			newSendCard(
-				withHeader("🖼️ 已进入图片创作模式", larkcard.TemplateBlue),
-				withPicResolutionBtn(&sessionId),
-				withNote("提醒：回复文本或图片，让AI生成相关的图片。"))
-		return newCard, nil, true
-	}
-	if cardMsg.Value == "0" {
-		newCard, _ := newSendCard(
-			withHeader("️🎒 机器人提醒", larkcard.TemplateGreen),
-			withMainMd("依旧保留此话题的上下文信息"),
-			withNote("我们可以继续探讨这个话题,期待和您聊天。如果您有其他问题或者想要讨论的话题，请告诉我哦"),
-		)
-		return newCard, nil, true
-	}
-	return nil, nil, false
-}
 func judgeMsgType(event *larkim.P2MessageReceiveV1) (string, error) {
 	msgType := event.Event.Message.MessageType
 
@@ -204,6 +95,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		&PicAction{},             //图片处理
 		&EmptyAction{},           //空消息处理
 		&ClearAction{},           //清除消息处理
+		&RoleListAction{},        //角色列表处理
 		&HelpAction{},            //帮助处理
 		&BalanceAction{},         //余额处理
 		&RolePlayAction{},        //角色扮演处理

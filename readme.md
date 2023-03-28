@@ -8,8 +8,10 @@
     <p align='center'>
     <img src='https://user-images.githubusercontent.com/50035229/224493411-085ba405-81cd-4972-b87b-74a2e811f23d.png' alt='语音对话' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/223590381-ed38db74-39f3-4e77-bd3a-aaa54d679286.png' alt='角色扮演' width='800'/>
+    <img src='https://user-images.githubusercontent.com/50035229/228092540-bb9c74de-fccb-4d07-9797-f3fe1fb3705a.png' alt='角色列表' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/223590817-37a56eac-ab6e-4293-862a-de0988ac50b7.png' alt='文字成图' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/224531308-378a5bc3-2964-4e32-905f-8237dafc3f91.png' alt='图片变体' width='800'/>
+    <img src='https://user-images.githubusercontent.com/50035229/227900488-10a53176-f4e3-4b9e-bf9e-b60d958aefc8.png' alt='余额查询' width='800'/>
     <img src='https://user-images.githubusercontent.com/50035229/224531775-3f0e1e1b-a373-4774-a8f0-e120ccba6670.png' alt='帮助菜单' width='800'/>
     </p>
 
@@ -32,6 +34,8 @@
 
 🖼 文本成图：支持文本成图和以图搜图
 
+🛖 场景预设：内置丰富角色列表，方便用户切换AI角色
+
 🎭 角色扮演：支持场景模式，增添讨论乐趣和创意
 
 🔄 上下文保留：回复对话框即可继续同一话题讨论
@@ -43,8 +47,6 @@
 👍 交互式反馈：即时获取机器人处理结果
 
 🎰 余额查询：即时获取token消耗情况
-
-🏞 场景预设：内置丰富场景预设，方便用户管理场景 🚧
 
 🔙 历史回档：轻松回档历史对话，继续话题讨论 🚧
 
@@ -343,7 +345,6 @@ docker compose down
       <img src='https://user-images.githubusercontent.com/50035229/223945122-f7ab3d9a-6742-43d2-970e-ddb0f284c7fa.png' alt='' width='800'/>
       <img src='https://user-images.githubusercontent.com/50035229/223944507-8d1a08d7-8b5b-4f32-a90d-fd338164ec82.png' alt='' width='800'/>
       <img src='https://user-images.githubusercontent.com/50035229/223944515-fb505e84-c840-484a-8df5-612f60bf27ea.png' alt='' width='800'/>
-      <img src='https://user-images.githubusercontent.com/50035229/227900488-10a53176-f4e3-4b9e-bf9e-b60d958aefc8.png' alt='' width='800'/>
       <img src='https://user-images.githubusercontent.com/50035229/223944590-ad61320f-c14a-4542-80ad-dee2e6469b67.png' alt='' width='800'/>
     </p>
 </details>
