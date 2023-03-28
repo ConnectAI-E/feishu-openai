@@ -62,6 +62,8 @@
 
 📊 表格分析：轻松导入飞书表格，提升数据分析效率 🚧
 
+🍊 私有数据训练：利用公司产品信息对GPT二次训练，更好地满足客户个性化需求 🚧
+
 ## 🌟 项目特点
 
 - 🍏 基于 OpenAI-[gpt-3.5-turbo](https://platform.openai.com/account/api-keys) 接口
