@@ -1,4 +1,4 @@
-FROM golang as golang
+FROM golang:1.18 as golang
 
 ENV GO111MODULE=on \
     CGO_ENABLED=1 \
