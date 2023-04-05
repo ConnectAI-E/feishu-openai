@@ -23,6 +23,11 @@ type Config struct {
 	KeyFile                    string
 	OpenaiApiUrl               string
 	HttpProxy                  string
+	AzureOn                    bool
+	AzureApiVersion            string
+	AzureDeploymentName        string
+	AzureResourceName          string
+	AzureOpenaiToken           string
 }
 
 func LoadConfig(cfg string) *Config {
@@ -49,6 +54,11 @@ func LoadConfig(cfg string) *Config {
 		KeyFile:                    getViperStringValue("KEY_FILE", "key.pem"),
 		OpenaiApiUrl:               getViperStringValue("API_URL", "https://api.openai.com"),
 		HttpProxy:                  getViperStringValue("HTTP_PROXY", ""),
+		AzureOn:                    getViperBoolValue("AZURE_ON", false),
+		AzureApiVersion:            getViperStringValue("AZURE_API_VERSION", "2023-03-15-preview"),
+		AzureDeploymentName:        getViperStringValue("AZURE_DEPLOYMENT_NAME", ""),
+		AzureResourceName:          getViperStringValue("AZURE_RESOURCE_NAME", ""),
+		AzureOpenaiToken:           getViperStringValue("AZURE_OPENAI_TOKEN", ""),
 	}
 
 	return config
