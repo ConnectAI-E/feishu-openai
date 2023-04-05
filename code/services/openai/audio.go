@@ -47,7 +47,7 @@ func audioMultipartForm(request AudioToTextRequestBody, w *multipart.Writer) err
 	return nil
 }
 
-func (gpt ChatGPT) AudioToText(audio string) (string, error) {
+func (gpt *ChatGPT) AudioToText(audio string) (string, error) {
 	requestBody := AudioToTextRequestBody{
 		File:           audio,
 		Model:          "whisper-1",

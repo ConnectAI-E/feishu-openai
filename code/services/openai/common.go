@@ -18,7 +18,7 @@ import (
 type PlatForm string
 
 const (
-	AzureApiUrlV1 = ".openai.azure.com/openai/deployments/"
+	AzureApiUrlV1 = "openai.azure.com/openai/deployments/"
 )
 const (
 	OpenAI PlatForm = "openai"
@@ -50,7 +50,8 @@ const (
 	nilBody
 )
 
-func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBodyType,
+func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
+	bodyType requestBodyType,
 	requestBody interface{}, responseBody interface{}, client *http.Client, maxRetries int) error {
 	var api *loadbalancer.API
 	var requestBodyData []byte
@@ -155,7 +156,8 @@ func (gpt ChatGPT) doAPIRequestWithRetry(url, method string, bodyType requestBod
 	return nil
 }
 
-func (gpt ChatGPT) sendRequestWithBodyType(link, method string, bodyType requestBodyType,
+func (gpt *ChatGPT) sendRequestWithBodyType(link, method string,
+	bodyType requestBodyType,
 	requestBody interface{}, responseBody interface{}) error {
 	var err error
 	client := &http.Client{Timeout: 110 * time.Second}
@@ -202,4 +204,17 @@ func NewChatGPT(config initialization.Config) *ChatGPT {
 			ApiVersion:     config.AzureApiVersion,
 		},
 	}
+}
+
+func (gpt *ChatGPT) FullUrl(suffix string) string {
+	var url string
+	switch gpt.Platform {
+	case Azure:
+		url = fmt.Sprintf("https://%s.%s%s%s?api-version=%s",
+			gpt.AzureConfig.ResourceName, gpt.AzureConfig.BaseURL,
+			gpt.AzureConfig.DeploymentName, suffix, gpt.AzureConfig.ApiVersion)
+	default:
+		url = fmt.Sprintf("%s/v1%s", gpt.ApiUrl, suffix)
+	}
+	return url
 }

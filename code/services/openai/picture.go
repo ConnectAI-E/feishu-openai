@@ -32,7 +32,8 @@ type ImageVariantRequestBody struct {
 	ResponseFormat string `json:"response_format"`
 }
 
-func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, error) {
+func (gpt *ChatGPT) GenerateImage(prompt string, size string,
+	n int) ([]string, error) {
 	requestBody := ImageGenerationRequestBody{
 		Prompt:         prompt,
 		N:              n,
@@ -55,7 +56,8 @@ func (gpt ChatGPT) GenerateImage(prompt string, size string, n int) ([]string, e
 	return b64Pool, nil
 }
 
-func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) {
+func (gpt *ChatGPT) GenerateOneImage(prompt string,
+	size string) (string, error) {
 	b64s, err := gpt.GenerateImage(prompt, size, 1)
 	if err != nil {
 		return "", err
@@ -63,11 +65,13 @@ func (gpt ChatGPT) GenerateOneImage(prompt string, size string) (string, error) 
 	return b64s[0], nil
 }
 
-func (gpt ChatGPT) GenerateOneImageWithDefaultSize(prompt string) (string, error) {
+func (gpt *ChatGPT) GenerateOneImageWithDefaultSize(
+	prompt string) (string, error) {
 	return gpt.GenerateOneImage(prompt, "512x512")
 }
 
-func (gpt ChatGPT) GenerateImageVariation(images string, size string, n int) ([]string, error) {
+func (gpt *ChatGPT) GenerateImageVariation(images string,
+	size string, n int) ([]string, error) {
 	requestBody := ImageVariantRequestBody{
 		Image:          images,
 		N:              n,
@@ -90,7 +94,8 @@ func (gpt ChatGPT) GenerateImageVariation(images string, size string, n int) ([]
 	return b64Pool, nil
 }
 
-func (gpt ChatGPT) GenerateOneImageVariation(images string, size string) (string, error) {
+func (gpt *ChatGPT) GenerateOneImageVariation(images string,
+	size string) (string, error) {
 	b64s, err := gpt.GenerateImageVariation(images, size, 1)
 	if err != nil {
 		return "", err
