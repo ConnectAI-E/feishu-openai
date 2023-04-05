@@ -30,6 +30,7 @@ type AzureConfig struct {
 	ResourceName   string
 	DeploymentName string
 	ApiVersion     string
+	ApiToken       string
 }
 
 type ChatGPT struct {
@@ -77,7 +78,6 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 			return err
 		}
 		requestBodyData = formBody.Bytes()
-
 	case formPictureDataBody:
 		formBody := &bytes.Buffer{}
 		writer = multipart.NewWriter(formBody)
@@ -110,7 +110,11 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 	if bodyType == formVoiceDataBody || bodyType == formPictureDataBody {
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 	}
-	req.Header.Set("Authorization", "Bearer "+api.Key)
+	if gpt.Platform == Azure {
+		req.Header.Set("api-key", gpt.AzureConfig.ApiToken)
+	} else {
+		req.Header.Set("Authorization", "Bearer "+api.Key)
+	}
 
 	var response *http.Response
 	var retry int
@@ -202,6 +206,7 @@ func NewChatGPT(config initialization.Config) *ChatGPT {
 			ResourceName:   config.AzureResourceName,
 			DeploymentName: config.AzureDeploymentName,
 			ApiVersion:     config.AzureApiVersion,
+			ApiToken:       config.AzureOpenaiToken,
 		},
 	}
 }
@@ -210,11 +215,11 @@ func (gpt *ChatGPT) FullUrl(suffix string) string {
 	var url string
 	switch gpt.Platform {
 	case Azure:
-		url = fmt.Sprintf("https://%s.%s%s%s?api-version=%s",
+		url = fmt.Sprintf("https://%s.%s%s/%s?api-version=%s",
 			gpt.AzureConfig.ResourceName, gpt.AzureConfig.BaseURL,
 			gpt.AzureConfig.DeploymentName, suffix, gpt.AzureConfig.ApiVersion)
-	default:
-		url = fmt.Sprintf("%s/v1%s", gpt.ApiUrl, suffix)
+	case OpenAI:
+		url = fmt.Sprintf("%s/v1/%s", gpt.ApiUrl, suffix)
 	}
 	return url
 }
