@@ -108,6 +108,7 @@ func TestVariateOneImageWithJpg(t *testing.T) {
 	}
 }
 
+// 余额接口已经被废弃
 func TestChatGPT_GetBalance(t *testing.T) {
 	config := initialization.LoadConfig("../../config.yaml")
 	gpt := NewChatGPT(*config)

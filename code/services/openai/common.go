@@ -15,11 +15,30 @@ import (
 	"time"
 )
 
+type PlatForm string
+
+const (
+	AzureApiUrlV1 = ".openai.azure.com/openai/deployments/"
+)
+const (
+	OpenAI PlatForm = "openai"
+	Azure  PlatForm = "azure"
+)
+
+type AzureConfig struct {
+	BaseURL        string
+	ResourceName   string
+	DeploymentName string
+	ApiVersion     string
+}
+
 type ChatGPT struct {
-	Lb        *loadbalancer.LoadBalancer
-	ApiKey    []string
-	ApiUrl    string
-	HttpProxy string
+	Lb          *loadbalancer.LoadBalancer
+	ApiKey      []string
+	ApiUrl      string
+	HttpProxy   string
+	Platform    PlatForm
+	AzureConfig AzureConfig
 }
 type requestBodyType int
 
@@ -163,14 +182,24 @@ func (gpt ChatGPT) sendRequestWithBodyType(link, method string, bodyType request
 }
 
 func NewChatGPT(config initialization.Config) *ChatGPT {
-	apiKeys := config.OpenaiApiKeys
-	apiUrl := config.OpenaiApiUrl
-	httpProxy := config.HttpProxy
-	lb := loadbalancer.NewLoadBalancer(apiKeys)
+	lb := loadbalancer.NewLoadBalancer(config.OpenaiApiKeys)
+	platform := OpenAI
+
+	if config.AzureOn {
+		platform = Azure
+	}
+
 	return &ChatGPT{
 		Lb:        lb,
-		ApiKey:    apiKeys,
-		ApiUrl:    apiUrl,
-		HttpProxy: httpProxy,
+		ApiKey:    config.OpenaiApiKeys,
+		ApiUrl:    config.OpenaiApiUrl,
+		HttpProxy: config.HttpProxy,
+		Platform:  platform,
+		AzureConfig: AzureConfig{
+			BaseURL:        AzureApiUrlV1,
+			ResourceName:   config.AzureResourceName,
+			DeploymentName: config.AzureDeploymentName,
+			ApiVersion:     config.AzureApiVersion,
+		},
 	}
 }
