@@ -110,10 +110,10 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 	if bodyType == formVoiceDataBody || bodyType == formPictureDataBody {
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 	}
-	if gpt.Platform == Azure {
-		req.Header.Set("api-key", gpt.AzureConfig.ApiToken)
-	} else {
+	if gpt.Platform == OpenAI {
 		req.Header.Set("Authorization", "Bearer "+api.Key)
+	} else {
+		req.Header.Set("api-key", gpt.AzureConfig.ApiToken)
 	}
 
 	var response *http.Response
@@ -188,7 +188,13 @@ func (gpt *ChatGPT) sendRequestWithBodyType(link, method string,
 }
 
 func NewChatGPT(config initialization.Config) *ChatGPT {
-	lb := loadbalancer.NewLoadBalancer(config.OpenaiApiKeys)
+	var lb *loadbalancer.LoadBalancer
+	if config.AzureOn {
+		keys := []string{config.AzureOpenaiToken}
+		lb = loadbalancer.NewLoadBalancer(keys)
+	} else {
+		lb = loadbalancer.NewLoadBalancer(config.OpenaiApiKeys)
+	}
 	platform := OpenAI
 
 	if config.AzureOn {
