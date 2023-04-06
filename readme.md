@@ -290,7 +290,7 @@ dockerproxy.com/leizhenpeng/feishu-chatgpt:latest
 卡片回调地址: http://IP:9000/webhook/card
 
 把它填入飞书后台
-<br>
+
 --- 
 
 部署azure版本
