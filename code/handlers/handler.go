@@ -125,3 +125,11 @@ func (m MessageHandler) judgeIfMentionMe(mention []*larkim.
 	}
 	return *mention[0].Name == m.config.FeishuBotName
 }
+
+func AzureModeCheck(a *ActionInfo) bool {
+	if a.handler.config.AzureOn {
+		//sendMsg(*a.ctx, "Azure Openai 接口下，暂不支持此功能", a.info.chatId)
+		return false
+	}
+	return true
+}

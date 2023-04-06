@@ -13,6 +13,11 @@ type AudioAction struct { /*语音*/
 }
 
 func (*AudioAction) Execute(a *ActionInfo) bool {
+	check := AzureModeCheck(a)
+	if !check {
+		return true
+	}
+
 	// 只有私聊才解析语音,其他不解析
 	if a.info.handlerType != UserHandler {
 		return true

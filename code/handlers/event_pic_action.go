@@ -15,6 +15,10 @@ type PicAction struct { /*图片*/
 }
 
 func (*PicAction) Execute(a *ActionInfo) bool {
+	check := AzureModeCheck(a)
+	if !check {
+		return true
+	}
 	// 开启图片创作模式
 	if _, foundPic := utils.EitherTrimEqual(a.info.qParsed,
 		"/picture", "图片创作"); foundPic {
