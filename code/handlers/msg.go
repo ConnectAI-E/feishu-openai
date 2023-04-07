@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"errors"
 	"github.com/google/uuid"
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
@@ -67,7 +68,7 @@ func replyCard(ctx context.Context,
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return err
+		return errors.New(resp.Msg)
 	}
 	return nil
 }
@@ -432,7 +433,7 @@ func replyMsg(ctx context.Context, msg string, msgId *string) error {
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return err
+		return errors.New(resp.Msg)
 	}
 	return nil
 }
@@ -461,7 +462,7 @@ func uploadImage(base64Str string) (*string, error) {
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return nil, err
+		return nil, errors.New(resp.Msg)
 	}
 	return resp.Data.ImageKey, nil
 }
@@ -495,7 +496,7 @@ func replyImage(ctx context.Context, ImageKey *string,
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return err
+		return errors.New(resp.Msg)
 	}
 	return nil
 
@@ -580,7 +581,7 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	// 服务端错误处理
 	if !resp.Success() {
 		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return err
+		return errors.New(resp.Msg)
 	}
 	return nil
 }
