@@ -26,6 +26,44 @@
     🚀 Feishu OpenAI 🚀
 </p>
 
+## 🥁 号外号外!
+
+大家好呀！我们正在招募一批小伙伴来加入我们的重构项目！
+
+如果你对以下领域感兴趣，那么你就是我们正在寻找的人啦！
+
+#### 前端小伙伴
+- React！React！React！
+- 如果你还有一些B端开发经验那就更棒啦！
+- 创意？没关系，我们有设计师！
+
+#### 后端小伙伴
+- Golang语言，了解不用说！
+- 熟练掌握gin框架，开发后端就跟呼吸一样自然！
+- 对钉钉、飞书、企微等平台的SDK有所了解，能够开发和集成一系列令人惊叹的功能！
+- 精通平台化细节思维，让你开发的高效服务端热更新脚本惊艳全场！
+- 轻松驾驭Docker容器化技术，随心所欲地部署代码！
+- 有一些支付功能开发经验，真正能让钞票砰砰砰地飞！
+- 对Linux脚本和socket编程了如指掌，就像自己的手指一样灵活！
+- 上述满足一些即可
+
+#### 测试小伙伴
+- 不是小姐姐也没关系哦~
+
+
+gpt应用没思路？要不试试加入我们的项目组，成为这个充满活力、热情的团队的一员吧！
+
+我们队员有
+- [EX-chatGPT的作者](https://github.com/circlestarzero/EX-chatGPT)-->[cc](https://github.com/circlestarzero)
+- [钉钉GPT的作者](https://github.com/eryajf/chatgpt-dingtalk)-->[eryajf](https://github.com/eryajf)
+- [飞书GPT的作者](https://github.com/Leizhenpeng/feishu-chatgpt)-->[river](https://space.bilibili.com/66891783)
+- 正在心动的你！
+
+有费用！不会白嫖！
+
+想来玩就戳我微信吧~~`laolei_forkway`~~
+
+
 ## 👻 机器人功能
 
 🗣 语音交流：私人直接与机器人畅所欲言
@@ -63,6 +101,8 @@
 📊 表格分析：轻松导入飞书表格，提升数据分析效率 🚧
 
 🍊 私有数据训练：利用公司产品信息对GPT二次训练，更好地满足客户个性化需求 🚧
+
+
 
 ## 🌟 项目特点
 
