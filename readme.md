@@ -54,9 +54,9 @@
 gpt应用没思路？要不试试加入我们的项目组，成为这个充满活力、热情的团队的一员吧！
 
 我们队员有
-- [EX-chatGPT的作者](https://github.com/circlestarzero/EX-chatGPT)-->[cc](https://github.com/circlestarzero)
-- [钉钉GPT的作者](https://github.com/eryajf/chatgpt-dingtalk)-->[eryajf](https://github.com/eryajf)
-- [飞书GPT的作者](https://github.com/Leizhenpeng/feishu-chatgpt)-->[river](https://space.bilibili.com/66891783)
+- [EX-chatGPT](https://github.com/circlestarzero/EX-chatGPT)和[ChatPaper的维护者](https://github.com/kaixindelele/ChatPaper)-->[cc](https://github.com/circlestarzero)
+- [钉钉GPT的维护者](https://github.com/eryajf/chatgpt-dingtalk)-->[eryajf](https://github.com/eryajf)
+- [飞书GPT的维护者](https://github.com/Leizhenpeng/feishu-chatgpt)-->[river](https://space.bilibili.com/66891783)
 - 正在心动的你！
 
 有费用！不会白嫖！
