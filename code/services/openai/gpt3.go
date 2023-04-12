@@ -24,6 +24,7 @@ type ChatGPTResponseBody struct {
 	Choices []ChatGPTChoiceItem    `json:"choices"`
 	Usage   map[string]interface{} `json:"usage"`
 }
+
 type ChatGPTChoiceItem struct {
 	Message      Messages `json:"message"`
 	Index        int      `json:"index"`

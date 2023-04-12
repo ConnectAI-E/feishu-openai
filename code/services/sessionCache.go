@@ -2,8 +2,9 @@ package services
 
 import (
 	"encoding/json"
-	"start-feishubot/services/openai"
 	"time"
+
+	"start-feishubot/services/openai"
 
 	"github.com/patrickmn/go-cache"
 )

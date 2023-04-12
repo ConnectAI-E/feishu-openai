@@ -3,10 +3,12 @@ package handlers
 import (
 	"context"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+
 	"start-feishubot/initialization"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
+
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type MsgInfo struct {
