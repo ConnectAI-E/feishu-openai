@@ -4,14 +4,16 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
-	"fmt"
 	"errors"
-	"github.com/google/uuid"
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
+	"fmt"
+
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
+
+	"github.com/google/uuid"
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type CardKind string
@@ -351,6 +353,7 @@ func withPicResolutionBtn(sessionID *string) larkcard.
 		Build()
 	return actions
 }
+
 func withRoleTagsBtn(sessionID *string, tags ...string) larkcard.
 	MessageCardElement {
 	var menuOptions []MenuOption
@@ -466,6 +469,7 @@ func uploadImage(base64Str string) (*string, error) {
 	}
 	return resp.Data.ImageKey, nil
 }
+
 func replyImage(ctx context.Context, ImageKey *string,
 	msgId *string) error {
 	//fmt.Println("sendMsg", ImageKey, msgId)
@@ -499,7 +503,6 @@ func replyImage(ctx context.Context, ImageKey *string,
 		return errors.New(resp.Msg)
 	}
 	return nil
-
 }
 
 func replayImageCardByBase64(ctx context.Context, base64Str string,
@@ -585,6 +588,7 @@ func sendMsg(ctx context.Context, msg string, chatId *string) error {
 	}
 	return nil
 }
+
 func sendClearCacheCheckCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(

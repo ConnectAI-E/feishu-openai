@@ -2,11 +2,12 @@ package initialization
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
+
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/duke-git/lancet/v2/validator"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"log"
 )
 
 type Role struct {
