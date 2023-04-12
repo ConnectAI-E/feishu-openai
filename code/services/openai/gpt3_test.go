@@ -2,8 +2,9 @@ package openai
 
 import (
 	"fmt"
-	"start-feishubot/initialization"
 	"testing"
+
+	"start-feishubot/initialization"
 )
 
 func TestCompletions(t *testing.T) {

@@ -29,6 +29,7 @@ func parseContent(content string) string {
 	text := contentMap["text"].(string)
 	return msgFilter(text)
 }
+
 func processMessage(msg interface{}) (string, error) {
 	msg = strings.TrimSpace(msg.(string))
 	msgB, err := json.Marshal(msg)

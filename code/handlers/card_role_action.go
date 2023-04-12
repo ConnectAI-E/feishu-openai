@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"context"
-	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+
 	"start-feishubot/initialization"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
+
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 )
 
 func NewRoleTagCardHandler(cardMsg CardMsg,
