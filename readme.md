@@ -61,7 +61,9 @@
 - 欢迎没有代码技能的小伙伴
 
 
-gpt应用没思路？要不试试加入我们的项目组，成为这个充满活力、热情的团队的一员吧！
+如果你正在寻找gpt应用的灵感，那不妨加入我们的项目组吧！
+
+我们的目标是通过泛AI技术，为企业层面的场景协同提供赋能。
 
 我们队员有
 - [EX-chatGPT](https://github.com/circlestarzero/EX-chatGPT)和[ChatPaper的维护者](https://github.com/kaixindelele/ChatPaper)-->[cc](https://github.com/circlestarzero)
@@ -71,7 +73,9 @@ gpt应用没思路？要不试试加入我们的项目组，成为这个充满�
 - 正在心动的你！
 
 
-想来玩就戳微信吧~~`laolei_forkway`~~
+想成为这个充满活力、热情的团队的一员嘛？
+
+戳我微信 ~`laolei_forkway`~
 
 
 ## 👻 机器人功能
