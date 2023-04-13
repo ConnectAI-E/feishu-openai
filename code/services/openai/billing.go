@@ -6,23 +6,12 @@ import (
 	"time"
 )
 
-//https://api.openai.com/dashboard/billing/credit_grants
-type Billing struct {
-	Object         string  `json:"object"`
-	TotalGranted   float64 `json:"total_granted"`
-	TotalUsed      float64 `json:"total_used"`
-	TotalAvailable float64 `json:"total_available"`
-	Grants         struct {
-		Object string `json:"object"`
-		Data   []struct {
-			Object      string  `json:"object"`
-			ID          string  `json:"id"`
-			GrantAmount float64 `json:"grant_amount"`
-			UsedAmount  float64 `json:"used_amount"`
-			EffectiveAt float64 `json:"effective_at"`
-			ExpiresAt   float64 `json:"expires_at"`
-		} `json:"data"`
-	} `json:"grants"`
+type BillingSubScrip struct {
+	HardLimitUsd float64 `json:"hard_limit_usd"`
+	AccessUntil  float64 `json:"access_until"`
+}
+type BillingUsage struct {
+	TotalUsage float64 `json:"total_usage"`
 }
 
 type BalanceResponse struct {
@@ -34,29 +23,47 @@ type BalanceResponse struct {
 }
 
 func (gpt *ChatGPT) GetBalance() (*BalanceResponse, error) {
-	var data Billing
+	fmt.Println("进入")
+	var data1 BillingSubScrip
 	err := gpt.sendRequestWithBodyType(
-		gpt.ApiUrl+"/dashboard/billing/credit_grants",
+		gpt.ApiUrl+"/v1/dashboard/billing/subscription",
 		http.MethodGet,
 		nilBody,
 		nil,
-		&data,
+		&data1,
 	)
+	fmt.Println("出错1", err)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get billing data: %v", err)
+		return nil, fmt.Errorf("failed to get billing subscription: %v", err)
+	}
+	nowdate := time.Now()
+	enddate := nowdate.Format("2006-01-02")
+	startdate := nowdate.AddDate(0, 0, -100).Format("2006-01-02")
+	var data2 BillingUsage
+	err = gpt.sendRequestWithBodyType(
+		gpt.ApiUrl+fmt.Sprintf("/v1/dashboard/billing/usage?start_date=%s&end_date=%s", startdate, enddate),
+		http.MethodGet,
+		nilBody,
+		nil,
+		&data2,
+	)
+	fmt.Println(data2)
+	fmt.Println("出错2", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get billing subscription: %v", err)
 	}
 
 	balance := &BalanceResponse{
-		TotalGranted:   data.TotalGranted,
-		TotalUsed:      data.TotalUsed,
-		TotalAvailable: data.TotalAvailable,
+		TotalGranted:   data1.HardLimitUsd,
+		TotalUsed:      data2.TotalUsage / 100,
+		TotalAvailable: data1.HardLimitUsd - data2.TotalUsage/100,
 		ExpiresAt:      time.Now(),
 		EffectiveAt:    time.Now(),
 	}
 
-	if len(data.Grants.Data) > 0 {
-		balance.EffectiveAt = time.Unix(int64(data.Grants.Data[0].EffectiveAt), 0)
-		balance.ExpiresAt = time.Unix(int64(data.Grants.Data[0].ExpiresAt), 0)
+	if data1.AccessUntil > 0 {
+		balance.EffectiveAt = time.Now()
+		balance.ExpiresAt = time.Unix(int64(data1.AccessUntil), 0)
 	}
 
 	return balance, nil
