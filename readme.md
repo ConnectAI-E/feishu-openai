@@ -271,12 +271,12 @@ s deploy
     <summary>使用 Railway 平台一键部署</summary>
 
 
-Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键将 Github 上的代码仓库部署到 Railway 平台，然后在 Railway
+Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键将 GitHub 上的代码仓库部署到 Railway 平台，然后在 Railway
 平台上配置环境变量即可。部署本项目的流程如下：
 
 #### 1. 生成 Railway 项目
 
-点击下方按钮即可创建一个对应的 Railway 项目，其会自动 Fork 本项目到你的 Github 账号下。
+点击下方按钮即可创建一个对应的 Railway 项目，其会自动 Fork 本项目到你的 GitHub 账号下。
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/10D-TF?referralCode=oMcVS2)
 
