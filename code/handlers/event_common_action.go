@@ -153,3 +153,15 @@ func (*RoleListAction) Execute(a *ActionInfo) bool {
 	}
 	return true
 }
+
+type AIModeAction struct { /*AI模式*/
+}
+
+func (*AIModeAction) Execute(a *ActionInfo) bool {
+	if _, foundMode := utils.EitherCutPrefix(a.info.qParsed,
+		"/ai_mode", "AI模式"); foundMode {
+		SendAIModeListsCard(*a.ctx, a.info.sessionId, a.info.msgId, openai.AIModeStrs)
+		return false
+	}
+	return true
+}

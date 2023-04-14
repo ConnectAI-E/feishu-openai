@@ -20,6 +20,7 @@ type SessionMeta struct {
 	Mode       SessionMode       `json:"mode"`
 	Msg        []openai.Messages `json:"msg,omitempty"`
 	PicSetting PicSetting        `json:"pic_setting,omitempty"`
+	AIMode     openai.AIMode     `json:"ai_mode,omitempty"`
 }
 
 const (
@@ -34,16 +35,36 @@ const (
 )
 
 type SessionServiceCacheInterface interface {
+	Get(sessionId string) *SessionMeta
+	Set(sessionId string, sessionMeta *SessionMeta)
 	GetMsg(sessionId string) []openai.Messages
 	SetMsg(sessionId string, msg []openai.Messages)
 	SetMode(sessionId string, mode SessionMode)
 	GetMode(sessionId string) SessionMode
+	GetAIMode(sessionId string) openai.AIMode
+	SetAIMode(sessionId string, aiMode openai.AIMode)
 	SetPicResolution(sessionId string, resolution Resolution)
 	GetPicResolution(sessionId string) string
 	Clear(sessionId string)
 }
 
 var sessionServices *SessionService
+
+// implement Get interface
+func (s *SessionService) Get(sessionId string) *SessionMeta {
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		return nil
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	return sessionMeta
+}
+
+// implement Set interface
+func (s *SessionService) Set(sessionId string, sessionMeta *SessionMeta) {
+	maxCacheTime := time.Hour * 12
+	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+}
 
 func (s *SessionService) GetMode(sessionId string) SessionMode {
 	// Get the session mode from the cache.
@@ -65,6 +86,29 @@ func (s *SessionService) SetMode(sessionId string, mode SessionMode) {
 	}
 	sessionMeta := sessionContext.(*SessionMeta)
 	sessionMeta.Mode = mode
+	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+}
+
+func (s *SessionService) GetAIMode(sessionId string) openai.AIMode {
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		return openai.Balance
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	return sessionMeta.AIMode
+}
+
+// SetAIMode set the ai mode for the session.
+func (s *SessionService) SetAIMode(sessionId string, aiMode openai.AIMode) {
+	maxCacheTime := time.Hour * 12
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		sessionMeta := &SessionMeta{AIMode: aiMode}
+		s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+		return
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	sessionMeta.AIMode = aiMode
 	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 }
 
