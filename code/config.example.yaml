@@ -19,7 +19,7 @@ API_URL: https://api.openai.com
 HTTP_PROXY: ""
 
 # AZURE OPENAI
-AZURE_ON: true # set to true to use Azure rather than OpenAI
+AZURE_ON: false # set true to use Azure rather than OpenAI
 AZURE_API_VERSION: 2023-03-15-preview # 2023-03-15-preview or 2022-12-01 refer https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#completions
 AZURE_RESOURCE_NAME: xxxx   # you can find in endpoint url. Usually looks like https://{RESOURCE_NAME}.openai.azure.com
 AZURE_DEPLOYMENT_NAME: xxxx # usually looks like ...openai.azure.com/openai/deployments/{DEPLOYMENT_NAME}/chat/completions.
