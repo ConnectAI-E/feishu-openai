@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"context"
-
-	"start-feishubot/services"
-
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
+	"start-feishubot/logger"
+	"start-feishubot/services"
 )
 
 func NewClearCardHandler(cardMsg CardMsg, m MessageHandler) CardHandlerFunc {
@@ -23,6 +22,7 @@ func NewClearCardHandler(cardMsg CardMsg, m MessageHandler) CardHandlerFunc {
 
 func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCacheInterface) (
 	interface{}, error, bool) {
+	logger.Debugf("card msg value %v", cardMsg.Value)
 	if cardMsg.Value == "1" {
 		session.Clear(cardMsg.SessionId)
 		newCard, _ := newSendCard(
@@ -30,7 +30,7 @@ func CommonProcessClearCache(cardMsg CardMsg, session services.SessionServiceCac
 			withMainMd("已删除此话题的上下文信息"),
 			withNote("我们可以开始一个全新的话题，继续找我聊天吧"),
 		)
-		//fmt.Printf("session: %v", newCard)
+		logger.Debugf("session %v", newCard)
 		return newCard, nil, true
 	}
 	if cardMsg.Value == "0" {

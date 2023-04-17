@@ -2,6 +2,7 @@ package openai
 
 import (
 	"errors"
+	"start-feishubot/logger"
 	"strings"
 
 	"github.com/pandodao/tokenizer-go"
@@ -86,6 +87,8 @@ func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
 	gptResponseBody := &ChatGPTResponseBody{}
 	url := gpt.FullUrl("chat/completions")
 	//fmt.Println(url)
+	logger.Debug(url)
+	logger.Debug("request body ", requestBody)
 	if url == "" {
 		return resp, errors.New("无法获取openai请求地址")
 	}
@@ -93,6 +96,7 @@ func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
 	if err == nil && len(gptResponseBody.Choices) > 0 {
 		resp = gptResponseBody.Choices[0].Message
 	} else {
+		logger.Errorf("ERROR %v", err)
 		resp = Messages{}
 		err = errors.New("openai 请求失败")
 	}

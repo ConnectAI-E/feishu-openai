@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"start-feishubot/logger"
 
 	"start-feishubot/initialization"
 	"start-feishubot/services/openai"
@@ -34,8 +35,10 @@ func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
 }
 
 func ReadHandler(ctx context.Context, event *larkim.P2MessageReadV1) error {
-	_ = event.Event.Reader.ReaderId.OpenId
+	readerId := event.Event.Reader.ReaderId.OpenId
 	//fmt.Printf("msg is read by : %v \n", *readerId)
+	logger.Debugf("msg is read by : %v \n", *readerId)
+
 	return nil
 }
 

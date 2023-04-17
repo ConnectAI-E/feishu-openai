@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"start-feishubot/logger"
 
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -36,7 +37,7 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
 	//fmt.Println("mode: ", mode)
-
+	logger.Debug("MODE:", mode)
 	// 收到一张图片,且不在图片创作模式下, 提醒是否切换到图片创作模式
 	if a.info.msgType == "image" && mode != services.ModePicCreate {
 		sendPicModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)

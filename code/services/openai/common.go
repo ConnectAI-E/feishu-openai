@@ -9,11 +9,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"start-feishubot/initialization"
+	"start-feishubot/logger"
+	"start-feishubot/services/loadbalancer"
 	"strings"
 	"time"
-
-	"start-feishubot/initialization"
-	"start-feishubot/services/loadbalancer"
 )
 
 type PlatForm string
@@ -124,6 +124,9 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 		//fmt.Println("--------------------")
 		//fmt.Println("req", req.Header)
 		//fmt.Printf("response: %v", response)
+		logger.Debug("req", req.Header)
+
+		logger.Debugf("response %v", response)
 		// read body
 		if err != nil || response.StatusCode < 200 || response.StatusCode >= 300 {
 

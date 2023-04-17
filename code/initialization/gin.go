@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	//"start-feishubot/logger"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,7 @@ func loadCertificate(config Config) (cert tls.Certificate, err error) {
 }
 
 func startHTTPServer(config Config, r *gin.Engine) (err error) {
-	log.Printf("http server started: http://localhost:%d/webhook/event\n", config.HttpPort)
+	log.Printf("http server started: http://localhost:%d/webhook/event\n\n", config.HttpPort)
 	err = r.Run(fmt.Sprintf(":%d", config.HttpPort))
 	if err != nil {
 		return fmt.Errorf("failed to start http server: %v", err)
