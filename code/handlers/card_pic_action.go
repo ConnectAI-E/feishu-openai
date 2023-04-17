@@ -2,6 +2,9 @@ package handlers
 
 import (
 	"context"
+	"fmt"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
+	"start-feishubot/logger"
 
 	"start-feishubot/services"
 
@@ -47,7 +50,7 @@ func CommonProcessPicResolution(msg CardMsg,
 	cardAction *larkcard.CardAction,
 	cache services.SessionServiceCacheInterface) {
 	option := cardAction.Action.Option
-	//fmt.Println(larkcore.Prettify(msg))
+	fmt.Println(larkcore.Prettify(msg))
 	cache.SetPicResolution(msg.SessionId, services.Resolution(option))
 	//send text
 	replyMsg(context.Background(), "已更新图片分辨率为"+option,
@@ -56,8 +59,9 @@ func CommonProcessPicResolution(msg CardMsg,
 
 func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
 	resolution := m.sessionCache.GetPicResolution(msg.SessionId)
-	//fmt.Println("resolution: ", resolution)
-	//fmt.Println("msg: ", msg)
+
+	logger.Debugf("resolution: %v", resolution)
+	logger.Debug("msg: %v", msg)
 	question := msg.Value.(string)
 	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
 	replayImageCardByBase64(context.Background(), bs64, &msg.MsgId,

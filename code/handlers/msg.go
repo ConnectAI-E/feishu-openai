@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"start-feishubot/logger"
 
 	"start-feishubot/initialization"
 	"start-feishubot/services"
@@ -70,7 +71,7 @@ func replyCard(ctx context.Context,
 
 	// 服务端错误处理
 	if !resp.Success() {
-		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
+		logger.Errorf("服务端错误 resp code[%v], msg [%v] requestId [%v] ", resp.Code, resp.Msg, resp.RequestId())
 		return errors.New(resp.Msg)
 	}
 	return nil
@@ -758,7 +759,10 @@ func SendRoleTagsCard(ctx context.Context,
 		withHeader("🛖 请选择角色类别", larkcard.TemplateIndigo),
 		withRoleTagsBtn(sessionId, roleTags...),
 		withNote("提醒：选择角色所属分类，以便我们为您推荐更多相关角色。"))
-	replyCard(ctx, msgId, newCard)
+	err := replyCard(ctx, msgId, newCard)
+	if err != nil {
+		logger.Errorf("选择角色出错 %v", err)
+	}
 }
 
 func SendRoleListCard(ctx context.Context,
