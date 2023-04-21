@@ -64,7 +64,9 @@ AIGC的热潮正在各行各业掀起巨大的变革，我们看到各大社群�
 
 如果您对Connect-AI开源马拉松感兴趣，请随时加入项目推进群，一起为AI技术的未来贡献力量！
 
-<img width="200" alt="image" src="https://user-images.githubusercontent.com/50035229/232762781-e89e01ec-2ba1-48c3-a1fc-9c230a9a169c.png">
+<img width="200" alt="image" src="https://user-images.githubusercontent.com/50035229/233607863-b58f7097-2454-4feb-8cae-822ee41267f9.png">
+
+
 
 
 
