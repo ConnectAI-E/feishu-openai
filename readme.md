@@ -26,6 +26,18 @@
     🚀 Feishu OpenAI 🚀
 </p>
 
+## 商业支持
+
+如果开源版无法满足您公司的需求，我们推荐您尝试我们目前正在内测的商业交付版本
+
+- 内置开箱即用的Azure Openai: 无需部署到海外，即可获得数十倍的性能提升
+- 掌控全局的Admin Panel: AI资源管理、对话日志查询、风险词规避和对话权限管理
+- 专人技术支持: 配备专业部署交付人员与后期一对一维护服务
+- 同时提供在线Saas版/企业级私有部署
+
+查看更多内容: https://connect-ai.forkway.cn
+
+
 ## 🥁 号外号外!
 
 大家好呀！我是[feishu-OpenAI](https://github.com/ConnectAI-E/Feishu-OpenAI)的作者River。非常兴奋地欢迎大家加入我们的[Connect-AI开源马拉松](https://fork-way.feishu.cn/base/LzPObR5YQaHSAssauDAcZdS3nuo?table=tblvKqjRYNfmoLMo&view=vewsekmPW4)活动！
@@ -469,17 +481,12 @@ docker compose down
 这里有些[免费的OpenAI Key](https://freeopenai.xyz/), 大家可测试使用。
 
 
-## 更多交流
 
-
-如需协助部署，或者其他定制服务，可联系下面的WeChat，支持发票~
+## 一起交流
 
 遇到问题，可以加入飞书群沟通~
 
-
 <img src='https://user-images.githubusercontent.com/13283837/232570671-1058555f-c9e5-4f64-889b-1d8efd0101ba.png' alt='' width='200'/>
-
-## 交朋友 或者 鼓励一下
 
 如果你觉得这个项目对你有帮助，可以请作者买本书~
 
