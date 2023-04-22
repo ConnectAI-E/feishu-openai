@@ -16,6 +16,7 @@ type Config struct {
 	FeishuAppVerificationToken string
 	FeishuBotName              string
 	OpenaiApiKeys              []string
+	OpenaiApiKeyPrefixs        []string
 	HttpPort                   int
 	HttpsPort                  int
 	UseHttps                   bool
@@ -47,6 +48,7 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
 		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
 		OpenaiApiKeys:              getViperStringArray("OPENAI_KEY", nil),
+		OpenaiApiKeyPrefixs:        getViperStringArray("OPENAI_KEY_PREFIX", []string{"sk-","fk"}),
 		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
 		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
 		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
@@ -61,6 +63,9 @@ func LoadConfig(cfg string) *Config {
 		AzureOpenaiToken:           getViperStringValue("AZURE_OPENAI_TOKEN", ""),
 	}
 
+	if config.OpenaiApiKeyPrefixs != nil {
+		config.OpenaiApiKeys = filterFormatKey(config.OpenaiApiKeys,config.OpenaiApiKeyPrefixs)
+	}
 	return config
 }
 
@@ -80,7 +85,7 @@ func getViperStringArray(key string, defaultValue []string) []string {
 		return defaultValue
 	}
 	raw := strings.Split(value, ",")
-	return filterFormatKey(raw)
+	return raw
 }
 
 func getViperIntValue(key string, defaultValue int) int {
@@ -132,12 +137,14 @@ func (config *Config) GetKeyFile() string {
 }
 
 // 过滤出 "sk-" 开头的 key
-func filterFormatKey(keys []string) []string {
+func filterFormatKey(keys []string,prefixs []string) []string {
 	var result []string
 	for _, key := range keys {
-		if strings.HasPrefix(key, "sk-") || strings.HasPrefix(key,
-			"fk") {
-			result = append(result, key)
+		for _, prefix := range prefixs {
+			if strings.HasPrefix(key, prefix)  {
+				result = append(result, key)
+				break
+			}
 		}
 	}
 	return result
