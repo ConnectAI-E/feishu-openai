@@ -16,6 +16,7 @@ type Config struct {
 	FeishuAppVerificationToken string
 	FeishuBotName              string
 	OpenaiApiKeys              []string
+	OpenaiModel                string
 	HttpPort                   int
 	HttpsPort                  int
 	UseHttps                   bool
@@ -42,6 +43,7 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
 		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
 		OpenaiApiKeys:              getViperStringArray("OPENAI_KEY", nil),
+		OpenaiModel:                getViperStringValue("OPENAI_MODEL", "gpt-3.5-turbo"),
 		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
 		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
 		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
@@ -62,8 +64,8 @@ func getViperStringValue(key string, defaultValue string) string {
 	return value
 }
 
-//OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
-//result:[sk-xxx sk-xxx sk-xxx]
+// OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
+// result:[sk-xxx sk-xxx sk-xxx]
 func getViperStringArray(key string, defaultValue []string) []string {
 	value := viper.GetString(key)
 	if value == "" {

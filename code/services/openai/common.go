@@ -19,6 +19,7 @@ type ChatGPT struct {
 	Lb        *loadbalancer.LoadBalancer
 	ApiKey    []string
 	ApiUrl    string
+	Model     string
 	HttpProxy string
 }
 type requestBodyType int
@@ -171,6 +172,7 @@ func NewChatGPT(config initialization.Config) *ChatGPT {
 		Lb:        lb,
 		ApiKey:    apiKeys,
 		ApiUrl:    apiUrl,
+		Model:     config.OpenaiModel,
 		HttpProxy: httpProxy,
 	}
 }
