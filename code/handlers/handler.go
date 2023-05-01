@@ -40,7 +40,7 @@ func judgeMsgType(event *larkim.P2MessageReceiveV1) (string, error) {
 	msgType := event.Event.Message.MessageType
 
 	switch *msgType {
-	case "text", "image", "audio":
+	case "text", "image", "audio", "post":
 		return *msgType, nil
 	default:
 		return "", fmt.Errorf("unknown message type: %v", *msgType)
@@ -76,7 +76,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		msgType:     msgType,
 		msgId:       msgId,
 		chatId:      chatId,
-		qParsed:     strings.Trim(parseContent(*content), " "),
+		qParsed:     strings.Trim(parseContent(*content, msgType), " "),
 		fileKey:     parseFileKey(*content),
 		imageKey:    parseImageKey(*content),
 		sessionId:   sessionId,
