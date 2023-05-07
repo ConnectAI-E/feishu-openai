@@ -120,6 +120,10 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 	var response *http.Response
 	var retry int
 	for retry = 0; retry <= maxRetries; retry++ {
+		// set body
+		if retry > 0 {
+			req.Body = ioutil.NopCloser(bytes.NewReader(requestBodyData))
+		}
 		response, err = client.Do(req)
 		//fmt.Println("--------------------")
 		//fmt.Println("req", req.Header)
