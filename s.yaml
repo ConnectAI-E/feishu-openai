@@ -28,7 +28,7 @@ services:
         name: "feishu-chatgpt"
         description: 'a simple feishubot by serverless devs'
         codeUri: './code'
-        cAPort: 9000
+        caPort: 9000
         customRuntimeConfig:
           command:
             - ./target/main
