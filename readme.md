@@ -26,6 +26,19 @@
     🚀 Feishu OpenAI 🚀
 </p>
 
+<p align='center'>
+  😀Connect-AI-E开源马拉松正式开始评审环节啦😀
+</p>
+
+<p align='center'>
+  快来pick你最喜欢的开源项目吧!
+</p>
+  
+<p align='center'>
+   https://wenjuan.feishu.cn/m/cfm?t=s6hfGkEr4pMi-8ph5
+</p>
+
+
 ## 商业支持
 
 如果开源版无法满足您公司的需求，推荐您尝试正在内测的商业交付版本
@@ -36,6 +49,7 @@
 - 同时提供在线Saas版/企业级私有部署
 
 查看更多内容: https://connect-ai.forkway.cn
+
 
 
 ## 🥁 号外号外!
