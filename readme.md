@@ -1,5 +1,5 @@
 <p align='center'>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/06abdc39-0fa8-4104-914d-23d4e78fb1ae' alt='' width='800'/>
+    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/263f647a-858e-4c4f-8eb9-4cc4d66c31fd' alt='' width='800'/>
 </p>
 
 <details align='center'>
@@ -7,9 +7,9 @@
     <br>
     <p align='center'>
     <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/8a589e42-c092-4878-83c3-dc12a801c2d6' alt='语音对话' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/06abdc39-0fa8-4104-914d-23d4e78fb1ae' alt='角色扮演' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/bc9af6c9-c63b-4e35-9afa-fa31e741f4b1' alt='角色扮演' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/c91b3ed8-ec1d-47ae-9659-f8a1cfb1608b' alt='角色列表' width='800'/>
+    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/263f647a-858e-4c4f-8eb9-4cc4d66c31fd' alt='角色扮演' width='800'/>
+    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/39192ec8-9823-46c5-a56e-87fb1c9ce255' alt='角色扮演' width='800'/>
+    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/8ff3decd-e0ae-436d-8f6f-4eb28f599866' alt='角色列表' width='800'/>
     <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/92712155-eb0c-4dce-a005-c05a21dd8280' alt='文字成图' width='800'/>
     <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/25cf595f-eaaf-4a52-8066-02afdc9fcdad' alt='余额查询' width='800'/>
     <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/9ce7b941-2806-484c-94dc-0abc8e735a7f' alt='帮助菜单' width='800'/>
