@@ -21,7 +21,7 @@
 <br>
 
 <p align='center'>
-   飞书 ×（GPT-3.5 + DALL·E + Whisper）
+   飞书 ×（GPT-4 + DALL·E + Whisper）
 <br>
 <br>
     🚀 Feishu OpenAI 🚀
