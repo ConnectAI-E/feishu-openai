@@ -45,9 +45,9 @@
 - 专人技术支持: 配备专业部署交付人员与后期一对一维护服务
 - 同时提供在线Saas版/企业级私有部署
 
-查看更多内容: https://connect-ai.forkway.cn
+查看更多内容: https://www.qiniai.com/
 
-企业客户咨询: 13995928702(River)
+企业客户咨询: 15623677720
 
 
 ## 👻 机器人功能
@@ -460,15 +460,17 @@ docker compose down
 ## 企联AI
 开源社区：https://github.com/ConnectAI-E
 
-产品日志：https://connect-ai.forkway.cn/logs
+产品日志：https://www.qiniai.com/logger
 
 需求追踪：[为更好的「企联AI」~ ](https://fork-way.feishu.cn/base/CvaNbmt1KaUIIOsU8xiciqylnTd)
 
 bug反馈：https://fork-way.feishu.cn/share/base/form/shrcnYcag9Jvp71dUWKkBe3wPQd
 
-企业咨询：13995928702(River)
+企业咨询：15623677720
 
-<img width="400" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/7912a8e9-2aa8-4235-a8be-4c323d248832">
+<img width="400" src="https://www.qiniai.com/assets/contact-15c00beb.png">
+
+
 
 
 
