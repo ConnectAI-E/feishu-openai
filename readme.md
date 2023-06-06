@@ -1,24 +1,22 @@
 <p align='center'>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/263f647a-858e-4c4f-8eb9-4cc4d66c31fd' alt='' width='800'/>
+    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/d855be1b-7d55-4b6f-aac1-2c7da5ab784c' alt='' width='800'/>
 </p>
 
 <details align='center'>
     <summary> 📷 点击展开企联AI完整功能</summary>
     <br>
     <p align='center'>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/8a589e42-c092-4878-83c3-dc12a801c2d6' alt='语音对话' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/263f647a-858e-4c4f-8eb9-4cc4d66c31fd' alt='角色扮演' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/39192ec8-9823-46c5-a56e-87fb1c9ce255' alt='角色扮演' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/8ff3decd-e0ae-436d-8f6f-4eb28f599866' alt='角色列表' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/92712155-eb0c-4dce-a005-c05a21dd8280' alt='文字成图' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/25cf595f-eaaf-4a52-8066-02afdc9fcdad' alt='余额查询' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/9ce7b941-2806-484c-94dc-0abc8e735a7f' alt='帮助菜单' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/d5128f44-53cc-4a49-9fd1-573bbb1fddff' alt='帮助菜单' width='800'/>
-    <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/43b52857-bde9-4c56-8cf1-bdafe31d4aaa' alt='帮助菜单' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/b3543ae5-23cc-4fd7-829b-74656a300901' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/948b051a-c25a-4825-8a18-5b72f6660b87' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/a2139cc3-021e-4820-8e95-53a70541f136' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/8e700709-ec0d-4c5e-b4af-710e42a0ba69' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/001cb314-5fe2-4c93-86a7-66ea747b7855' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/4dc12ca6-5305-4bc5-bf1a-40354c17ef29' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/12d9015d-58c1-40ac-9779-e77da5ad6eff' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/d18d3fea-331e-41a9-bf05-c7da7c26d5ad' width='800'/>
+        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/0c3178a0-e648-4013-a042-c1f83dbbe847' width='800'/>   
     </p>
 </details>
-
-
 
 <br>
 
