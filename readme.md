@@ -12,8 +12,6 @@
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/8e700709-ec0d-4c5e-b4af-710e42a0ba69' width='800'/>
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/001cb314-5fe2-4c93-86a7-66ea747b7855' width='800'/>
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/4dc12ca6-5305-4bc5-bf1a-40354c17ef29' width='800'/>
-        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/12d9015d-58c1-40ac-9779-e77da5ad6eff' width='800'/>
-        <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/d18d3fea-331e-41a9-bf05-c7da7c26d5ad' width='800'/>
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/0c3178a0-e648-4013-a042-c1f83dbbe847' width='800'/>   
     </p>
 </details>
