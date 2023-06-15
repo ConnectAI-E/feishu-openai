@@ -474,11 +474,10 @@ docker compose down
 
 bug反馈：https://fork-way.feishu.cn/share/base/form/shrcnYcag9Jvp71dUWKkBe3wPQd
 
-企业咨询：15623677720
+企业咨询：15123308040
 
-<img width="400" src="https://www.qiniai.com/assets/contact-15c00beb.png">
-
-
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/34025c94-4332-440c-a6a1-ba99b68415bd">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/579dcc5e-49e1-4a0d-a2e6-77eaec033575">
 
 
 
