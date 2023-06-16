@@ -1,5 +1,5 @@
 <div align="center">
-	<a href='https://www.qiniai.com' target="_blank" rel="noopener noreferrer">
+	<a href='https://www.connectai-e.com' target="_blank" rel="noopener noreferrer">
 	<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/110169811/243596447-d855be1b-7d55-4b6f-aac1-2c7da5ab784c.png" width="800" >
 	</a>
 </div>
@@ -44,9 +44,12 @@
 - 专人技术支持: 配备专业部署交付人员与后期一对一维护服务
 - 同时提供在线Saas版/企业级私有部署
 
-查看更多内容: https://www.qiniai.com/
+查看更多内容: https://www.connectai-e.com
 
 企业客户咨询: 15623677720
+
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/34025c94-4332-440c-a6a1-ba99b68415bd">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/579dcc5e-49e1-4a0d-a2e6-77eaec033575">
 
 
 ## 👻 机器人功能
@@ -468,7 +471,7 @@ docker compose down
 
 开源社区：https://github.com/ConnectAI-E
 
-产品日志：https://www.qiniai.com/logger
+产品日志：https://www.connectai-e.com/logger
 
 需求追踪：[为更好的「企联AI」~ ](https://fork-way.feishu.cn/base/CvaNbmt1KaUIIOsU8xiciqylnTd)
 
