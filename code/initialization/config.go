@@ -22,6 +22,8 @@ type Config struct {
 	CertFile                   string
 	KeyFile                    string
 	OpenaiApiUrl               string
+	OpenaiModel                string
+	OpenaiMaxTokens            int
 	HttpProxy                  string
 	AzureOn                    bool
 	AzureApiVersion            string
@@ -47,6 +49,8 @@ func LoadConfig(cfg string) *Config {
 		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
 		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
 		OpenaiApiKeys:              getViperStringArray("OPENAI_KEY", nil),
+		OpenaiModel:                getViperStringValue("OPENAI_MODEL", "gpt-3.5-turbo"),
+		OpenaiMaxTokens:            getViperIntValue("OPENAI_MAX_TOKENS", 2000),
 		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
 		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
 		UseHttps:                   getViperBoolValue("USE_HTTPS", false),

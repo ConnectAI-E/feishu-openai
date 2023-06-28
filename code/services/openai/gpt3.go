@@ -30,11 +30,6 @@ var AIModeStrs = []string{
 	"创意",
 }
 
-const (
-	maxTokens = 2000
-	engine    = "gpt-3.5-turbo"
-)
-
 type Messages struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -75,9 +70,9 @@ func (msg *Messages) CalculateTokenLength() int {
 func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
 	err error) {
 	requestBody := ChatGPTRequestBody{
-		Model:            engine,
+		Model:            gpt.Model,
 		Messages:         msg,
-		MaxTokens:        maxTokens,
+		MaxTokens:        gpt.MaxTokens,
 		Temperature:      aiMode,
 		TopP:             1,
 		FrequencyPenalty: 0,
