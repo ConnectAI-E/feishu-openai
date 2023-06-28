@@ -39,6 +39,8 @@ type ChatGPT struct {
 	ApiKey      []string
 	ApiUrl      string
 	HttpProxy   string
+	Model       string
+	MaxTokens   int
 	Platform    PlatForm
 	AzureConfig AzureConfig
 }
@@ -211,6 +213,8 @@ func NewChatGPT(config initialization.Config) *ChatGPT {
 		ApiKey:    config.OpenaiApiKeys,
 		ApiUrl:    config.OpenaiApiUrl,
 		HttpProxy: config.HttpProxy,
+		Model:     config.OpenaiModel,
+		MaxTokens: config.OpenaiMaxTokens,
 		Platform:  platform,
 		AzureConfig: AzureConfig{
 			BaseURL:        AzureApiUrlV1,
