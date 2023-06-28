@@ -36,7 +36,7 @@ services:
         handler: index.handler
         instanceConcurrency: 20
         instanceType: e1
-        memorySize: 128
+        memorySize: 512
         runtime: custom
         timeout: 120
         internetAccess: true
