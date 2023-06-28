@@ -4,7 +4,7 @@
 	</a>
 </div>
 <details align='center'>
-    <summary> 📷 点击展开企联AI完整功能</summary>
+    <summary> 📷 点击展开企联AI-飞书的完整功能</summary>
     <br>
     <p align='center'>
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/b3543ae5-23cc-4fd7-829b-74656a300901' width='800'/>
@@ -26,9 +26,6 @@
     🚀 Feishu OpenAI 🚀
 </p>
 
-<p align='center'>
-  😀企联AI共创计划正式开启😀
-</p>
   
 <p align='center'>
    www.connectai-e.com
@@ -37,19 +34,19 @@
 
 ## 商业支持
 
-如果开源版无法满足您公司的需求，推荐您尝试的商业共创版
+如果开源版无法满足您公司的需求，推荐您体验商业共创版
 
-- 内置开箱即用的Azure Openai: 无需部署到海外，即可获得数十倍的性能提升
-- 掌控全局的Admin Panel: AI资源管理、对话日志查询、风险词规避和对话权限管理
+- 内置开箱即用的 Azure Openai: 无需部署到海外，即可获得数十倍的性能提升
+- 掌控全局的 Admin Panel: AI资源管理、对话日志查询、风险词规避和对话权限管理
 - 专人技术支持: 配备专业部署交付人员与后期一对一维护服务
-- 同时提供在线Saas版/企业级私有部署
+- 同时提供在线 Saas 版/企业级私有部署
 
 查看更多内容: https://www.connectai-e.com
 
 企业客户咨询: 15123308040
 
-<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/34025c94-4332-440c-a6a1-ba99b68415bd">
-<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/579dcc5e-49e1-4a0d-a2e6-77eaec033575">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/e8ad253f-874c-4df2-a97e-cf4139efde06">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/69d00520-013b-43ff-bc2e-561781709a17">
 
 
 ## 👻 机器人功能
