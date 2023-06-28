@@ -17,7 +17,14 @@ func init() {
 
 	gin.DefaultWriter = logger.Out
 
-	logger.Level = logrus.DebugLevel
+	// 设置日志级别 支持
+	//PanicLevel
+	//FatalLevel
+	//ErrorLevel
+	//WarnLevel
+	//InfoLevel
+	//DebugLevel
+	logger.Level = logrus.InfoLevel
 
 }
 
