@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"start-feishubot/logger"
 
 	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 )
@@ -34,6 +35,7 @@ func NewCardHandler(m MessageHandler) CardHandlerFunc {
 			return nil, err
 		}
 		//pp.Println(cardMsg)
+		logger.Debug("cardMsg ", cardMsg)
 		for _, handler := range handlers {
 			h := handler(cardMsg, m)
 			i, err := h(ctx, cardAction)

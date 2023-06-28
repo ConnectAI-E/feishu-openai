@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
-
 	"start-feishubot/handlers"
 	"start-feishubot/initialization"
-	"start-feishubot/services/openai"
+	"start-feishubot/logger"
 
 	"github.com/gin-gonic/gin"
 	sdkginext "github.com/larksuite/oapi-sdk-gin"
@@ -14,6 +12,7 @@ import (
 	"github.com/larksuite/oapi-sdk-go/v3/event/dispatcher"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"github.com/spf13/pflag"
+	"start-feishubot/services/openai"
 )
 
 var (
@@ -32,6 +31,7 @@ func main() {
 		config.FeishuAppVerificationToken, config.FeishuAppEncryptKey).
 		OnP2MessageReceiveV1(handlers.Handler).
 		OnP2MessageReadV1(func(ctx context.Context, event *larkim.P2MessageReadV1) error {
+			logger.Debugf("收到请求 %v", event.RequestURI)
 			return handlers.ReadHandler(ctx, event)
 		})
 
@@ -52,6 +52,6 @@ func main() {
 			cardHandler))
 
 	if err := initialization.StartServer(*config, r); err != nil {
-		log.Fatalf("failed to start server: %v", err)
+		logger.Fatalf("failed to start server: %v", err)
 	}
 }

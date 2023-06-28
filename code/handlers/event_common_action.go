@@ -69,6 +69,7 @@ func (*EmptyAction) Execute(a *ActionInfo) bool {
 		sendMsg(*a.ctx, "🤖️：你想知道什么呢~", a.info.chatId)
 		fmt.Println("msgId", *a.info.msgId,
 			"message.text is empty")
+
 		return false
 	}
 	return true
