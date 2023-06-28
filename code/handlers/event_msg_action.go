@@ -26,7 +26,8 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 		Role: "user", Content: a.info.qParsed,
 	})
 
-	fmt.Println("msg", msg)
+	//fmt.Println("msg", msg)
+	//logger.Debug("msg", msg)
 	// get ai mode as temperature
 	aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
 	completions, err := a.handler.gpt.Completions(msg, aiMode)
