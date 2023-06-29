@@ -276,7 +276,7 @@ Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键
 
 The fastest way to deploy the feishu-openai to `repl.it` is to click the `run on repl.it` button below.
 
-<a href="https://repl.it/github/ConnectAI-E/Feishu-OpenAI">
+<a href="https://replit.com/@Leizhenpeng/Feishu-OpenAI#.replit">
   <img alt="Run on Repl.it" src="https://repl.it/badge/github/alist-org/alist-replit" style="height: 40px; width: 190px;" />
 </a>
 
