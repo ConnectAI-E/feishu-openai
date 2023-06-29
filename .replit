@@ -6,11 +6,6 @@ compile = "cd code&&go build -o main ."
 pattern = "**/*.go"
 
 
-[deployment]
-run = ["sh", "-c", "cd code && ./main"]
-build = ["sh", "-c", "cd code && go build -o main ."]
-
-
 [env]
 APP_ID: xx
 APP_SECRET: xx
