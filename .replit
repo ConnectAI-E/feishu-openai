@@ -5,14 +5,6 @@ compile = "cd code&&go build -o main ."
 [languages.go]
 pattern = "**/*.go"
 
-[languages.go.languageServer]
-start = "gopls"
-
-[nix]
-channel = "stable-22_11"
-
-[gitHubImport]
-requiredFiles = [".replit", "replit.nix"]
 
 [deployment]
 run = ["sh", "-c", "cd code && ./main"]
@@ -27,5 +19,4 @@ APP_VERIFICATION_TOKEN: xx
 BOT_NAME: ChatGPT
 OPENAI_MODEL: gpt-3.5-turbo
 OPENAI_MAX_TOKENS: 2000
-# openai
 OPENAI_KEY: sk-xx
