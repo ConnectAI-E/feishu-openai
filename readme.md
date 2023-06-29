@@ -269,6 +269,33 @@ Railway 是一家国外的 Serverless 平台，支持多种语言，可以一键
 
 </details>
 
+
+<details>
+    <summary>Repl.it部署</summary>
+<br>
+
+The fastest way to deploy the feishu-openai to `repl.it` is to click the `run on repl.it` button below.
+
+<a href="https://repl.it/github/ConnectAI-E/Feishu-OpenAI">
+  <img alt="Run on Repl.it" src="https://repl.it/badge/github/alist-org/alist-replit" style="height: 40px; width: 190px;" />
+</a>
+
+Remember switch to `secrets` tab then edit `System environment variables`.You can also edit raw json:
+
+```json
+{
+  "APP_ID": "",
+  "APP_SECRET": "",
+  "APP_ENCRYPT_KEY": "",
+  "APP_VERIFICATION_TOKEN": "",
+  "BOT_NAME": "ChatGPT",
+  "OPENAI_KEY": "sk-",
+  "OPENAI_MODEL": "gpt-3.5-turbo"
+}
+```
+
+</details>
+
 <details>
     <summary>docker部署</summary>
 <br>

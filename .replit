@@ -1,0 +1,31 @@
+run = "cd code && ./main"
+hidden = ["main"]
+compile = "cd code&&go build -o main ."
+
+[languages.go]
+pattern = "**/*.go"
+
+[languages.go.languageServer]
+start = "gopls"
+
+[nix]
+channel = "stable-22_11"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix"]
+
+[deployment]
+run = ["sh", "-c", "cd code && ./main"]
+build = ["sh", "-c", "cd code && go build -o main ."]
+
+
+[env]
+APP_ID: xx
+APP_SECRET: xx
+APP_ENCRYPT_KEY: xx
+APP_VERIFICATION_TOKEN: xx
+BOT_NAME: ChatGPT
+OPENAI_MODEL: gpt-3.5-turbo
+OPENAI_MAX_TOKENS: 2000
+# openai
+OPENAI_KEY: sk-xx
