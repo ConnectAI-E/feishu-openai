@@ -43,10 +43,10 @@
 
 查看更多内容: https://www.connectai-e.com
 
-企业客户咨询: 15123308040
+企业客户咨询: 15623677720
 
-<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/e8ad253f-874c-4df2-a97e-cf4139efde06">
-<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/50035229/69d00520-013b-43ff-bc2e-561781709a17">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/e4350e7f-cf1f-4499-932d-7a0ee2385e11">
+<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/ef313ce0-158e-4314-a932-e6b1180cc750">
 
 
 ## 👻 机器人功能
