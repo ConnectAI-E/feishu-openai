@@ -1,9 +1,9 @@
-<div align="center">
-	<a href='https://www.connectai-e.com' target="_blank" rel="noopener noreferrer">
-	<img src="https://github-production-user-asset-6210df.s3.amazonaws.com/110169811/243596447-d855be1b-7d55-4b6f-aac1-2c7da5ab784c.png" width="800" >
-	</a>
-</div>
-<details align='center'>
+<a href="https://www.connectai-e.com" target="_blank" rel="noreferrer">
+  <img align="center" width="100%" height="auto" src="https://github-production-user-asset-6210df.s3.amazonaws.com/50035229/250274252-7f07a95e-b5aa-4dd8-90e7-5fb3bfb863c7.svg" >
+</a>
+<br>
+<br>
+<details align='center' style="margin-top: 10px">
     <summary> 📷 点击展开企联AI-飞书的完整功能</summary>
     <br>
     <p align='center'>
