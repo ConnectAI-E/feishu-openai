@@ -39,7 +39,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	msg = append(msg, completions)
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 	//if new topic
-	if len(msg) == 4 {
+	if len(msg) == 3 {
 		//fmt.Println("new topic", msg[1].Content)
 		sendNewTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
 			completions.Content)
