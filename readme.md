@@ -4,7 +4,7 @@
 <br>
 <br>
 <details align='center' style="margin-top: 10px">
-    <summary> 📷 点击展开企联AI-飞书的完整功能</summary>
+    <summary> 📷 点击展开完整功能</summary>
     <br>
     <p align='center'>
         <img src='https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/b3543ae5-23cc-4fd7-829b-74656a300901' width='800'/>
