@@ -45,8 +45,9 @@
 
 企业客户咨询: 15623677720
 
-<img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/e4350e7f-cf1f-4499-932d-7a0ee2385e11">
+<img width="300" src="https://github.com/DDMeaqua/Feishu-OpenAI/assets/110169811/0a07f7e2-183f-4ee4-a40a-e33ee5c440e4">
 <img width="300" src="https://github.com/ConnectAI-E/Feishu-OpenAI/assets/110169811/ef313ce0-158e-4314-a932-e6b1180cc750">
+
 
 
 ## 👻 机器人功能
