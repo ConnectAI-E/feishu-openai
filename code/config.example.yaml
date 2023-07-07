@@ -12,6 +12,8 @@ OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
 OPENAI_MODEL: gpt-3.5-turbo
 # openAI 最大token数 默认为2000
 OPENAI_MAX_TOKENS: 2000
+# 响应超时时间，单位为毫秒，默认为550毫秒
+OPENAI_HTTP_CLIENT_TIMEOUT: 550
 # 服务器配置
 HTTP_PORT: 9000
 HTTPS_PORT: 9001
@@ -23,6 +25,7 @@ API_URL: https://api.openai.com
 # 代理设置, 例如 "http://127.0.0.1:7890", ""代表不使用代理
 HTTP_PROXY: ""
 
+STREAM_MODE: false # set true to use stream mode
 # AZURE OPENAI
 AZURE_ON: false # set true to use Azure rather than OpenAI
 AZURE_API_VERSION: 2023-03-15-preview # 2023-03-15-preview or 2022-12-01 refer https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#completions
