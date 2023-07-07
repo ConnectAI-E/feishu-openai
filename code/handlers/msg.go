@@ -664,6 +664,15 @@ func sendNewTopicCard(ctx context.Context,
 	replyCard(ctx, msgId, newCard)
 }
 
+func sendOldTopicCard(ctx context.Context,
+	sessionId *string, msgId *string, content string) {
+	newCard, _ := newSendCard(
+		withHeader("🔃️ 上下文的话题", larkcard.TemplateBlue),
+		withMainText(content),
+		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
+	replyCard(ctx, msgId, newCard)
+}
+
 func sendHelpCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
