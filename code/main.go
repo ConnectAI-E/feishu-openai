@@ -15,14 +15,10 @@ import (
 	"start-feishubot/services/openai"
 )
 
-var (
-	cfg = pflag.StringP("config", "c", "./config.yaml", "apiserver config file path.")
-)
-
 func main() {
 	initialization.InitRoleList()
 	pflag.Parse()
-	config := initialization.LoadConfig(*cfg)
+	config := initialization.GetConfig()
 	initialization.LoadLarkClient(*config)
 	gpt := openai.NewChatGPT(*config)
 	handlers.InitHandlers(gpt, *config)

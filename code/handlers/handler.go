@@ -103,6 +103,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		&BalanceAction{},         //余额处理
 		&RolePlayAction{},        //角色扮演处理
 		&MessageAction{},         //消息处理
+		&StreamMessageAction{},   //流式消息处理
 
 	}
 	chain(data, actions...)

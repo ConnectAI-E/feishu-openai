@@ -174,25 +174,15 @@ func (gpt *ChatGPT) sendRequestWithBodyType(link, method string,
 	bodyType requestBodyType,
 	requestBody interface{}, responseBody interface{}) error {
 	var err error
-	client := &http.Client{Timeout: 110 * time.Second}
-	if gpt.HttpProxy == "" {
-		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
-			requestBody, responseBody, client, 3)
-	} else {
-		proxyUrl, err := url.Parse(gpt.HttpProxy)
-		if err != nil {
-			return err
-		}
-		transport := &http.Transport{
-			Proxy: http.ProxyURL(proxyUrl),
-		}
-		proxyClient := &http.Client{
-			Transport: transport,
-			Timeout:   110 * time.Second,
-		}
-		err = gpt.doAPIRequestWithRetry(link, method, bodyType,
-			requestBody, responseBody, proxyClient, 3)
+	proxyString := gpt.HttpProxy
+
+	client, parseProxyError := GetProxyClient(proxyString)
+	if parseProxyError != nil {
+		return parseProxyError
 	}
+
+	err = gpt.doAPIRequestWithRetry(link, method, bodyType,
+		requestBody, responseBody, client, 3)
 
 	return err
 }
@@ -240,4 +230,25 @@ func (gpt *ChatGPT) FullUrl(suffix string) string {
 		url = fmt.Sprintf("%s/v1/%s", gpt.ApiUrl, suffix)
 	}
 	return url
+}
+
+func GetProxyClient(proxyString string) (*http.Client, error) {
+	var client *http.Client
+	timeOutDuration := time.Duration(initialization.GetConfig().OpenAIHttpClientTimeOut) * time.Second
+	if proxyString == "" {
+		client = &http.Client{Timeout: timeOutDuration}
+	} else {
+		proxyUrl, err := url.Parse(proxyString)
+		if err != nil {
+			return nil, err
+		}
+		transport := &http.Transport{
+			Proxy: http.ProxyURL(proxyUrl),
+		}
+		client = &http.Client{
+			Transport: transport,
+			Timeout:   timeOutDuration,
+		}
+	}
+	return client, nil
 }
