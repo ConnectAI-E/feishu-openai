@@ -24,7 +24,7 @@ KEY_FILE: key.pem
 API_URL: https://api.openai.com
 # 代理设置, 例如 "http://127.0.0.1:7890", ""代表不使用代理
 HTTP_PROXY: ""
-
+# 是否开启流式接口返回
 STREAM_MODE: false # set true to use stream mode
 # AZURE OPENAI
 AZURE_ON: false # set true to use Azure rather than OpenAI
