@@ -157,7 +157,7 @@ func TestChatGPT_streamChat(t *testing.T) {
 
 		// 启动一个协程来模拟流式聊天
 		go func() {
-			err := c.StreamChat(ctx, tc.msg, responseStream)
+			err := c.StreamChat(ctx, tc.msg, Balance, responseStream)
 			if err != nil {
 				t.Errorf("streamChat() error = %v, wantErr %v", err, tc.wantErr)
 			}
