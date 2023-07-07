@@ -56,6 +56,11 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 			completions.Content)
 		return false
 	}
+	if len(msg) != 3 {
+		sendOldTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
+			completions.Content)
+		return false
+	}
 	err = replyMsg(*a.ctx, completions.Content, a.info.msgId)
 	if err != nil {
 		replyMsg(*a.ctx, fmt.Sprintf(
