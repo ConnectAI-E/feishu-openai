@@ -55,3 +55,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+//replace github.com/sashabaranov/go-openai v1.13.0 => github.com/Leizhenpeng/go-openai v0.0.3

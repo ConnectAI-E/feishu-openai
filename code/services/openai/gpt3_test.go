@@ -11,19 +11,15 @@ import (
 
 func TestCompletions(t *testing.T) {
 	config := initialization.LoadConfig("../../config.yaml")
-
 	msgs := []Messages{
 		{Role: "system", Content: "你是一个专业的翻译官，负责中英文翻译。"},
 		{Role: "user", Content: "翻译这段话: The assistant messages help store prior responses. They can also be written by a developer to help give examples of desired behavior."},
 	}
-
 	gpt := NewChatGPT(*config)
-
 	resp, err := gpt.Completions(msgs, Balance)
 	if err != nil {
 		t.Errorf("TestCompletions failed with error: %v", err)
 	}
-
 	fmt.Println(resp.Content, resp.Role)
 }
 
@@ -157,7 +153,7 @@ func TestChatGPT_streamChat(t *testing.T) {
 
 		// 启动一个协程来模拟流式聊天
 		go func() {
-			err := c.StreamChat(ctx, tc.msg, responseStream)
+			err := c.StreamChat(ctx, tc.msg, Balance, responseStream)
 			if err != nil {
 				t.Errorf("streamChat() error = %v, wantErr %v", err, tc.wantErr)
 			}
