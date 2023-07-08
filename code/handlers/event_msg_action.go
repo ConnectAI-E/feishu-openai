@@ -93,8 +93,15 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 	msg = append(msg, openai.Messages{
 		Role: "user", Content: a.info.qParsed,
 	})
+	//if new topic
+	var ifNewTopic bool
+	if len(msg) <= 3 {
+		ifNewTopic = true
+	} else {
+		ifNewTopic = false
+	}
 
-	cardId, err2 := sendOnProcess(a)
+	cardId, err2 := sendOnProcess(a, ifNewTopic)
 	if err2 != nil {
 		return false
 	}
@@ -105,7 +112,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 	noContentTimeout := time.AfterFunc(10*time.Second, func() {
 		log.Println("no content timeout")
 		close(done)
-		err := updateFinalCard(*a.ctx, "请求超时", cardId)
+		err := updateFinalCard(*a.ctx, "请求超时", cardId, ifNewTopic)
 		if err != nil {
 			return
 		}
@@ -116,7 +123,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				err := updateFinalCard(*a.ctx, "聊天失败", cardId)
+				err := updateFinalCard(*a.ctx, "聊天失败", cardId, ifNewTopic)
 				if err != nil {
 					return
 				}
@@ -127,7 +134,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 		aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
 		if err := a.handler.gpt.StreamChat(*a.ctx, msg, aiMode,
 			chatResponseStream); err != nil {
-			err := updateFinalCard(*a.ctx, "聊天失败", cardId)
+			err := updateFinalCard(*a.ctx, "聊天失败", cardId, ifNewTopic)
 			if err != nil {
 				return
 			}
@@ -144,7 +151,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 			case <-done:
 				return
 			case <-ticker.C:
-				err := updateTextCard(*a.ctx, answer, cardId)
+				err := updateTextCard(*a.ctx, answer, cardId, ifNewTopic)
 				if err != nil {
 					return
 				}
@@ -161,7 +168,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 			answer += res
 			//pp.Println("answer", answer)
 		case <-done: // 添加 done 信号的处理
-			err := updateFinalCard(*a.ctx, answer, cardId)
+			err := updateFinalCard(*a.ctx, answer, cardId, ifNewTopic)
 			if err != nil {
 				return false
 			}
@@ -184,9 +191,10 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 	}
 }
 
-func sendOnProcess(a *ActionInfo) (*string, error) {
+func sendOnProcess(a *ActionInfo, ifNewTopic bool) (*string, error) {
 	// send 正在处理中
-	cardId, err := sendOnProcessCard(*a.ctx, a.info.sessionId, a.info.msgId)
+	cardId, err := sendOnProcessCard(*a.ctx, a.info.sessionId,
+		a.info.msgId, ifNewTopic)
 	if err != nil {
 		return nil, err
 	}

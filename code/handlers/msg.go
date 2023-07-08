@@ -793,9 +793,19 @@ func SendAIModeListsCard(ctx context.Context,
 }
 
 func sendOnProcessCard(ctx context.Context,
-	sessionId *string, msgId *string) (*string, error) {
-	newCard, _ := newSendCardWithOutHeader(
-		withNote("正在思考，请稍等..."))
+	sessionId *string, msgId *string, ifNewTopic bool) (*string,
+	error) {
+	var newCard string
+	if ifNewTopic {
+		newCard, _ = newSendCard(
+			withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
+			withNote("正在思考，请稍等..."))
+	} else {
+		newCard, _ = newSendCard(
+			withHeader("🔃️ 上下文的话题", larkcard.TemplateBlue),
+			withNote("正在思考，请稍等..."))
+	}
+
 	id, err := replyCardWithBackId(ctx, msgId, newCard)
 	if err != nil {
 		return nil, err
@@ -804,10 +814,19 @@ func sendOnProcessCard(ctx context.Context,
 }
 
 func updateTextCard(ctx context.Context, msg string,
-	msgId *string) error {
-	newCard, _ := newSendCardWithOutHeader(
-		withMainText(msg),
-		withNote("正在生成，请稍等..."))
+	msgId *string, ifNewTopic bool) error {
+	var newCard string
+	if ifNewTopic {
+		newCard, _ = newSendCard(
+			withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
+			withMainText(msg),
+			withNote("正在生成，请稍等..."))
+	} else {
+		newCard, _ = newSendCard(
+			withHeader("🔃️ 上下文的话题", larkcard.TemplateBlue),
+			withMainText(msg),
+			withNote("正在生成，请稍等..."))
+	}
 	err := PatchCard(ctx, msgId, newCard)
 	if err != nil {
 		return err
@@ -818,10 +837,21 @@ func updateFinalCard(
 	ctx context.Context,
 	msg string,
 	msgId *string,
+	ifNewSession bool,
 ) error {
-	newCard, _ := newSendCardWithOutHeader(
-		withMainText(msg),
-		withNote("已完成，您可以继续提问或者选择其他功能。"))
+	var newCard string
+	if ifNewSession {
+		newCard, _ = newSendCard(
+			withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
+			withMainText(msg),
+			withNote("已完成，您可以继续提问或者选择其他功能。"))
+	} else {
+		newCard, _ = newSendCard(
+			withHeader("🔃️ 上下文的话题", larkcard.TemplateBlue),
+
+			withMainText(msg),
+			withNote("已完成，您可以继续提问或者选择其他功能。"))
+	}
 	err := PatchCard(ctx, msgId, newCard)
 	if err != nil {
 		return err
