@@ -28,8 +28,19 @@ func (c *ChatGPT) StreamChatWithHistory(ctx context.Context,
 	aiMode AIMode,
 	responseStream chan string,
 ) error {
+
 	config := go_openai.DefaultConfig(c.ApiKey[0])
 	config.BaseURL = c.ApiUrl + "/v1"
+	if c.Platform != OpenAI {
+		baseUrl := fmt.Sprintf("https://%s.%s",
+			c.AzureConfig.ResourceName, "openai.azure.com")
+		config = go_openai.DefaultAzureConfig(c.AzureConfig.
+			ApiToken, baseUrl)
+		config.AzureModelMapperFunc = func(model string) string {
+			return c.AzureConfig.DeploymentName
+
+		}
+	}
 
 	proxyClient, parseProxyError := GetProxyClient(c.HttpProxy)
 	if parseProxyError != nil {
@@ -43,12 +54,12 @@ func (c *ChatGPT) StreamChatWithHistory(ctx context.Context,
 	var temperature float32
 	temperature = float32(aiMode)
 	req := go_openai.ChatCompletionRequest{
-		Model:       c.Model,
+		Model:       "gpt-35-turbo",
 		Messages:    msg,
 		N:           1,
 		Temperature: temperature,
 		MaxTokens:   maxTokens,
-		TopP:        1,
+		//TopP:        1,
 		//Moderation:     true,
 		//ModerationStop: true,
 	}
@@ -60,6 +71,7 @@ func (c *ChatGPT) StreamChatWithHistory(ctx context.Context,
 	defer stream.Close()
 	for {
 		response, err := stream.Recv()
+		fmt.Println("response: ", response)
 		if errors.Is(err, io.EOF) {
 			//fmt.Println("Stream finished")
 			return nil
