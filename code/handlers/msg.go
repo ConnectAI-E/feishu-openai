@@ -87,9 +87,7 @@ func newSendCard(
 		UpdateMulti(false).
 		Build()
 	var aElementPool []larkcard.MessageCardElement
-	for _, element := range elements {
-		aElementPool = append(aElementPool, element)
-	}
+	aElementPool = append(aElementPool, elements...)
 	// 卡片消息体
 	cardContent, err := larkcard.NewMessageCard().
 		Config(config).
@@ -110,9 +108,7 @@ func newSimpleSendCard(
 		UpdateMulti(false).
 		Build()
 	var aElementPool []larkcard.MessageCardElement
-	for _, element := range elements {
-		aElementPool = append(aElementPool, element)
-	}
+	aElementPool = append(aElementPool, elements...)
 	// 卡片消息体
 	cardContent, err := larkcard.NewMessageCard().
 		Config(config).
@@ -867,9 +863,7 @@ func newSendCardWithOutHeader(
 		UpdateMulti(true).
 		Build()
 	var aElementPool []larkcard.MessageCardElement
-	for _, element := range elements {
-		aElementPool = append(aElementPool, element)
-	}
+	aElementPool = append(aElementPool, elements...)
 	// 卡片消息体
 	cardContent, err := larkcard.NewMessageCard().
 		Config(config).
