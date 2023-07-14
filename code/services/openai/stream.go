@@ -54,7 +54,7 @@ func (c *ChatGPT) StreamChatWithHistory(ctx context.Context,
 	var temperature float32
 	temperature = float32(aiMode)
 	req := go_openai.ChatCompletionRequest{
-		Model:       "gpt-35-turbo",
+		Model:       c.Model,
 		Messages:    msg,
 		N:           1,
 		Temperature: temperature,
