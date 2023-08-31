@@ -1,4 +1,5 @@
 #  飞书
+BASE_URL: https://open.feishu.cn
 APP_ID: cli_axxx
 APP_SECRET: xxx
 APP_ENCRYPT_KEY: xxx
