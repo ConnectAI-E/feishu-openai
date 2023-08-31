@@ -2,11 +2,12 @@ package initialization
 
 import (
 	"fmt"
-	"github.com/spf13/pflag"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/spf13/pflag"
 
 	"github.com/spf13/viper"
 )
@@ -14,6 +15,7 @@ import (
 type Config struct {
 	// 表示配置是否已经被初始化了。
 	Initialized                bool
+	FeishuBaseUrl              string
 	FeishuAppId                string
 	FeishuAppSecret            string
 	FeishuAppEncryptKey        string
@@ -64,6 +66,7 @@ func LoadConfig(cfg string) *Config {
 	//fmt.Println(string(content))
 
 	config := &Config{
+		FeishuBaseUrl:              getViperStringValue("BASE_URL", ""),
 		FeishuAppId:                getViperStringValue("APP_ID", ""),
 		FeishuAppSecret:            getViperStringValue("APP_SECRET", ""),
 		FeishuAppEncryptKey:        getViperStringValue("APP_ENCRYPT_KEY", ""),
@@ -163,7 +166,7 @@ func filterFormatKey(keys []string) []string {
 	var result []string
 	for _, key := range keys {
 		if strings.HasPrefix(key, "sk-") || strings.HasPrefix(key,
-			"fk") {
+			"fk") || strings.HasPrefix(key, "fastgpt") {
 			result = append(result, key)
 		}
 	}

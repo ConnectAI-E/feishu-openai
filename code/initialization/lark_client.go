@@ -8,9 +8,14 @@ import (
 var larkClient *lark.Client
 
 func LoadLarkClient(config Config) {
+	options := []lark.ClientOptionFunc{
+		lark.WithLogLevel(larkcore.LogLevelDebug),
+	}
+	if config.FeishuBaseUrl != "" {
+		options = append(options, lark.WithOpenBaseUrl(config.FeishuBaseUrl))
+	}
 
-	option := lark.WithLogLevel(larkcore.LogLevelDebug)
-	larkClient = lark.NewClient(config.FeishuAppId, config.FeishuAppSecret, option)
+	larkClient = lark.NewClient(config.FeishuAppId, config.FeishuAppSecret, options...)
 
 }
 
