@@ -701,7 +701,7 @@ func sendHelpCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
 		withHeader("🎒需要帮助吗？", larkcard.TemplateBlue),
-		withMainMd("**你好呀~我来自企联AI，一款基于OpenAI的智能助手！**"),
+		withMainMd("**🤠你好呀~ 我来自企联AI，一款基于OpenAI的智能助手！**"),
 		withSplitLine(),
 		withMdAndExtraBtn(
 			"** 🆑 清除话题上下文**\n文本回复 *清除* 或 */clear*",
@@ -721,6 +721,8 @@ func sendHelpCard(ctx context.Context,
 		withMainMd("🎤 **AI语音对话**\n私聊模式下直接发送语音"),
 		withSplitLine(),
 		withMainMd("🎨 **图片创作模式**\n回复*图片创作* 或 */picture*"),
+		withSplitLine(),
+		withMainMd("🕵️ **图片理解模式** \n"+" 文本回复 *图片理解* 或 */vision*"),
 		withSplitLine(),
 		withMainMd("🎰 **Token余额查询**\n回复*余额* 或 */balance*"),
 		withSplitLine(),
