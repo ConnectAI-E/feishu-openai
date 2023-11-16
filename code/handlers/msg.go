@@ -25,6 +25,7 @@ var (
 	PicModeChangeKind  = CardKind("pic_mode_change")  // 切换图片创作模式
 	PicResolutionKind  = CardKind("pic_resolution")   // 图片分辨率调整
 	PicStyleKind       = CardKind("pic_style")        // 图片风格调整
+	VisionStyleKind    = CardKind("vision_style")     // 图片推理级别调整
 	PicTextMoreKind    = CardKind("pic_text_more")    // 重新根据文本生成图片
 	PicVarMoreKind     = CardKind("pic_var_more")     // 变量图片
 	RoleTagsChooseKind = CardKind("role_tags_choose") // 内置角色所属标签选择
@@ -380,6 +381,32 @@ func withPicResolutionBtn(sessionID *string) larkcard.
 	return actions
 }
 
+func withVisionDetailLevelBtn(sessionID *string) larkcard.
+	MessageCardElement {
+	detailMenu := newMenu("选择图片解析度，默认为高",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      VisionStyleKind,
+			"sessionId": *sessionID,
+			"msgId":     *sessionID,
+		},
+		MenuOption{
+			label: "高",
+			value: string(services.VisionDetailHigh),
+		},
+		MenuOption{
+			label: "低",
+			value: string(services.VisionDetailLow),
+		},
+	)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{detailMenu}).
+		Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+		Build()
+
+	return actions
+}
 func withRoleTagsBtn(sessionID *string, tags ...string) larkcard.
 	MessageCardElement {
 	var menuOptions []MenuOption
@@ -669,6 +696,15 @@ func sendPicCreateInstructionCard(ctx context.Context,
 	replyCard(ctx, msgId, newCard)
 }
 
+func sendVisionInstructionCard(ctx context.Context,
+	sessionId *string, msgId *string) {
+	newCard, _ := newSendCard(
+		withHeader("🕵️️ 已进入图片推理模式", larkcard.TemplateBlue),
+		withVisionDetailLevelBtn(sessionId),
+		withNote("提醒：回复图片，让LLM和你一起推理图片的内容。"))
+	replyCard(ctx, msgId, newCard)
+}
+
 func sendPicModeCheckCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
@@ -722,7 +758,7 @@ func sendHelpCard(ctx context.Context,
 		withSplitLine(),
 		withMainMd("🎨 **图片创作模式**\n回复*图片创作* 或 */picture*"),
 		withSplitLine(),
-		withMainMd("🕵️ **图片理解模式** \n"+" 文本回复 *图片理解* 或 */vision*"),
+		withMainMd("🕵️ **图片推理模式** \n"+" 文本回复 *图片推理* 或 */vision*"),
 		withSplitLine(),
 		withMainMd("🎰 **Token余额查询**\n回复*余额* 或 */balance*"),
 		withSplitLine(),
