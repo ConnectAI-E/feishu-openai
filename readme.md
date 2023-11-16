@@ -94,7 +94,7 @@
 
 ## 🌟 项目特点
 
-- 🍏 对话基于 OpenAI-[gpt-3.5-turbo](https://platform.openai.com/account/api-keys) 接口
+- 🍏 对话基于 OpenAI (https://platform.openai.com/account/api-keys) 接口
 - 🍎 通过 lark，将 ChatGPT 接入[飞书](https://open.feishu.cn/app)和[飞书国际版](https://www.larksuite.com/)
 - 🥒
   支持[Serverless 云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/)、[二进制安装包](https://github.com/Leizhenpeng/feishu-chatgpt/releases/)
