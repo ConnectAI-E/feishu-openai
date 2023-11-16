@@ -28,7 +28,7 @@ func TestGenerateOneImage(t *testing.T) {
 	gpt := NewChatGPT(*config)
 	prompt := "a red apple"
 	size := "256x256"
-	imageURL, err := gpt.GenerateOneImage(prompt, size)
+	imageURL, err := gpt.GenerateOneImage(prompt, size, "")
 	if err != nil {
 		t.Errorf("TestGenerateOneImage failed with error: %v", err)
 	}

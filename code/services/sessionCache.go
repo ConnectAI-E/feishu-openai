@@ -13,8 +13,10 @@ type SessionService struct {
 }
 type PicSetting struct {
 	resolution Resolution
+	style      PicStyle
 }
 type Resolution string
+type PicStyle string
 
 type SessionMeta struct {
 	Mode       SessionMode       `json:"mode"`
@@ -24,9 +26,15 @@ type SessionMeta struct {
 }
 
 const (
-	Resolution256  Resolution = "256x256"
-	Resolution512  Resolution = "512x512"
-	Resolution1024 Resolution = "1024x1024"
+	Resolution256      Resolution = "256x256"
+	Resolution512      Resolution = "512x512"
+	Resolution1024     Resolution = "1024x1024"
+	Resolution10241792 Resolution = "1024x1792"
+	Resolution17921024 Resolution = "1792x1024"
+)
+const (
+	PicStyleVivid   PicStyle = "vivid"
+	PicStyleNatural PicStyle = "natural"
 )
 const (
 	ModePicCreate SessionMode = "pic_create"
@@ -44,7 +52,9 @@ type SessionServiceCacheInterface interface {
 	GetAIMode(sessionId string) openai.AIMode
 	SetAIMode(sessionId string, aiMode openai.AIMode)
 	SetPicResolution(sessionId string, resolution Resolution)
+	SetPicStyle(sessionId string, resolution PicStyle)
 	GetPicResolution(sessionId string) string
+	GetPicStyle(sessionId string) string
 	Clear(sessionId string)
 }
 
@@ -141,6 +151,35 @@ func (s *SessionService) SetMsg(sessionId string, msg []openai.Messages) {
 	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
 }
 
+func (s *SessionService) SetPicStyle(sessionId string, style PicStyle) {
+	maxCacheTime := time.Hour * 12
+
+	switch style {
+	case PicStyleVivid, PicStyleNatural:
+	default:
+		style = PicStyleVivid
+	}
+
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		sessionMeta := &SessionMeta{PicSetting: PicSetting{style: style}}
+		s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+		return
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	sessionMeta.PicSetting.style = style
+	s.cache.Set(sessionId, sessionMeta, maxCacheTime)
+}
+
+func (s *SessionService) GetPicStyle(sessionId string) string {
+	sessionContext, ok := s.cache.Get(sessionId)
+	if !ok {
+		return string(PicStyleVivid)
+	}
+	sessionMeta := sessionContext.(*SessionMeta)
+	return string(sessionMeta.PicSetting.style)
+}
+
 func (s *SessionService) SetPicResolution(sessionId string,
 	resolution Resolution) {
 	maxCacheTime := time.Hour * 12
@@ -148,9 +187,9 @@ func (s *SessionService) SetPicResolution(sessionId string,
 	//if not in [Resolution256, Resolution512, Resolution1024] then set
 	//to Resolution256
 	switch resolution {
-	case Resolution256, Resolution512, Resolution1024:
+	case Resolution256, Resolution512, Resolution1024, Resolution10241792, Resolution17921024:
 	default:
-		resolution = Resolution256
+		resolution = Resolution1024
 	}
 
 	sessionContext, ok := s.cache.Get(sessionId)

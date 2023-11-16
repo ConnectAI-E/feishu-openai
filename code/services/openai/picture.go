@@ -16,6 +16,8 @@ type ImageGenerationRequestBody struct {
 	N              int    `json:"n"`
 	Size           string `json:"size"`
 	ResponseFormat string `json:"response_format"`
+	Model          string `json:"model,omitempty"`
+	Style          string `json:"style,omitempty"`
 }
 
 type ImageResponseBody struct {
@@ -33,12 +35,14 @@ type ImageVariantRequestBody struct {
 }
 
 func (gpt *ChatGPT) GenerateImage(prompt string, size string,
-	n int) ([]string, error) {
+	n int, style string) ([]string, error) {
 	requestBody := ImageGenerationRequestBody{
 		Prompt:         prompt,
 		N:              n,
 		Size:           size,
 		ResponseFormat: "b64_json",
+		Model:          "dall-e-3",
+		Style:          style,
 	}
 
 	imageResponseBody := &ImageResponseBody{}
@@ -57,8 +61,8 @@ func (gpt *ChatGPT) GenerateImage(prompt string, size string,
 }
 
 func (gpt *ChatGPT) GenerateOneImage(prompt string,
-	size string) (string, error) {
-	b64s, err := gpt.GenerateImage(prompt, size, 1)
+	size string, style string) (string, error) {
+	b64s, err := gpt.GenerateImage(prompt, size, 1, style)
 	if err != nil {
 		return "", err
 	}
@@ -67,7 +71,8 @@ func (gpt *ChatGPT) GenerateOneImage(prompt string,
 
 func (gpt *ChatGPT) GenerateOneImageWithDefaultSize(
 	prompt string) (string, error) {
-	return gpt.GenerateOneImage(prompt, "512x512")
+	// works for dall-e 2&3
+	return gpt.GenerateOneImage(prompt, "1024x1024", "")
 }
 
 func (gpt *ChatGPT) GenerateImageVariation(images string,

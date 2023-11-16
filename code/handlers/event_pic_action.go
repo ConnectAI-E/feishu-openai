@@ -29,7 +29,7 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 		a.handler.sessionCache.SetMode(*a.info.sessionId,
 			services.ModePicCreate)
 		a.handler.sessionCache.SetPicResolution(*a.info.sessionId,
-			services.Resolution256)
+			services.Resolution1024)
 		sendPicCreateInstructionCard(*a.ctx, a.info.sessionId,
 			a.info.msgId)
 		return false
@@ -92,8 +92,10 @@ func (*PicAction) Execute(a *ActionInfo) bool {
 	if mode == services.ModePicCreate {
 		resolution := a.handler.sessionCache.GetPicResolution(*a.
 			info.sessionId)
+		style := a.handler.sessionCache.GetPicStyle(*a.
+			info.sessionId)
 		bs64, err := a.handler.gpt.GenerateOneImage(a.info.qParsed,
-			resolution)
+			resolution, style)
 		if err != nil {
 			replyMsg(*a.ctx, fmt.Sprintf(
 				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)

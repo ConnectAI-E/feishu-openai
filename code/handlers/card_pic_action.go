@@ -17,6 +17,10 @@ func NewPicResolutionHandler(cardMsg CardMsg, m MessageHandler) CardHandlerFunc 
 			CommonProcessPicResolution(cardMsg, cardAction, m.sessionCache)
 			return nil, nil
 		}
+		if cardMsg.Kind == PicStyleKind {
+			CommonProcessPicStyle(cardMsg, cardAction, m.sessionCache)
+			return nil, nil
+		}
 		return nil, ErrNextHandler
 	}
 }
@@ -57,13 +61,25 @@ func CommonProcessPicResolution(msg CardMsg,
 		&msg.MsgId)
 }
 
+func CommonProcessPicStyle(msg CardMsg,
+	cardAction *larkcard.CardAction,
+	cache services.SessionServiceCacheInterface) {
+	option := cardAction.Action.Option
+	fmt.Println(larkcore.Prettify(msg))
+	cache.SetPicStyle(msg.SessionId, services.PicStyle(option))
+	//send text
+	replyMsg(context.Background(), "已更新图片风格为"+option,
+		&msg.MsgId)
+}
+
 func (m MessageHandler) CommonProcessPicMore(msg CardMsg) {
 	resolution := m.sessionCache.GetPicResolution(msg.SessionId)
+	style := m.sessionCache.GetPicStyle(msg.SessionId)
 
 	logger.Debugf("resolution: %v", resolution)
 	logger.Debug("msg: %v", msg)
 	question := msg.Value.(string)
-	bs64, _ := m.gpt.GenerateOneImage(question, resolution)
+	bs64, _ := m.gpt.GenerateOneImage(question, resolution, style)
 	replayImageCardByBase64(context.Background(), bs64, &msg.MsgId,
 		&msg.SessionId, question)
 }
