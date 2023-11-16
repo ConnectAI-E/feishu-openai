@@ -24,6 +24,7 @@ var (
 	ClearCardKind      = CardKind("clear")            // 清空上下文
 	PicModeChangeKind  = CardKind("pic_mode_change")  // 切换图片创作模式
 	PicResolutionKind  = CardKind("pic_resolution")   // 图片分辨率调整
+	PicStyleKind       = CardKind("pic_style")        // 图片风格调整
 	PicTextMoreKind    = CardKind("pic_text_more")    // 重新根据文本生成图片
 	PicVarMoreKind     = CardKind("pic_var_more")     // 变量图片
 	RoleTagsChooseKind = CardKind("role_tags_choose") // 内置角色所属标签选择
@@ -324,29 +325,56 @@ func withOneBtn(btn *larkcard.MessageCardEmbedButton) larkcard.
 
 func withPicResolutionBtn(sessionID *string) larkcard.
 	MessageCardElement {
-	cancelMenu := newMenu("默认分辨率",
+	resolutionMenu := newMenu("默认分辨率",
 		map[string]interface{}{
 			"value":     "0",
 			"kind":      PicResolutionKind,
 			"sessionId": *sessionID,
 			"msgId":     *sessionID,
 		},
-		MenuOption{
-			label: "256x256",
-			value: string(services.Resolution256),
-		},
-		MenuOption{
-			label: "512x512",
-			value: string(services.Resolution512),
-		},
+		// dall-e-2 256, 512, 1024
+		//MenuOption{
+		//	label: "256x256",
+		//	value: string(services.Resolution256),
+		//},
+		//MenuOption{
+		//	label: "512x512",
+		//	value: string(services.Resolution512),
+		//},
+		// dall-e-3
 		MenuOption{
 			label: "1024x1024",
 			value: string(services.Resolution1024),
 		},
+		MenuOption{
+			label: "1024x1792",
+			value: string(services.Resolution10241792),
+		},
+		MenuOption{
+			label: "1792x1024",
+			value: string(services.Resolution17921024),
+		},
+	)
+
+	styleMenu := newMenu("风格",
+		map[string]interface{}{
+			"value":     "0",
+			"kind":      PicStyleKind,
+			"sessionId": *sessionID,
+			"msgId":     *sessionID,
+		},
+		MenuOption{
+			label: "生动风格",
+			value: string(services.PicStyleVivid),
+		},
+		MenuOption{
+			label: "自然风格",
+			value: string(services.PicStyleNatural),
+		},
 	)
 
 	actions := larkcard.NewMessageCardAction().
-		Actions([]larkcard.MessageCardActionElement{cancelMenu}).
+		Actions([]larkcard.MessageCardActionElement{resolutionMenu, styleMenu}).
 		Layout(larkcard.MessageCardActionLayoutFlow.Ptr()).
 		Build()
 	return actions
