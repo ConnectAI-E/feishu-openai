@@ -1,7 +1,10 @@
 package openai
 
 import (
+	"context"
 	"errors"
+	"start-feishubot/contexts"
+	"start-feishubot/initialization"
 	"start-feishubot/logger"
 	"strings"
 
@@ -68,7 +71,7 @@ func (msg *Messages) CalculateTokenLength() int {
 	return tokenizer.MustCalToken(text)
 }
 
-func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
+func (gpt *ChatGPT) Completions(ctx context.Context, msg []Messages, aiMode AIMode) (resp Messages,
 	err error) {
 	requestBody := ChatGPTRequestBody{
 		Model:            gpt.Model,
@@ -80,14 +83,23 @@ func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
 		PresencePenalty:  0,
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
-	url := gpt.FullUrl("chat/completions")
+	fullUrl := gpt.FullUrl("chat/completions")
+	if initialization.GetConfig().AuditQueryParams {
+		cc := contexts.ChatContextKey.Must(ctx)
+		if cc != nil {
+			encode := cc.Encode()
+			if encode != "" {
+				fullUrl = fullUrl + "?" + encode
+			}
+		}
+	}
 	//fmt.Println(url)
-	logger.Debug(url)
+	logger.Debug(fullUrl)
 	logger.Debug("request body ", requestBody)
-	if url == "" {
+	if fullUrl == "" {
 		return resp, errors.New("无法获取openai请求地址")
 	}
-	err = gpt.sendRequestWithBodyType(url, "POST", jsonBody, requestBody, gptResponseBody)
+	err = gpt.sendRequestWithBodyType(fullUrl, "POST", jsonBody, requestBody, gptResponseBody)
 	if err == nil && len(gptResponseBody.Choices) > 0 {
 		resp = gptResponseBody.Choices[0].Message
 	} else {
