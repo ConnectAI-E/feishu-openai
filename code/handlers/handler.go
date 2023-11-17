@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
+	"log"
+	"start-feishubot/contexts"
 	"start-feishubot/logger"
 	"strings"
 
@@ -85,6 +87,27 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		sessionId:   sessionId,
 		mention:     mention,
 	}
+	{
+		get := func(s *string) string {
+			if s == nil {
+				return ""
+			}
+			return *s
+		}
+		cc := &contexts.ChatContext{
+			MessageID:     get(msgInfo.msgId),
+			MessageType:   msgInfo.msgType,
+			ChatID:        get(msgInfo.chatId),
+			ChatType:      get(event.Event.Message.ChatType),
+			SessionID:     get(msgInfo.sessionId),
+			SenderUserID:  get(event.Event.Sender.SenderId.UserId),
+			SenderOpenID:  get(event.Event.Sender.SenderId.OpenId),
+			SenderUnionID: get(event.Event.Sender.SenderId.UnionId),
+			SenderType:    get(event.Event.Sender.SenderType),
+			Tenant:        get(event.Event.Sender.TenantKey),
+		}
+		msgInfo.Context = cc
+	}
 	data := &ActionInfo{
 		ctx:     &ctx,
 		handler: &m,
@@ -127,6 +150,8 @@ func (m MessageHandler) judgeIfMentionMe(mention []*larkim.
 	if len(mention) != 1 {
 		return false
 	}
+	// for simple debugging, find a way to pass the info to endpoint
+	log.Printf("mention: name=%v key=%v id.userid=%v id.openid=%v", *mention[0].Name, *mention[0].Key, *mention[0].Id.UserId, *mention[0].Id.OpenId)
 	return *mention[0].Name == m.config.FeishuBotName
 }
 

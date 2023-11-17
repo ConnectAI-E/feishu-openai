@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
-
+	"start-feishubot/contexts"
 	"start-feishubot/initialization"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
@@ -21,6 +21,7 @@ type MsgInfo struct {
 	imageKey    string
 	sessionId   *string
 	mention     []*larkim.MentionEvent
+	Context     *contexts.ChatContext
 }
 type ActionInfo struct {
 	handler *MessageHandler

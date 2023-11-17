@@ -38,6 +38,7 @@ type Config struct {
 	AzureResourceName          string
 	AzureOpenaiToken           string
 	StreamMode                 bool
+	AuditQueryParams           bool
 }
 
 var (
@@ -89,6 +90,7 @@ func LoadConfig(cfg string) *Config {
 		AzureResourceName:          getViperStringValue("AZURE_RESOURCE_NAME", ""),
 		AzureOpenaiToken:           getViperStringValue("AZURE_OPENAI_TOKEN", ""),
 		StreamMode:                 getViperBoolValue("STREAM_MODE", false),
+		AuditQueryParams:           getViperBoolValue("AUDIT_QUERY_PARAMS", false),
 	}
 
 	return config

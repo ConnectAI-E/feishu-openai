@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"start-feishubot/contexts"
 	"strings"
 	"time"
 
@@ -37,11 +39,14 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 		Role: "user", Content: a.info.qParsed,
 	})
 
+	ctx := context.Background()
+	ctx = contexts.ChatContextKey.WithValue(ctx, a.info.Context)
+
 	//fmt.Println("msg", msg)
 	//logger.Debug("msg", msg)
 	// get ai mode as temperature
 	aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
-	completions, err := a.handler.gpt.Completions(msg, aiMode)
+	completions, err := a.handler.gpt.Completions(ctx, msg, aiMode)
 	if err != nil {
 		replyMsg(*a.ctx, fmt.Sprintf(
 			"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
@@ -70,7 +75,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	return true
 }
 
-//判断msg中的是否包含system role
+// 判断msg中的是否包含system role
 func hasSystemRole(msg []openai.Messages) bool {
 	for _, m := range msg {
 		if m.Role == "system" {
