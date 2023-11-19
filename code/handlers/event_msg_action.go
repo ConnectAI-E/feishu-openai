@@ -37,10 +37,10 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 		Role: "user", Content: a.info.qParsed,
 	})
 
-	//fmt.Println("msg", msg)
-	//logger.Debug("msg", msg)
 	// get ai mode as temperature
 	aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
+	fmt.Println("msg: ", msg)
+	fmt.Println("aiMode: ", aiMode)
 	completions, err := a.handler.gpt.Completions(msg, aiMode)
 	if err != nil {
 		replyMsg(*a.ctx, fmt.Sprintf(
@@ -132,6 +132,8 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 
 		//log.Printf("UserId: %s , Request: %s", a.info.userId, msg)
 		aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
+		//fmt.Println("msg: ", msg)
+		//fmt.Println("aiMode: ", aiMode)
 		if err := a.handler.gpt.StreamChat(*a.ctx, msg, aiMode,
 			chatResponseStream); err != nil {
 			err := updateFinalCard(*a.ctx, "聊天失败", cardId, ifNewTopic)
