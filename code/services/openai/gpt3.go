@@ -12,23 +12,23 @@ type AIMode float64
 
 const (
 	Fresh      AIMode = 0.1
-	Warmth     AIMode = 0.4
-	Balance    AIMode = 0.7
-	Creativity AIMode = 1.0
+	Warmth     AIMode = 0.7
+	Balance    AIMode = 1.2
+	Creativity AIMode = 1.7
 )
 
 var AIModeMap = map[string]AIMode{
-	"清新": Fresh,
-	"温暖": Warmth,
-	"平衡": Balance,
-	"创意": Creativity,
+	"严谨": Fresh,
+	"简洁": Warmth,
+	"标准": Balance,
+	"发散": Creativity,
 }
 
 var AIModeStrs = []string{
-	"清新",
-	"温暖",
-	"平衡",
-	"创意",
+	"严谨",
+	"简洁",
+	"标准",
+	"发散",
 }
 
 type Messages struct {

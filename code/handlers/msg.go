@@ -29,7 +29,7 @@ var (
 	PicVarMoreKind     = CardKind("pic_var_more")     // 变量图片
 	RoleTagsChooseKind = CardKind("role_tags_choose") // 内置角色所属标签选择
 	RoleChooseKind     = CardKind("role_choose")      // 内置角色选择
-	AIModeChooseKind   = CardKind("ai_mode_choose")   // AI模式选择
+	AIModeChooseKind   = CardKind("ai_mode_choose")   // 发散模式选择
 )
 
 var (
@@ -712,7 +712,7 @@ func sendHelpCard(ctx context.Context,
 				"sessionId": *sessionId,
 			}, larkcard.MessageCardButtonTypeDanger)),
 		withSplitLine(),
-		withMainMd("🤖 **AI模式选择** \n"+" 文本回复 *AI模式* 或 */ai_mode*"),
+		withMainMd("🤖 **发散模式选择** \n"+" 文本回复 *发散模式* 或 */ai_mode*"),
 		withSplitLine(),
 		withMainMd("🛖 **内置角色列表** \n"+" 文本回复 *角色列表* 或 */roles*"),
 		withSplitLine(),
@@ -810,7 +810,7 @@ func SendRoleListCard(ctx context.Context,
 func SendAIModeListsCard(ctx context.Context,
 	sessionId *string, msgId *string, aiModeStrs []string) {
 	newCard, _ := newSendCard(
-		withHeader("🤖 AI模式选择", larkcard.TemplateIndigo),
+		withHeader("🤖 发散模式选择", larkcard.TemplateIndigo),
 		withAIModeBtn(sessionId, aiModeStrs),
 		withNote("提醒：选择内置模式，让AI更好的理解您的需求。"))
 	replyCard(ctx, msgId, newCard)
