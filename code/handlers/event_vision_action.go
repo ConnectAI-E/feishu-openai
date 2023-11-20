@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"start-feishubot/initialization"
-	"start-feishubot/logger"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
@@ -16,177 +15,146 @@ import (
 type VisionAction struct { /*图片推理*/
 }
 
-func (*VisionAction) Execute(a *ActionInfo) bool {
-	check := AzureModeCheck(a)
-	if !check {
+func (va *VisionAction) Execute(a *ActionInfo) bool {
+	if !AzureModeCheck(a) {
 		return true
 	}
-	// 开启图片创作模式
-	if _, foundPic := utils.EitherTrimEqual(a.info.qParsed,
-		"/vision", "图片推理"); foundPic {
-		a.handler.sessionCache.Clear(*a.info.sessionId)
-		a.handler.sessionCache.SetMode(*a.info.sessionId,
-			services.ModeVision)
-		a.handler.sessionCache.SetVisionDetail(*a.info.sessionId,
-			services.VisionDetailHigh)
-		sendVisionInstructionCard(*a.ctx, a.info.sessionId,
-			a.info.msgId)
+
+	if isVisionCommand(a) {
+		initializeVisionMode(a)
+		sendVisionInstructionCard(*a.ctx, a.info.sessionId, a.info.msgId)
 		return false
 	}
 
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
-	fmt.Println("a.info.msgType: ", a.info.msgType)
 
-	logger.Debug("MODE:", mode)
-
-	// 收到一张图片,且不在图片推理模式下, 提醒是否切换到图片推理模式
-	if a.info.msgType == "image" && mode != services.ModeVision {
-		sendVisionModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
-		return false
-	}
-
-	// todo
-	//return false
-
-	if a.info.msgType == "image" && mode == services.ModeVision {
-		//保存图片
-		imageKey := a.info.imageKey
-		//fmt.Printf("fileKey: %s \n", imageKey)
-		msgId := a.info.msgId
-		//fmt.Println("msgId: ", *msgId)
-		req := larkim.NewGetMessageResourceReqBuilder().MessageId(
-			*msgId).FileKey(imageKey).Type("image").Build()
-		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
-		fmt.Println(resp, err)
-		if err != nil {
-			//fmt.Println(err)
-			replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
-				a.info.msgId)
+	if a.info.msgType == "image" {
+		if mode != services.ModeVision {
+			sendVisionModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
 			return false
 		}
 
-		f := fmt.Sprintf("%s.png", imageKey)
-		fmt.Println(f)
-		resp.WriteFile(f)
-		defer os.Remove(f)
-
-		base64, err := openai.GetBase64FromImage(f)
-		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
-				a.info.msgId)
-			return false
-		}
-		//
-		var msg []openai.VisionMessages
-		detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
-		// 如果没有提示词，默认模拟ChatGPT
-
-		content2 := []openai.ContentType{
-			{Type: "text", Text: "图片里面有什么", ImageURL: nil},
-			{Type: "image_url", ImageURL: &openai.ImageURL{
-				URL:    "data:image/jpeg;base64," + base64,
-				Detail: detail,
-			}},
-		}
-
-		msg = append(msg, openai.VisionMessages{
-			Role: "user", Content: content2,
-		})
-
-		// get ai mode as temperature
-		fmt.Println("msg: ", msg)
-		completions, err := a.handler.gpt.GetVisionInfo(msg)
-		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf(
-				"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
-			return false
-		}
-		sendOldTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
-			completions.Content)
-		return false
-		//a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
-
+		return va.handleVisionImage(a)
 	}
 
 	if a.info.msgType == "post" && mode == services.ModeVision {
-		fmt.Println(a.info.imageKeys)
-		fmt.Println(a.info.qParsed)
-		imagesKeys := a.info.imageKeys
-		var base64s []string
-		if len(imagesKeys) == 0 {
-			replyMsg(*a.ctx, "🤖️：请发送一张图片", a.info.msgId)
-			return false
-		}
-		//保存图片
-		for i := 0; i < len(imagesKeys); i++ {
-			if imagesKeys[i] == "" {
-				continue
-			}
-			imageKey := imagesKeys[i]
-			msgId := a.info.msgId
-			//fmt.Println("msgId: ", *msgId)
-			req := larkim.NewGetMessageResourceReqBuilder().MessageId(
-				*msgId).FileKey(imageKey).Type("image").Build()
-			resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
-			if err != nil {
-				//fmt.Println(err)
-				replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
-					a.info.msgId)
-				return false
-			}
-
-			f := fmt.Sprintf("%s.png", imageKey)
-			fmt.Println(f)
-			resp.WriteFile(f)
-			defer os.Remove(f)
-
-			base64, err := openai.GetBase64FromImage(f)
-			base64s = append(base64s, base64)
-			if err != nil {
-				replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
-					a.info.msgId)
-				return false
-			}
-		}
-
-		var msg []openai.VisionMessages
-		detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
-		// 如果没有提示词，默认模拟ChatGPT
-
-		content0 := []openai.ContentType{
-			{Type: "text", Text: a.info.qParsed, ImageURL: nil},
-		}
-		// 循环数组
-		for i := 0; i < len(base64s); i++ {
-			content1 := []openai.ContentType{
-				{Type: "image_url", ImageURL: &openai.ImageURL{
-					URL:    "data:image/jpeg;base64," + base64s[i],
-					Detail: detail,
-				}},
-			}
-			content0 = append(content0, content1...)
-		}
-
-		msg = append(msg, openai.VisionMessages{
-			Role: "user", Content: content0,
-		})
-
-		// get ai mode as temperature
-		fmt.Println("msg: ", msg)
-		completions, err := a.handler.gpt.GetVisionInfo(msg)
-		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf(
-				"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
-			return false
-		}
-		sendOldTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
-			completions.Content)
-		return false
-		//a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
-
-		return false
-
+		return va.handleVisionPost(a)
 	}
 
 	return true
+}
+
+func isVisionCommand(a *ActionInfo) bool {
+	_, foundPic := utils.EitherTrimEqual(a.info.qParsed, "/vision", "图片推理")
+	return foundPic
+}
+
+func initializeVisionMode(a *ActionInfo) {
+	a.handler.sessionCache.Clear(*a.info.sessionId)
+	a.handler.sessionCache.SetMode(*a.info.sessionId, services.ModeVision)
+	a.handler.sessionCache.SetVisionDetail(*a.info.sessionId, services.VisionDetailHigh)
+}
+
+func (va *VisionAction) handleVisionImage(a *ActionInfo) bool {
+	detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
+	base64, err := downloadAndEncodeImage(a.info.imageKey, a.info.msgId)
+	if err != nil {
+		replyWithErrorMsg(*a.ctx, err, a.info.msgId)
+		return false
+	}
+
+	return va.processImageAndReply(a, base64, detail)
+}
+
+func (va *VisionAction) handleVisionPost(a *ActionInfo) bool {
+	detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
+	var base64s []string
+
+	for _, imageKey := range a.info.imageKeys {
+		if imageKey == "" {
+			continue
+		}
+		base64, err := downloadAndEncodeImage(imageKey, a.info.msgId)
+		if err != nil {
+			replyWithErrorMsg(*a.ctx, err, a.info.msgId)
+			return false
+		}
+		base64s = append(base64s, base64)
+	}
+
+	if len(base64s) == 0 {
+		replyMsg(*a.ctx, "🤖️：请发送一张图片", a.info.msgId)
+		return false
+	}
+
+	return va.processMultipleImagesAndReply(a, base64s, detail)
+}
+
+func downloadAndEncodeImage(imageKey string, msgId *string) (string, error) {
+	f := fmt.Sprintf("%s.png", imageKey)
+	defer os.Remove(f)
+
+	req := larkim.NewGetMessageResourceReqBuilder().MessageId(*msgId).FileKey(imageKey).Type("image").Build()
+	resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
+	if err != nil {
+		return "", err
+	}
+
+	resp.WriteFile(f)
+	return openai.GetBase64FromImage(f)
+}
+
+func replyWithErrorMsg(ctx context.Context, err error, msgId *string) {
+	replyMsg(ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err), msgId)
+}
+
+func (va *VisionAction) processImageAndReply(a *ActionInfo, base64 string, detail string) bool {
+	msg := createVisionMessages("解释这个图片", base64, detail)
+	completions, err := a.handler.gpt.GetVisionInfo(msg)
+	if err != nil {
+		replyWithErrorMsg(*a.ctx, err, a.info.msgId)
+		return false
+	}
+	sendVisionTopicCard(*a.ctx, a.info.sessionId, a.info.msgId, completions.Content)
+	return false
+}
+
+func (va *VisionAction) processMultipleImagesAndReply(a *ActionInfo, base64s []string, detail string) bool {
+	msg := createMultipleVisionMessages(a.info.qParsed, base64s, detail)
+	completions, err := a.handler.gpt.GetVisionInfo(msg)
+	if err != nil {
+		replyWithErrorMsg(*a.ctx, err, a.info.msgId)
+		return false
+	}
+	sendVisionTopicCard(*a.ctx, a.info.sessionId, a.info.msgId, completions.Content)
+	return false
+}
+
+func createVisionMessages(query, base64Image, detail string) []openai.VisionMessages {
+	return []openai.VisionMessages{
+		{
+			Role: "user",
+			Content: []openai.ContentType{
+				{Type: "text", Text: query},
+				{Type: "image_url", ImageURL: &openai.ImageURL{
+					URL:    "data:image/jpeg;base64," + base64Image,
+					Detail: detail,
+				}},
+			},
+		},
+	}
+}
+
+func createMultipleVisionMessages(query string, base64Images []string, detail string) []openai.VisionMessages {
+	content := []openai.ContentType{{Type: "text", Text: query}}
+	for _, base64Image := range base64Images {
+		content = append(content, openai.ContentType{
+			Type: "image_url",
+			ImageURL: &openai.ImageURL{
+				URL:    "data:image/jpeg;base64," + base64Image,
+				Detail: detail,
+			},
+		})
+	}
+	return []openai.VisionMessages{{Role: "user", Content: content}}
 }

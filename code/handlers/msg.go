@@ -767,6 +767,15 @@ func sendOldTopicCard(ctx context.Context,
 	replyCard(ctx, msgId, newCard)
 }
 
+func sendVisionTopicCard(ctx context.Context,
+	sessionId *string, msgId *string, content string) {
+	newCard, _ := newSendCard(
+		withHeader("🕵️图片推理结果", larkcard.TemplateBlue),
+		withMainText(content),
+		withNote("让LLM和你一起推理图片的内容~"))
+	replyCard(ctx, msgId, newCard)
+}
+
 func sendHelpCard(ctx context.Context,
 	sessionId *string, msgId *string) {
 	newCard, _ := newSendCard(
