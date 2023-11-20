@@ -6,20 +6,18 @@ import (
 )
 
 type ImageURL struct {
-	URL    string `json:"url"`
+	URL    string `json:"url,omitempty"`
 	Detail string `json:"detail,omitempty"`
 }
 
 type ContentType struct {
-	Type string   `json:"type"`
-	Text string   `json:"text,omitempty"`
-	URL  ImageURL `json:"image_url,omitempty"`
-	// Add other fields as needed for different content types
+	Type     string    `json:"type"`
+	Text     string    `json:"text,omitempty"`
+	ImageURL *ImageURL `json:"image_url,omitempty"`
 }
-
 type VisionMessages struct {
-	Role    string        `json:"role"`
-	Content []ContentType `json:"content"`
+	Role    string      `json:"role"`
+	Content interface{} `json:"content"`
 }
 
 type VisionRequestBody struct {

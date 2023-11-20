@@ -73,6 +73,29 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 				a.info.msgId)
 			return false
 		}
+		//
+		var msg []openai.VisionMessages
+		detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
+		// 如果没有提示词，默认模拟ChatGPT
+		msg = append(msg, openai.VisionMessages{
+			Role: "user", Content: []openai.ContentType{
+				{
+					Type: "image", ImageURL: openai.
+						ImageURL{URL: base64, Detail: detail},
+				},
+			},
+		})
+		// get ai mode as temperature
+		fmt.Println("msg: ", msg)
+		completions, err := a.handler.gpt.GetVisionInfo(msg)
+		if err != nil {
+			replyMsg(*a.ctx, fmt.Sprintf(
+				"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+			return false
+		}
+		msg = append(msg, completions)
+		a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
+
 		////图片校验
 		//err = openai.VerifyPngs([]string{f})
 		//if err != nil {

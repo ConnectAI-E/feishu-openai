@@ -26,15 +26,20 @@ func TestCompletions(t *testing.T) {
 func TestVisionOnePic(t *testing.T) {
 	config := initialization.LoadConfig("../../config.yaml")
 	content := []ContentType{
-		{Type: "text", Text: "What’s in this image?"},
-		{Type: "image_url", URL: ImageURL{
+		{Type: "text", Text: "What’s in this image?", ImageURL: nil},
+		{Type: "image_url", ImageURL: &ImageURL{
 			URL: "https://resource.liaobots." +
 				"com/1849d492904448a0ac17f975f0b7ca8b.jpg",
-			Detail: "low",
+			Detail: "high",
 		}},
 	}
+	//turn content-json to str
+	//contentStr, err2 := json.Marshal(content)
+	//if err2 != nil {
+	//	return
+	//}
 	msgs := []VisionMessages{
-		{Role: "user", Content: content},
+		{Role: "assistant", Content: content},
 	}
 	gpt := NewChatGPT(*config)
 	resp, err := gpt.GetVisionInfo(msgs)
