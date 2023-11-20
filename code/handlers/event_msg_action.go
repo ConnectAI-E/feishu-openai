@@ -23,6 +23,23 @@ func setDefaultPrompt(msg []openai.Messages) []openai.Messages {
 	return msg
 }
 
+//func setDefaultVisionPrompt(msg []openai.VisionMessages) []openai.VisionMessages {
+//	if !hasSystemRole(msg) {
+//		msg = append(msg, openai.VisionMessages{
+//			Role: "system", Content: []openai.ContentType{
+//				{Type: "text", Text: "You are ChatGPT4V, " +
+//					"You are ChatGPT4V, " +
+//					"a large language and picture model trained by" +
+//					" OpenAI. " +
+//					"Answer in user's language as concisely as" +
+//					" possible. Knowledge cutoff: 20230601 " +
+//					"Current date" + time.Now().Format("20060102"),
+//				}},
+//		})
+//	}
+//	return msg
+//}
+
 type MessageAction struct { /*消息*/
 }
 

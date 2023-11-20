@@ -19,6 +19,9 @@ import (
 type PlatForm string
 
 const (
+	MaxRetries = 3
+)
+const (
 	AzureApiUrlV1 = "openai.azure.com/openai/deployments/"
 )
 const (
@@ -104,6 +107,7 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 		return errors.New("no available API")
 	}
 
+	//fmt.Println("requestBodyData", string(requestBodyData))
 	req, err := http.NewRequest(method, url, bytes.NewReader(requestBodyData))
 	if err != nil {
 		return err
@@ -182,7 +186,7 @@ func (gpt *ChatGPT) sendRequestWithBodyType(link, method string,
 	}
 
 	err = gpt.doAPIRequestWithRetry(link, method, bodyType,
-		requestBody, responseBody, client, 3)
+		requestBody, responseBody, client, MaxRetries)
 
 	return err
 }
@@ -251,4 +255,9 @@ func GetProxyClient(proxyString string) (*http.Client, error) {
 		}
 	}
 	return client, nil
+}
+
+func (gpt *ChatGPT) ChangeMode(model string) *ChatGPT {
+	gpt.Model = model
+	return gpt
 }

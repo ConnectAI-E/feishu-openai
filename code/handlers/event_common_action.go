@@ -19,6 +19,7 @@ type MsgInfo struct {
 	qParsed     string
 	fileKey     string
 	imageKey    string
+	imageKeys   []string // post 消息卡片中的图片组
 	sessionId   *string
 	mention     []*larkim.MentionEvent
 }
