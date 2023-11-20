@@ -19,7 +19,7 @@ import (
 type PlatForm string
 
 const (
-	MaxRetries = 1
+	MaxRetries = 3
 )
 const (
 	AzureApiUrlV1 = "openai.azure.com/openai/deployments/"
