@@ -13,7 +13,6 @@ func msgFilter(msg string) string {
 	//replace @到下一个非空的字段 为 ''
 	regex := regexp.MustCompile(`@[^ ]*`)
 	return regex.ReplaceAllString(msg, "")
-
 }
 
 // Parse rich text json to text
@@ -45,6 +44,33 @@ func parsePostContent(content string) string {
 		text += "\n"
 	}
 	return msgFilter(text)
+}
+
+func parsePostImageKeys(content string) []string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	var imageKeys []string
+
+	if contentMap["content"] == nil {
+		return imageKeys
+	}
+
+	contentList := contentMap["content"].([]interface{})
+	for _, v := range contentList {
+		for _, v1 := range v.([]interface{}) {
+			if v1.(map[string]interface{})["tag"] == "img" {
+				imageKeys = append(imageKeys, v1.(map[string]interface{})["image_key"].(string))
+			}
+		}
+	}
+
+	return imageKeys
 }
 
 func parseContent(content, msgType string) string {

@@ -82,6 +82,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		qParsed:     strings.Trim(parseContent(*content, msgType), " "),
 		fileKey:     parseFileKey(*content),
 		imageKey:    parseImageKey(*content),
+		imageKeys:   parsePostImageKeys(*content),
 		sessionId:   sessionId,
 		mention:     mention,
 	}
