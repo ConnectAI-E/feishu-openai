@@ -33,11 +33,7 @@ func TestVisionOnePic(t *testing.T) {
 			Detail: "high",
 		}},
 	}
-	//turn content-json to str
-	//contentStr, err2 := json.Marshal(content)
-	//if err2 != nil {
-	//	return
-	//}
+
 	msgs := []VisionMessages{
 		{Role: "assistant", Content: content},
 	}

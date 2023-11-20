@@ -35,7 +35,6 @@ func (gpt *ChatGPT) GetVisionInfo(msg []VisionMessages) (
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
 	url := gpt.FullUrl("chat/completions")
-	logger.Debug(url)
 	logger.Debug("request body ", requestBody)
 	if url == "" {
 		return resp, errors.New("无法获取openai请求地址")

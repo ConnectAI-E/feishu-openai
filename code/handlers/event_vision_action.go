@@ -43,6 +43,8 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		return false
 	}
 
+	// todo
+
 	if a.info.msgType == "image" && mode == services.ModeVision {
 		//保存图片
 		imageKey := a.info.imageKey
@@ -77,14 +79,19 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		var msg []openai.VisionMessages
 		detail := a.handler.sessionCache.GetVisionDetail(*a.info.sessionId)
 		// 如果没有提示词，默认模拟ChatGPT
+
+		content2 := []openai.ContentType{
+			{Type: "text", Text: "图片里面有什么", ImageURL: nil},
+			{Type: "image_url", ImageURL: &openai.ImageURL{
+				URL:    "data:image/jpeg;base64," + base64,
+				Detail: detail,
+			}},
+		}
+
 		msg = append(msg, openai.VisionMessages{
-			Role: "user", Content: []openai.ContentType{
-				{
-					Type: "image", ImageURL: openai.
-						ImageURL{URL: base64, Detail: detail},
-				},
-			},
+			Role: "user", Content: content2,
 		})
+
 		// get ai mode as temperature
 		fmt.Println("msg: ", msg)
 		completions, err := a.handler.gpt.GetVisionInfo(msg)
@@ -93,8 +100,10 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 				"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 			return false
 		}
-		msg = append(msg, completions)
-		a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
+		sendOldTopicCard(*a.ctx, a.info.sessionId, a.info.msgId,
+			completions.Content)
+		return false
+		//a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 
 		////图片校验
 		//err = openai.VerifyPngs([]string{f})
@@ -109,27 +118,9 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		//		"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
 		//	return false
 		//}
-		replayImagePlainByBase64(*a.ctx, base64, a.info.msgId)
+		//replayImagePlainByBase64(*a.ctx, base64, a.info.msgId)
 		return false
 
-	}
-
-	// 生成图片
-	if mode == services.ModePicCreate {
-		resolution := a.handler.sessionCache.GetPicResolution(*a.
-			info.sessionId)
-		style := a.handler.sessionCache.GetPicStyle(*a.
-			info.sessionId)
-		bs64, err := a.handler.gpt.GenerateOneImage(a.info.qParsed,
-			resolution, style)
-		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf(
-				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
-			return false
-		}
-		replayImageCardByBase64(*a.ctx, bs64, a.info.msgId, a.info.sessionId,
-			a.info.qParsed)
-		return false
 	}
 
 	return true
