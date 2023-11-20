@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"start-feishubot/logger"
-
 	"start-feishubot/initialization"
+	"start-feishubot/logger"
 	"start-feishubot/services"
 	"start-feishubot/services/openai"
 	"start-feishubot/utils"
@@ -39,7 +38,7 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 	fmt.Println("a.info.msgType: ", a.info.msgType)
 	logger.Debug("MODE:", mode)
 	// 收到一张图片,且不在图片推理模式下, 提醒是否切换到图片推理模式
-	if a.info.msgType == "image" && mode != services.ModePicCreate {
+	if a.info.msgType == "image" && mode != services.ModeVision {
 		sendVisionModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
 		return false
 	}
@@ -53,7 +52,7 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		req := larkim.NewGetMessageResourceReqBuilder().MessageId(
 			*msgId).FileKey(imageKey).Type("image").Build()
 		resp, err := initialization.GetLarkClient().Im.MessageResource.Get(context.Background(), req)
-		//fmt.Println(resp, err)
+		fmt.Println(resp, err)
 		if err != nil {
 			//fmt.Println(err)
 			replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
@@ -62,28 +61,32 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		}
 
 		f := fmt.Sprintf("%s.png", imageKey)
+		fmt.Println(f)
 		resp.WriteFile(f)
 		defer os.Remove(f)
-		resolution := a.handler.sessionCache.GetPicResolution(*a.
-			info.sessionId)
+		//resolution := a.handler.sessionCache.GetPicResolution(*a.
+		//	info.sessionId)
 
-		openai.ConvertJpegToPNG(f)
-		openai.ConvertToRGBA(f, f)
-
-		//图片校验
-		err = openai.VerifyPngs([]string{f})
+		base64, err := openai.GetBase64FromImage(f)
 		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf("🤖️：无法解析图片，请发送原图并尝试重新操作～"),
+			replyMsg(*a.ctx, fmt.Sprintf("🤖️：图片下载失败，请稍后再试～\n 错误信息: %v", err),
 				a.info.msgId)
 			return false
 		}
-		bs64, err := a.handler.gpt.GenerateOneImageVariation(f, resolution)
-		if err != nil {
-			replyMsg(*a.ctx, fmt.Sprintf(
-				"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
-			return false
-		}
-		replayImagePlainByBase64(*a.ctx, bs64, a.info.msgId)
+		////图片校验
+		//err = openai.VerifyPngs([]string{f})
+		//if err != nil {
+		//	replyMsg(*a.ctx, fmt.Sprintf("🤖️：无法解析图片，请发送原图并尝试重新操作～"),
+		//		a.info.msgId)
+		//	return false
+		//}
+		//bs64, err := a.handler.gpt.GenerateOneImageVariation(f, resolution)
+		//if err != nil {
+		//	replyMsg(*a.ctx, fmt.Sprintf(
+		//		"🤖️：图片生成失败，请稍后再试～\n错误信息: %v", err), a.info.msgId)
+		//	return false
+		//}
+		replayImagePlainByBase64(*a.ctx, base64, a.info.msgId)
 		return false
 
 	}

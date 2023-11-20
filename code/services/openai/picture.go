@@ -2,11 +2,13 @@ package openai
 
 import (
 	"bufio"
+	"encoding/base64"
 	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"os"
 )
@@ -299,4 +301,23 @@ func GetImageCompressionType(path string) (string, error) {
 	fmt.Println("format: ", format)
 	// 返回压缩类型
 	return format, nil
+}
+
+func GetBase64FromImage(imagePath string) (string, error) {
+	// 打开文件
+	// 读取图片文件
+	imageFile, err := os.Open(imagePath)
+	if err != nil {
+		return "", err
+	}
+	defer imageFile.Close()
+	// 读取图片内容
+	imageData, err := ioutil.ReadAll(imageFile)
+	if err != nil {
+		return "", err
+	}
+	// 将图片内容转换为base64编码
+	base64String := base64.StdEncoding.EncodeToString(imageData)
+
+	return base64String, nil
 }
