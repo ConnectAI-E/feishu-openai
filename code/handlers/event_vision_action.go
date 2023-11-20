@@ -44,7 +44,7 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 		return false
 	}
 
-	if a.info.msgType == "image" && mode == services.ModePicCreate {
+	if a.info.msgType == "image" && mode == services.ModeVision {
 		//保存图片
 		imageKey := a.info.imageKey
 		//fmt.Printf("fileKey: %s \n", imageKey)
