@@ -36,11 +36,11 @@ func (*VisionAction) Execute(a *ActionInfo) bool {
 	}
 
 	mode := a.handler.sessionCache.GetMode(*a.info.sessionId)
-	//fmt.Println("mode: ", mode)
+	fmt.Println("a.info.msgType: ", a.info.msgType)
 	logger.Debug("MODE:", mode)
-	// 收到一张图片,且不在图片创作模式下, 提醒是否切换到图片创作模式
+	// 收到一张图片,且不在图片推理模式下, 提醒是否切换到图片推理模式
 	if a.info.msgType == "image" && mode != services.ModePicCreate {
-		sendPicModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
+		sendVisionModeCheckCard(*a.ctx, a.info.sessionId, a.info.msgId)
 		return false
 	}
 

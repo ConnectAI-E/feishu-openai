@@ -24,6 +24,7 @@ func NewCardHandler(m MessageHandler) CardHandlerFunc {
 		NewRoleTagCardHandler,
 		NewRoleCardHandler,
 		NewAIModeCardHandler,
+		NewVisionModeChangeHandler,
 	}
 
 	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {

@@ -21,16 +21,17 @@ type CardKind string
 type CardChatType string
 
 var (
-	ClearCardKind      = CardKind("clear")            // 清空上下文
-	PicModeChangeKind  = CardKind("pic_mode_change")  // 切换图片创作模式
-	PicResolutionKind  = CardKind("pic_resolution")   // 图片分辨率调整
-	PicStyleKind       = CardKind("pic_style")        // 图片风格调整
-	VisionStyleKind    = CardKind("vision_style")     // 图片推理级别调整
-	PicTextMoreKind    = CardKind("pic_text_more")    // 重新根据文本生成图片
-	PicVarMoreKind     = CardKind("pic_var_more")     // 变量图片
-	RoleTagsChooseKind = CardKind("role_tags_choose") // 内置角色所属标签选择
-	RoleChooseKind     = CardKind("role_choose")      // 内置角色选择
-	AIModeChooseKind   = CardKind("ai_mode_choose")   // AI模式选择
+	ClearCardKind        = CardKind("clear")            // 清空上下文
+	PicModeChangeKind    = CardKind("pic_mode_change")  // 切换图片创作模式
+	VisionModeChangeKind = CardKind("vision_mode")      // 切换图片解析模式
+	PicResolutionKind    = CardKind("pic_resolution")   // 图片分辨率调整
+	PicStyleKind         = CardKind("pic_style")        // 图片风格调整
+	VisionStyleKind      = CardKind("vision_style")     // 图片推理级别调整
+	PicTextMoreKind      = CardKind("pic_text_more")    // 重新根据文本生成图片
+	PicVarMoreKind       = CardKind("pic_var_more")     // 变量图片
+	RoleTagsChooseKind   = CardKind("role_tags_choose") // 内置角色所属标签选择
+	RoleChooseKind       = CardKind("role_choose")      // 内置角色选择
+	AIModeChooseKind     = CardKind("ai_mode_choose")   // AI模式选择
 )
 
 var (
@@ -300,6 +301,30 @@ func withPicModeDoubleCheckBtn(sessionID *string) larkcard.
 	cancelBtn := newBtn("我再想想", map[string]interface{}{
 		"value":     "0",
 		"kind":      PicModeChangeKind,
+		"sessionId": *sessionID,
+		"chatType":  UserChatType,
+	},
+		larkcard.MessageCardButtonTypeDefault)
+
+	actions := larkcard.NewMessageCardAction().
+		Actions([]larkcard.MessageCardActionElement{confirmBtn, cancelBtn}).
+		Layout(larkcard.MessageCardActionLayoutBisected.Ptr()).
+		Build()
+
+	return actions
+}
+func withVisionModeDoubleCheckBtn(sessionID *string) larkcard.
+	MessageCardElement {
+	confirmBtn := newBtn("切换模式", map[string]interface{}{
+		"value":     "1",
+		"kind":      VisionModeChangeKind,
+		"chatType":  UserChatType,
+		"sessionId": *sessionID,
+	}, larkcard.MessageCardButtonTypeDanger,
+	)
+	cancelBtn := newBtn("我再想想", map[string]interface{}{
+		"value":     "0",
+		"kind":      VisionModeChangeKind,
 		"sessionId": *sessionID,
 		"chatType":  UserChatType,
 	},
@@ -712,6 +737,15 @@ func sendPicModeCheckCard(ctx context.Context,
 		withMainMd("收到图片，是否进入图片创作模式？"),
 		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
 		withPicModeDoubleCheckBtn(sessionId))
+	replyCard(ctx, msgId, newCard)
+}
+func sendVisionModeCheckCard(ctx context.Context,
+	sessionId *string, msgId *string) {
+	newCard, _ := newSendCard(
+		withHeader("🕵️ 机器人提醒", larkcard.TemplateBlue),
+		withMainMd("检测到图片，是否进入图片推理模式？"),
+		withNote("请注意，这将开始一个全新的对话，您将无法利用之前话题的历史信息"),
+		withVisionModeDoubleCheckBtn(sessionId))
 	replyCard(ctx, msgId, newCard)
 }
 
