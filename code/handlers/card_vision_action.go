@@ -53,7 +53,7 @@ func CommonProcessVisionModeChange(cardMsg CardMsg,
 		session.SetMode(sessionId,
 			services.ModeVision)
 		session.SetVisionDetail(sessionId,
-			services.VisionDetailLow)
+			services.VisionDetailHigh)
 
 		newCard, _ :=
 			newSendCard(
