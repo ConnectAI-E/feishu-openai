@@ -469,6 +469,30 @@ docker compose down
 
 更多介绍，参考[飞书上的小计算器: Go 机器人来啦](https://www.bilibili.com/video/BV12M41187rV/)
 
+## 一些附加功能
+
+### 1. 日志功能
+
+可以参考 docker-compose.yml 和 config.example.yaml 里面的配置。要注意需要将 logs 目录映射到外部，这样可以方便查看日志。
+
+记录的日志大概是这样的：
+```
+2023/05/04 00:00:00 Success request: UserId: XXX , Request: [{user 请问今天是几号？} {assistant 抱歉，作为AI语言模型，我不知道今天是几号。请您查看您的设备上的日期或者问问其他人。}] , Response: 
+抱歉，作为AI语言模型，我不知道今天是几号。请您查看您的设备上的日期或者问问其他人。
+```
+
+这里为了保护用户隐私，没有调用飞书接口，将 UserId 翻译为可读的名字。如果有需要的话，建议单个单个按照 UserId 让飞书管理员查找。
+
+
+此外，比如可以使用
+```
+grep "UserId" app.log | wc -l
+```
+来统计一共问了多少个问题。(可以根据实际需求来进行搜索，比如只搜索 Success request 成功回复的请求。)
+
+### 2. 限流功能
+
+可以参考 docker-compose.yml 和 config.example.yaml 里面的配置。要注意这里没有将访问数据保存在外部，这样是为了先不引入外部依赖，比如 redis 或者 mysql。由于可以控制的时间范围是1天，所以放内存里也没啥大问题。
 
 ## 一起交流
 

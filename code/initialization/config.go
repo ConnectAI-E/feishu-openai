@@ -14,30 +14,33 @@ import (
 
 type Config struct {
 	// 表示配置是否已经被初始化了。
-	Initialized                bool
-	FeishuBaseUrl              string
-	FeishuAppId                string
-	FeishuAppSecret            string
-	FeishuAppEncryptKey        string
-	FeishuAppVerificationToken string
-	FeishuBotName              string
-	OpenaiApiKeys              []string
-	HttpPort                   int
-	HttpsPort                  int
-	UseHttps                   bool
-	CertFile                   string
-	KeyFile                    string
-	OpenaiApiUrl               string
-	OpenaiModel                string
-	OpenAIHttpClientTimeOut    int
-	OpenaiMaxTokens            int
-	HttpProxy                  string
-	AzureOn                    bool
-	AzureApiVersion            string
-	AzureDeploymentName        string
-	AzureResourceName          string
-	AzureOpenaiToken           string
-	StreamMode                 bool
+	Initialized                        bool
+	EnableLog                          bool
+	FeishuBaseUrl                      string
+	FeishuAppId                        string
+	FeishuAppSecret                    string
+	FeishuAppEncryptKey                string
+	FeishuAppVerificationToken         string
+	FeishuBotName                      string
+	OpenaiApiKeys                      []string
+	HttpPort                           int
+	HttpsPort                          int
+	UseHttps                           bool
+	CertFile                           string
+	KeyFile                            string
+	OpenaiApiUrl                       string
+	OpenaiModel                        string
+	OpenAIHttpClientTimeOut            int
+	OpenaiMaxTokens                    int
+	HttpProxy                          string
+	AzureOn                            bool
+	AzureApiVersion                    string
+	AzureDeploymentName                string
+	AzureResourceName                  string
+	AzureOpenaiToken                   string
+	StreamMode                         bool
+	AccessControlEnable                bool
+	AccessControlMaxCountPerUserPerDay int
 }
 
 var (
@@ -66,29 +69,32 @@ func LoadConfig(cfg string) *Config {
 	//fmt.Println(string(content))
 
 	config := &Config{
-		FeishuBaseUrl:              getViperStringValue("BASE_URL", ""),
-		FeishuAppId:                getViperStringValue("APP_ID", ""),
-		FeishuAppSecret:            getViperStringValue("APP_SECRET", ""),
-		FeishuAppEncryptKey:        getViperStringValue("APP_ENCRYPT_KEY", ""),
-		FeishuAppVerificationToken: getViperStringValue("APP_VERIFICATION_TOKEN", ""),
-		FeishuBotName:              getViperStringValue("BOT_NAME", ""),
-		OpenaiApiKeys:              getViperStringArray("OPENAI_KEY", []string{""}),
-		OpenaiModel:                getViperStringValue("OPENAI_MODEL", "gpt-3.5-turbo"),
-		OpenAIHttpClientTimeOut:    getViperIntValue("OPENAI_HTTP_CLIENT_TIMEOUT", 550),
-		OpenaiMaxTokens:            getViperIntValue("OPENAI_MAX_TOKENS", 2000),
-		HttpPort:                   getViperIntValue("HTTP_PORT", 9000),
-		HttpsPort:                  getViperIntValue("HTTPS_PORT", 9001),
-		UseHttps:                   getViperBoolValue("USE_HTTPS", false),
-		CertFile:                   getViperStringValue("CERT_FILE", "cert.pem"),
-		KeyFile:                    getViperStringValue("KEY_FILE", "key.pem"),
-		OpenaiApiUrl:               getViperStringValue("API_URL", "https://api.openai.com"),
-		HttpProxy:                  getViperStringValue("HTTP_PROXY", ""),
-		AzureOn:                    getViperBoolValue("AZURE_ON", false),
-		AzureApiVersion:            getViperStringValue("AZURE_API_VERSION", "2023-03-15-preview"),
-		AzureDeploymentName:        getViperStringValue("AZURE_DEPLOYMENT_NAME", ""),
-		AzureResourceName:          getViperStringValue("AZURE_RESOURCE_NAME", ""),
-		AzureOpenaiToken:           getViperStringValue("AZURE_OPENAI_TOKEN", ""),
-		StreamMode:                 getViperBoolValue("STREAM_MODE", false),
+		EnableLog:                          getViperBoolValue("ENABLE_LOG", false),
+		FeishuBaseUrl:                      getViperStringValue("BASE_URL", ""),
+		FeishuAppId:                        getViperStringValue("APP_ID", ""),
+		FeishuAppSecret:                    getViperStringValue("APP_SECRET", ""),
+		FeishuAppEncryptKey:                getViperStringValue("APP_ENCRYPT_KEY", ""),
+		FeishuAppVerificationToken:         getViperStringValue("APP_VERIFICATION_TOKEN", ""),
+		FeishuBotName:                      getViperStringValue("BOT_NAME", ""),
+		OpenaiApiKeys:                      getViperStringArray("OPENAI_KEY", []string{""}),
+		OpenaiModel:                        getViperStringValue("OPENAI_MODEL", "gpt-3.5-turbo"),
+		OpenAIHttpClientTimeOut:            getViperIntValue("OPENAI_HTTP_CLIENT_TIMEOUT", 550),
+		OpenaiMaxTokens:                    getViperIntValue("OPENAI_MAX_TOKENS", 2000),
+		HttpPort:                           getViperIntValue("HTTP_PORT", 9000),
+		HttpsPort:                          getViperIntValue("HTTPS_PORT", 9001),
+		UseHttps:                           getViperBoolValue("USE_HTTPS", false),
+		CertFile:                           getViperStringValue("CERT_FILE", "cert.pem"),
+		KeyFile:                            getViperStringValue("KEY_FILE", "key.pem"),
+		OpenaiApiUrl:                       getViperStringValue("API_URL", "https://api.openai.com"),
+		HttpProxy:                          getViperStringValue("HTTP_PROXY", ""),
+		AzureOn:                            getViperBoolValue("AZURE_ON", false),
+		AzureApiVersion:                    getViperStringValue("AZURE_API_VERSION", "2023-03-15-preview"),
+		AzureDeploymentName:                getViperStringValue("AZURE_DEPLOYMENT_NAME", ""),
+		AzureResourceName:                  getViperStringValue("AZURE_RESOURCE_NAME", ""),
+		AzureOpenaiToken:                   getViperStringValue("AZURE_OPENAI_TOKEN", ""),
+		StreamMode:                         getViperBoolValue("STREAM_MODE", false),
+		AccessControlEnable:                getViperBoolValue("ACCESS_CONTROL_ENABLE", false),
+		AccessControlMaxCountPerUserPerDay: getViperIntValue("ACCESS_CONTROL_MAX_COUNT_PER_USER_PER_DAY", 0),
 	}
 
 	return config
@@ -102,8 +108,8 @@ func getViperStringValue(key string, defaultValue string) string {
 	return value
 }
 
-//OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
-//result:[sk-xxx sk-xxx sk-xxx]
+// OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
+// result:[sk-xxx sk-xxx sk-xxx]
 func getViperStringArray(key string, defaultValue []string) []string {
 	value := viper.GetString(key)
 	if value == "" {

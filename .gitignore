@@ -38,3 +38,7 @@ docker.md
 .DS_Store
 **/.DS_Store
 *.pem
+
+# 方便在本地放一些不用上传给 github 的文档，只需要在本地建立一个 ignore 文件夹，然后把需要忽略的文件放进去就行了
+ignore
+logs
