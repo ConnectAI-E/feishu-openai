@@ -78,6 +78,7 @@ func (m MessageHandler) msgReceivedHandler(ctx context.Context, event *larkim.P2
 		handlerType: handlerType,
 		msgType:     msgType,
 		msgId:       msgId,
+		userId:      *event.Event.Sender.SenderId.UserId,
 		chatId:      chatId,
 		qParsed:     strings.Trim(parseContent(*content, msgType), " "),
 		fileKey:     parseFileKey(*content),
