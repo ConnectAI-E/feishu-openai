@@ -1,0 +1,39 @@
+name: Build Release
+
+on:
+  release:
+    types: [created,published]
+
+permissions:
+  contents: read
+
+jobs:
+  build-go-binary:
+    permissions:
+      contents: write  # for build-go-binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [ linux, windows, darwin ] # 需要打包的系统
+        goarch: [ amd64, arm64 ] # 需要打包的架构
+        exclude: # 排除某些平台和架构
+          - goarch: arm64
+            goos: windows
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+      - name: Create version file
+        run: echo ${{ github.event.release.tag_name }} > VERSION
+      - name: Parallel build
+        uses: wangyoucao577/go-release-action@v1.30
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: 1.18
+          pre_command: export CGO_ENABLED=0 && export GODEBUG=http2client=0
+          executable_compression: "upx -9"
+          md5sum: false
+          project_path: "./code"
+          binary_name: "feishu-chatgpt"
+          extra_files: ./code/config.example.yaml readme.md LICENSE ./code/role_list.yaml

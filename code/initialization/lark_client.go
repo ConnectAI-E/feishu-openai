@@ -2,14 +2,21 @@ package initialization
 
 import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
-	"github.com/spf13/viper"
+	larkcore "github.com/larksuite/oapi-sdk-go/v3/core"
 )
 
 var larkClient *lark.Client
 
-func LoadLarkClient() {
-	larkClient = lark.NewClient(viper.GetString("APP_ID"),
-		viper.GetString("APP_SECRET"))
+func LoadLarkClient(config Config) {
+	options := []lark.ClientOptionFunc{
+		lark.WithLogLevel(larkcore.LogLevelDebug),
+	}
+	if config.FeishuBaseUrl != "" {
+		options = append(options, lark.WithOpenBaseUrl(config.FeishuBaseUrl))
+	}
+
+	larkClient = lark.NewClient(config.FeishuAppId, config.FeishuAppSecret, options...)
+
 }
 
 func GetLarkClient() *lark.Client {

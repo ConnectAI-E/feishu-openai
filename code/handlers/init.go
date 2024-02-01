@@ -2,11 +2,18 @@ package handlers
 
 import (
 	"context"
+	"start-feishubot/logger"
+
+	"start-feishubot/initialization"
+	"start-feishubot/services/openai"
+
+	larkcard "github.com/larksuite/oapi-sdk-go/v3/card"
 	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 )
 
 type MessageHandlerInterface interface {
-	handle(ctx context.Context, event *larkim.P2MessageReceiveV1) error
+	msgReceivedHandler(ctx context.Context, event *larkim.P2MessageReceiveV1) error
+	cardHandler(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error)
 }
 
 type HandlerType string
@@ -17,14 +24,52 @@ const (
 )
 
 // handlers 所有消息类型类型的处理器
-var handlers map[HandlerType]MessageHandlerInterface
+var handlers MessageHandlerInterface
 
-func init() {
-	handlers = make(map[HandlerType]MessageHandlerInterface)
-	//handlers[GroupHandler] = NewGroupMessageHandler()
-	handlers[UserHandler] = NewPersonalMessageHandler()
+func InitHandlers(gpt *openai.ChatGPT, config initialization.Config) {
+	handlers = NewMessageHandler(gpt, config)
 }
 
 func Handler(ctx context.Context, event *larkim.P2MessageReceiveV1) error {
-	return handlers[UserHandler].handle(ctx, event)
+	return handlers.msgReceivedHandler(ctx, event)
+}
+
+func ReadHandler(ctx context.Context, event *larkim.P2MessageReadV1) error {
+	readerId := event.Event.Reader.ReaderId.OpenId
+	//fmt.Printf("msg is read by : %v \n", *readerId)
+	logger.Debugf("msg is read by : %v \n", *readerId)
+
+	return nil
+}
+
+func CardHandler() func(ctx context.Context,
+	cardAction *larkcard.CardAction) (interface{}, error) {
+	return func(ctx context.Context, cardAction *larkcard.CardAction) (interface{}, error) {
+		//handlerType := judgeCardType(cardAction)
+		return handlers.cardHandler(ctx, cardAction)
+	}
+}
+
+func judgeCardType(cardAction *larkcard.CardAction) HandlerType {
+	actionValue := cardAction.Action.Value
+	chatType := actionValue["chatType"]
+	//fmt.Printf("chatType: %v", chatType)
+	if chatType == "group" {
+		return GroupHandler
+	}
+	if chatType == "personal" {
+		return UserHandler
+	}
+	return "otherChat"
+}
+
+func judgeChatType(event *larkim.P2MessageReceiveV1) HandlerType {
+	chatType := event.Event.Message.ChatType
+	if *chatType == "group" {
+		return GroupHandler
+	}
+	if *chatType == "p2p" {
+		return UserHandler
+	}
+	return "otherChat"
 }
