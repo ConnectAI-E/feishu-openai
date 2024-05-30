@@ -161,14 +161,8 @@ func withMainMd(msg string) larkcard.MessageCardElement {
 	if i != nil {
 		return nil
 	}
-	mainElement := larkcard.NewMessageCardDiv().
-		Fields([]*larkcard.MessageCardField{larkcard.NewMessageCardField().
-			Text(larkcard.NewMessageCardLarkMd().
-				Content(msg).
-				Build()).
-			IsShort(true).
-			Build()}).
-		Build()
+	mainElement := larkcard.NewMessageCardMarkdown().
+		Content(msg).Build()
 	return mainElement
 }
 
@@ -753,7 +747,7 @@ func sendNewTopicCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
 		withHeader("👻️ 已开启新的话题", larkcard.TemplateBlue),
-		withMainText(content),
+		withMainMd(content),
 		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
 	replyCard(ctx, msgId, newCard)
 }
@@ -762,7 +756,7 @@ func sendOldTopicCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
 		withHeader("🔃️ 上下文的话题", larkcard.TemplateBlue),
-		withMainText(content),
+		withMainMd(content),
 		withNote("提醒：点击对话框参与回复，可保持话题连贯"))
 	replyCard(ctx, msgId, newCard)
 }
@@ -771,7 +765,7 @@ func sendVisionTopicCard(ctx context.Context,
 	sessionId *string, msgId *string, content string) {
 	newCard, _ := newSendCard(
 		withHeader("🕵️图片推理结果", larkcard.TemplateBlue),
-		withMainText(content),
+		withMainMd(content),
 		withNote("让LLM和你一起推理图片的内容~"))
 	replyCard(ctx, msgId, newCard)
 }
