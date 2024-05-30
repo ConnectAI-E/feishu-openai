@@ -474,7 +474,7 @@ docker compose down
 
 遇到问题，可以加入飞书群沟通~
 
-<img src='https://user-images.githubusercontent.com/13283837/232570671-1058555f-c9e5-4f64-889b-1d8efd0101ba.png' alt='' width='200'/>
+<img src='https://github.com/ConnectAI-E/feishu-openai/assets/110169811/bc19db83-422e-4f2f-9465-77489817d482' alt='' width='300'/>
 
 
 ## 企联AI
