@@ -1,71 +1,92 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	larkim "github.com/larksuite/oapi-sdk-go/v3/service/im/v1"
 	"regexp"
-	"start-feishubot/initialization"
+	"strconv"
 	"strings"
 )
 
-func sendMsg(ctx context.Context, msg string, chatId *string) error {
-	//msg = strings.Trim(msg, " ")
-	//msg = strings.Trim(msg, "\n")
-	//msg = strings.Trim(msg, "\r")
-	//msg = strings.Trim(msg, "\t")
-	//// 去除空行 以及空行前的空格
-	//regex := regexp.MustCompile(`\n[\s| ]*\r`)
-	//msg = regex.ReplaceAllString(msg, "\n")
-	////换行符转义
-	//msg = strings.ReplaceAll(msg, "\n", "\\n")
-	fmt.Println("sendMsg", msg, chatId)
-	msg, i := processMessage(msg)
-	if i != nil {
-		return i
-	}
-	client := initialization.GetLarkClient()
-	content := larkim.NewTextMsgBuilder().
-		Text(msg).
-		Build()
-	fmt.Println("content", content)
-
-	resp, err := client.Im.Message.Create(ctx, larkim.NewCreateMessageReqBuilder().
-		ReceiveIdType(larkim.ReceiveIdTypeChatId).
-		Body(larkim.NewCreateMessageReqBodyBuilder().
-			MsgType(larkim.MsgTypeText).
-			ReceiveId(*chatId).
-			Content(content).
-			Build()).
-		Build())
-
-	// 处理错误
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
-
-	// 服务端错误处理
-	if !resp.Success() {
-		fmt.Println(resp.Code, resp.Msg, resp.RequestId())
-		return err
-	}
-	return nil
-}
+// func sendCard
 func msgFilter(msg string) string {
 	//replace @到下一个非空的字段 为 ''
 	regex := regexp.MustCompile(`@[^ ]*`)
 	return regex.ReplaceAllString(msg, "")
-
 }
-func parseContent(content string) string {
+
+// Parse rich text json to text
+func parsePostContent(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if contentMap["content"] == nil {
+		return ""
+	}
+	var text string
+	// deal with title
+	if contentMap["title"] != nil && contentMap["title"] != "" {
+		text += contentMap["title"].(string) + "\n"
+	}
+	// deal with content
+	contentList := contentMap["content"].([]interface{})
+	for _, v := range contentList {
+		for _, v1 := range v.([]interface{}) {
+			if v1.(map[string]interface{})["tag"] == "text" {
+				text += v1.(map[string]interface{})["text"].(string)
+			}
+		}
+		// add new line
+		text += "\n"
+	}
+	return msgFilter(text)
+}
+
+func parsePostImageKeys(content string) []string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	var imageKeys []string
+
+	if contentMap["content"] == nil {
+		return imageKeys
+	}
+
+	contentList := contentMap["content"].([]interface{})
+	for _, v := range contentList {
+		for _, v1 := range v.([]interface{}) {
+			if v1.(map[string]interface{})["tag"] == "img" {
+				imageKeys = append(imageKeys, v1.(map[string]interface{})["image_key"].(string))
+			}
+		}
+	}
+
+	return imageKeys
+}
+
+func parseContent(content, msgType string) string {
 	//"{\"text\":\"@_user_1  hahaha\"}",
 	//only get text content hahaha
+	if msgType == "post" {
+		return parsePostContent(content)
+	}
+
 	var contentMap map[string]interface{}
 	err := json.Unmarshal([]byte(content), &contentMap)
 	if err != nil {
 		fmt.Println(err)
+	}
+	if contentMap["text"] == nil {
+		return ""
 	}
 	text := contentMap["text"].(string)
 	return msgFilter(text)
@@ -83,6 +104,60 @@ func processMessage(msg interface{}) (string, error) {
 	if len(msgStr) >= 2 {
 		msgStr = msgStr[1 : len(msgStr)-1]
 	}
-
 	return msgStr, nil
+}
+
+func processNewLine(msg string) string {
+	return strings.Replace(msg, "\\n", `
+`, -1)
+}
+
+func processQuote(msg string) string {
+	return strings.Replace(msg, "\\\"", "\"", -1)
+}
+
+// 将字符中 \u003c 替换为 <  等等
+func processUnicode(msg string) string {
+	regex := regexp.MustCompile(`\\u[0-9a-fA-F]{4}`)
+	return regex.ReplaceAllStringFunc(msg, func(s string) string {
+		r, _ := regexp.Compile(`\\u`)
+		s = r.ReplaceAllString(s, "")
+		i, _ := strconv.ParseInt(s, 16, 32)
+		return string(rune(i))
+	})
+}
+
+func cleanTextBlock(msg string) string {
+	msg = processNewLine(msg)
+	msg = processUnicode(msg)
+	msg = processQuote(msg)
+	return msg
+}
+
+func parseFileKey(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	if contentMap["file_key"] == nil {
+		return ""
+	}
+	fileKey := contentMap["file_key"].(string)
+	return fileKey
+}
+
+func parseImageKey(content string) string {
+	var contentMap map[string]interface{}
+	err := json.Unmarshal([]byte(content), &contentMap)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	if contentMap["image_key"] == nil {
+		return ""
+	}
+	imageKey := contentMap["image_key"].(string)
+	return imageKey
 }

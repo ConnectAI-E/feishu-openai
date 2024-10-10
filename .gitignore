@@ -30,3 +30,11 @@ config.yaml
 
 
 /code/target/
+start-feishubot
+.env
+
+docker.md
+# Mac OS
+.DS_Store
+**/.DS_Store
+*.pem
