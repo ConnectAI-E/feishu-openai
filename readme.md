@@ -101,8 +101,7 @@
 - 🥒
   支持[Serverless 云函数](https://github.com/serverless-devs/serverless-devs)、[本地环境](https://dashboard.cpolar.com/login)、[Docker](https://www.docker.com/)、[二进制安装包](https://github.com/Leizhenpeng/feishu-chatgpt/releases/)
   等多种渠道部署
-- 🍋 基于[goCache](https://github.com/patrickmn/go-cache)内存键值对缓存
-
+  
 ## 项目部署
 
 ###### 有关飞书的配置文件说明，**[➡︎ 点击查看](#详细配置步骤)**
