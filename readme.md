@@ -33,6 +33,12 @@
    www.connectai-e.com
 </p>
 
+## 赞助
+
+本项目 CDN 加速及安全防护由 [Tencent EdgeOne](https://edgeone.ai/zh?from=github) 赞助
+
+<img src='https://github.com/user-attachments/assets/a8111283-d774-423d-8f7d-30b2521baa73' width='200'/>   
+
 
 ## 商业支持
 
