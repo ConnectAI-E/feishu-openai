@@ -16,6 +16,7 @@ type MsgInfo struct {
 	msgType     string
 	msgId       *string
 	chatId      *string
+	userId      string
 	qParsed     string
 	fileKey     string
 	imageKey    string

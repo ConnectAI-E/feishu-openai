@@ -1,21 +1,27 @@
-#  飞书
-BASE_URL: https://open.feishu.cn
-APP_ID: cli_axxx
-APP_SECRET: xxx
-APP_ENCRYPT_KEY: xxx
-APP_VERIFICATION_TOKEN: xxx
+## 日志配置
+ENABLE_LOG: true
+
+## 飞书
+# https://open.feishu.cn
+BASE_URL:
+APP_ID: XXXXXXXXXXXXXXXXXXXX
+APP_SECRET: XXXXXXXXXXXXXXXXXXXX
+APP_ENCRYPT_KEY: XXXXXXXXXXXXXXXXXXXX
+APP_VERIFICATION_TOKEN: XXXXXXXXXXXXXXXXXXXX
 # 请确保和飞书应用管理平台中的设置一致
-BOT_NAME: chatGpt
-# openAI key 支持负载均衡 可以填写多个key 用逗号分隔
-OPENAI_KEY: sk-xxx,sk-xxx,sk-xxx
-# openAI model 指定模型，默认为 gpt-3.5-turbo
-# 可选参数有："gpt-4-1106-preview", "gpt-4-32K","gpt-4","gpt-3.5-turbo-16k", "gpt-3.5-turbo"，"gpt-3.5-turbo-16k","gpt-3.5-turbo-1106" 等
-#  如果使用gpt-4，请确认自己是否有接口调用白名单
-OPENAI_MODEL: gpt-3.5-turbo
+BOT_NAME: XXXXXXXXXXXXXXXXXXXX
+
+## OpenAI
+# 支持负载均衡 可以填写多个key 用逗号分隔
+OPENAI_KEY: XXXXXXXXXXXXXXXXXXXX
+# openai 指定模型, 更多见 https://platform.openai.com/docs/models/model-endpoint-compatibility 中 /v1/chat/completions
+# gpt-4 gpt-3.5-turbo
+OPENAI_MODEL: gpt-4
 # openAI 最大token数 默认为2000
-OPENAI_MAX_TOKENS: 2000
-# 响应超时时间，单位为毫秒，默认为550毫秒
-OPENAI_HTTP_CLIENT_TIMEOUT: 550
+OPENAI_MAX_TOKENS:
+# 访问OpenAi的 普通 Http请求的超时时间，单位秒，默认为 550 秒
+OPENAI_HTTP_CLIENT_TIMEOUT:
+
 # 服务器配置
 HTTP_PORT: 9000
 HTTPS_PORT: 9001
@@ -25,13 +31,26 @@ KEY_FILE: key.pem
 # openai 地址, 一般不需要修改, 除非你有自己的反向代理
 API_URL: https://api.openai.com
 # 代理设置, 例如 "http://127.0.0.1:7890", ""代表不使用代理
-HTTP_PROXY: ""
-# 是否开启流式接口返回
-STREAM_MODE: false # set true to use stream mode
-# AZURE OPENAI
-AZURE_ON: false # set true to use Azure rather than OpenAI
-AZURE_API_VERSION: 2023-03-15-preview # 2023-03-15-preview or 2022-12-01 refer https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#completions
-AZURE_RESOURCE_NAME: xxxx   # you can find in endpoint url. Usually looks like https://{RESOURCE_NAME}.openai.azure.com
-AZURE_DEPLOYMENT_NAME: xxxx # usually looks like ...openai.azure.com/openai/deployments/{DEPLOYMENT_NAME}/chat/completions.
-AZURE_OPENAI_TOKEN: xxxx  # Authentication key. We can use Azure Active Directory Authentication(TBD).
+HTTP_PROXY: 
 
+# 是否开启流式接口返回
+STREAM_MODE: true
+
+
+## AZURE OPENAI
+# 是否启用 AZURE，如果开启的话，将不会启用 OpenAI 的相关功能。
+AZURE_ON: false
+# 2023-03-15-preview or 2022-12-01 refer https://learn.microsoft.com/en-us/azure/cognitive-services/openai/reference#completions
+AZURE_API_VERSION: 2023-03-15-preview
+# you can find in endpoint url. Usually looks like https://{RESOURCE_NAME}.openai.azure.com
+AZURE_RESOURCE_NAME: xxxx
+# usually looks like ...openai.azure.com/openai/deployments/{DEPLOYMENT_NAME}/chat/completions.
+AZURE_DEPLOYMENT_NAME: xxxx
+# Authentication key. We can use Azure Active Directory Authentication(TBD).
+AZURE_OPENAI_TOKEN: xxxx
+
+## 访问控制
+# 是否启用访问控制。默认不启用。
+ACCESS_CONTROL_ENABLE: false
+# 每个用户每天最多问多少个问题。默认为不限制. 配置成为小于等于0表示不限制。
+ACCESS_CONTROL_MAX_COUNT_PER_USER_PER_DAY: 0

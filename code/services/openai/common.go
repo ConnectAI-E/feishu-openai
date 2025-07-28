@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -128,7 +129,7 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 	for retry = 0; retry <= maxRetries; retry++ {
 		// set body
 		if retry > 0 {
-			req.Body = ioutil.NopCloser(bytes.NewReader(requestBodyData))
+			req.Body = io.NopCloser(bytes.NewReader(requestBodyData))
 		}
 		response, err = client.Do(req)
 		//fmt.Println("--------------------")
@@ -140,8 +141,8 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 		// read body
 		if err != nil || response.StatusCode < 200 || response.StatusCode >= 300 {
 
-			body, _ := ioutil.ReadAll(response.Body)
-			fmt.Println("body", string(body))
+			body, _ := io.ReadAll(response.Body)
+			log.Printf("OpenAI body %s", string(body))
 
 			gpt.Lb.SetAvailability(api.Key, false)
 			if retry == maxRetries {
@@ -160,7 +161,7 @@ func (gpt *ChatGPT) doAPIRequestWithRetry(url, method string,
 		return fmt.Errorf("%s api failed after %d retries", strings.ToUpper(method), retry)
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}

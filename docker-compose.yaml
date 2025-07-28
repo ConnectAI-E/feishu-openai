@@ -7,15 +7,20 @@ services:
       dockerfile: Dockerfile
     ports:
       - "9000:9000/tcp"
-    # volumes:
-    #   - ./code/config.yaml:/app/config.yaml:ro
+    volumes:
+      # - ./code/config.yaml:/app/config.yaml:ro
+      # 要注意，这里右边的容器内的路径，不是从根目录开始的，要参考 dockerfile 中的 WORKDIR
+      - ./logs:/app/logs
     environment:
+      ################ 以下配置建议和 config.example.yaml 里面的配置综合起来看 ################
+      # 日志配置, 默认不开启, 可以开启后查看日志
+      - ENABLE_LOG=false
       - APP_ID=cli_axxx
       - APP_SECRET=xxx
       - APP_ENCRYPT_KEY=xxx
       - APP_VERIFICATION_TOKEN=xxx
       # 请确保和飞书应用管理平台中的设置一致
-      - BOT_NAME=chatGpt
+      - BOT_NAME=xxx
       # OpenAI API Key 支持负载均衡, 可以填写多个 Key 用逗号分隔
       - OPENAI_KEY=sk-xxx,sk-xxx,sk-xxx
       # 服务器配置
@@ -28,3 +33,10 @@ services:
       - API_URL=https://api.openai.com
       # 代理设置, 例如 - HTTP_PROXY=http://127.0.0.1:7890, 默认代表不使用代理
       - HTTP_PROXY
+      ## 访问控制
+      # 是否启用访问控制。默认不启用。
+      - ACCESS_CONTROL_ENABLE=false
+      # 每个用户每天最多问多少个问题。默认为0. 配置成为小于等于0表示不限制。
+      - ACCESS_CONTROL_MAX_COUNT_PER_USER_PER_DAY=0
+      # 访问OpenAi的 普通 Http请求的超时时间，单位秒，不配置的话默认为 550 秒
+      - OPENAI_HTTP_CLIENT_TIMEOUT

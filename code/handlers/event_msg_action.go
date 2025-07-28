@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"start-feishubot/initialization"
+	"start-feishubot/services/accesscontrol"
+	"start-feishubot/services/openai"
 	"strings"
 	"time"
-
-	"start-feishubot/services/openai"
 )
 
 func setDefaultPrompt(msg []openai.Messages) []openai.Messages {
@@ -44,6 +45,11 @@ type MessageAction struct { /*消息*/
 }
 
 func (*MessageAction) Execute(a *ActionInfo) bool {
+
+	if !allowAccess(a) {
+		return false
+	}
+
 	if a.handler.config.StreamMode {
 		return true
 	}
@@ -66,6 +72,8 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	}
 	msg = append(msg, completions)
 	a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
+
+	printMessage(a, err, msg, completions.Content)
 	//if new topic
 	if len(msg) == 3 {
 		//fmt.Println("new topic", msg[1].Content)
@@ -87,7 +95,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	return true
 }
 
-//判断msg中的是否包含system role
+// 判断msg中的是否包含system role
 func hasSystemRole(msg []openai.Messages) bool {
 	for _, m := range msg {
 		if m.Role == "system" {
@@ -101,6 +109,17 @@ type StreamMessageAction struct { /*消息*/
 }
 
 func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
+
+	if !allowAccess(a) {
+		return false
+	}
+
+	//s := "快速响应，用于测试访问控制： " + time.Now().String() +
+	//	" accesscontrol.currentDate " + accesscontrol.GetCurrentDateFlag()
+	//_ = sendMsg(*a.ctx, s, a.info.chatId)
+	//log.Println(s)
+	//return false
+
 	if !a.handler.config.StreamMode {
 		return true
 	}
@@ -142,6 +161,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 			if err := recover(); err != nil {
 				err := updateFinalCard(*a.ctx, "聊天失败", cardId, ifNewTopic)
 				if err != nil {
+					printErrorMessage(a, msg, err)
 					return
 				}
 			}
@@ -151,10 +171,10 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 		aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
 		//fmt.Println("msg: ", msg)
 		//fmt.Println("aiMode: ", aiMode)
-		if err := a.handler.gpt.StreamChat(*a.ctx, msg, aiMode,
-			chatResponseStream); err != nil {
+		if err := a.handler.gpt.StreamChat(*a.ctx, msg, aiMode, chatResponseStream); err != nil {
 			err := updateFinalCard(*a.ctx, "聊天失败", cardId, ifNewTopic)
 			if err != nil {
+				printErrorMessage(a, msg, err)
 				return
 			}
 			close(done) // 关闭 done 信号
@@ -172,6 +192,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 			case <-ticker.C:
 				err := updateTextCard(*a.ctx, answer, cardId, ifNewTopic)
 				if err != nil {
+					printErrorMessage(a, msg, err)
 					return
 				}
 			}
@@ -189,6 +210,7 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 		case <-done: // 添加 done 信号的处理
 			err := updateFinalCard(*a.ctx, answer, cardId, ifNewTopic)
 			if err != nil {
+				printErrorMessage(a, msg, err)
 				return false
 			}
 			ticker.Stop()
@@ -197,17 +219,39 @@ func (m *StreamMessageAction) Execute(a *ActionInfo) bool {
 			})
 			a.handler.sessionCache.SetMsg(*a.info.sessionId, msg)
 			close(chatResponseStream)
-			log.Printf("\n\n\n")
-			jsonByteArray, err := json.Marshal(msg)
-			if err != nil {
-				log.Println(err)
-			}
-			jsonStr := strings.ReplaceAll(string(jsonByteArray), "\\n", "")
-			jsonStr = strings.ReplaceAll(jsonStr, "\n", "")
-			log.Printf("\n\n\n")
+			printMessage(a, err, msg, answer)
 			return false
 		}
 	}
+}
+
+func printMessage(a *ActionInfo, err error, msg []openai.Messages, answer string) {
+	jsonByteArray, err := json.Marshal(msg)
+	if err != nil {
+		log.Printf("Error marshaling JSON request: UserId: %s , Request: %s , Response: %s", a.info.userId, jsonByteArray, answer)
+		return
+	}
+	requestString := strings.ReplaceAll(string(jsonByteArray), "\\n", "")
+	requestString = strings.ReplaceAll(requestString, "\n", "")
+	answer = strings.ReplaceAll(answer, "\\n", "")
+	answer = strings.ReplaceAll(answer, "\n", "")
+
+	log.Printf("Success request plain requestString: UserId: %s , Request: %s , Response: %s",
+		a.info.userId, requestString, answer)
+}
+
+func allowAccess(a *ActionInfo) bool {
+	// Add access control
+	if initialization.GetConfig().AccessControlEnable &&
+		!accesscontrol.CheckAllowAccessThenIncrement(&a.info.userId) {
+
+		msg := fmt.Sprintf("UserId: 【%s】 has accessed max count today! Max access count today %s: 【%d】",
+			a.info.userId, accesscontrol.GetCurrentDateFlag(), initialization.GetConfig().AccessControlMaxCountPerUserPerDay)
+
+		_ = sendMsg(*a.ctx, msg, a.info.chatId)
+		return false
+	}
+	return true
 }
 
 func sendOnProcess(a *ActionInfo, ifNewTopic bool) (*string, error) {
@@ -219,4 +263,8 @@ func sendOnProcess(a *ActionInfo, ifNewTopic bool) (*string, error) {
 	}
 	return cardId, nil
 
+}
+
+func printErrorMessage(a *ActionInfo, msg []openai.Messages, err error) {
+	log.Printf("Failed request: UserId: %s , Request: %s , Err: %s", a.info.userId, msg, err)
 }
