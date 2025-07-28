@@ -54,6 +54,9 @@ type ChatGPTChoiceItem struct {
 
 // ChatGPTRequestBody 响应体
 type ChatGPTRequestBody struct {
+	ChatId           string     `json:"chatId"`
+	Stream           bool       `json:"stream"`
+	Detail           bool       `json:"detail"`
 	Model            string     `json:"model"`
 	Messages         []Messages `json:"messages"`
 	MaxTokens        int        `json:"max_tokens"`
@@ -68,9 +71,10 @@ func (msg *Messages) CalculateTokenLength() int {
 	return tokenizer.MustCalToken(text)
 }
 
-func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
+func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode, chatid string) (resp Messages,
 	err error) {
 	requestBody := ChatGPTRequestBody{
+		ChatId:           chatid,
 		Model:            gpt.Model,
 		Messages:         msg,
 		MaxTokens:        gpt.MaxTokens,
@@ -81,13 +85,13 @@ func (gpt *ChatGPT) Completions(msg []Messages, aiMode AIMode) (resp Messages,
 	}
 	gptResponseBody := &ChatGPTResponseBody{}
 	url := gpt.FullUrl("chat/completions")
-	//fmt.Println(url)
-	logger.Debug(url)
+	logger.Debug("request url  ", url)
 	logger.Debug("request body ", requestBody)
 	if url == "" {
 		return resp, errors.New("无法获取openai请求地址")
 	}
 	err = gpt.sendRequestWithBodyType(url, "POST", jsonBody, requestBody, gptResponseBody)
+	logger.Debugf("gptresponse %v", gptResponseBody)
 	if err == nil && len(gptResponseBody.Choices) > 0 {
 		resp = gptResponseBody.Choices[0].Message
 	} else {

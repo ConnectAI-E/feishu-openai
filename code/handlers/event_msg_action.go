@@ -49,7 +49,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	}
 	msg := a.handler.sessionCache.GetMsg(*a.info.sessionId)
 	// 如果没有提示词，默认模拟ChatGPT
-	msg = setDefaultPrompt(msg)
+	// msg = setDefaultPrompt(msg)
 	msg = append(msg, openai.Messages{
 		Role: "user", Content: a.info.qParsed,
 	})
@@ -58,7 +58,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	aiMode := a.handler.sessionCache.GetAIMode(*a.info.sessionId)
 	fmt.Println("msg: ", msg)
 	fmt.Println("aiMode: ", aiMode)
-	completions, err := a.handler.gpt.Completions(msg, aiMode)
+	completions, err := a.handler.gpt.Completions(msg, aiMode, *a.info.sessionId)
 	if err != nil {
 		replyMsg(*a.ctx, fmt.Sprintf(
 			"🤖️：消息机器人摆烂了，请稍后再试～\n错误信息: %v", err), a.info.msgId)
@@ -87,7 +87,7 @@ func (*MessageAction) Execute(a *ActionInfo) bool {
 	return true
 }
 
-//判断msg中的是否包含system role
+// 判断msg中的是否包含system role
 func hasSystemRole(msg []openai.Messages) bool {
 	for _, m := range msg {
 		if m.Role == "system" {
