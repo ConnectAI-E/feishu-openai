@@ -1,5 +1,7 @@
 <img width="1280" alt="飞书 AI 对话" src="https://github.com/user-attachments/assets/f5b27246-6d56-43a3-a4e1-9db8c69f698d" />
 
+[![Deploy to Railyard](https://app.railyard.run/deploy/badge)](https://app.railyard.run/deploy?repo=https://github.com/ConnectAI-E/feishu-openai)
+
 <a href="https://www.connectai-e.com" target="_blank" rel="noreferrer">
   <img align="center" width="100%" height="auto" src="https://github-production-user-asset-6210df.s3.amazonaws.com/50035229/250274252-7f07a95e-b5aa-4dd8-90e7-5fb3bfb863c7.svg" >
 </a>
